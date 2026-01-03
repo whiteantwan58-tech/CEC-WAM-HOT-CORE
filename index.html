@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CEC-WAM // ANTWAN WHITE // 5D STAR MAP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-cyan: #00f3ff; --neon-gold: #ffd700; --bg-dark: #000000; }
+        body { background-color: var(--bg-dark); color: #e0e0e0; font-family: 'Rajdhani', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
+        #star-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; pointer-events: none; }
+        .ui-overlay { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; }
+        .neon-border { border: 1px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+        .map-cmd-text { color: var(--neon-gold); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <canvas id="star-canvas"></canvas>
+
+    <div class="ui-overlay p-4">
+        <header class="flex justify-between items-center border-b border-cyan-900/50 pb-3 mb-4 bg-black/40 backdrop-blur-sm p-2 rounded">
+            <div>
+                <h1 class="font-orbitron text-lg tracking-widest text-white uppercase">Antwan White <span class="text-[10px] text-cyan-400 block">5D STAR MAP ENGINE ACTIVE</span></h1>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-gray-500 uppercase">Liquid Ledger</div>
+                <div class="text-gold-400 font-bold font-orbitron text-xl">$1,250,343M</div>
+            </div>
+        </header>
+
+        <section class="flex-1 neon-border bg-black/60 backdrop-blur-md rounded-lg flex flex-col overflow-hidden mb-4">
+            <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-sm">
+                <div class="text-purple-400">
+                    <span class="text-gray-600">[EVE]:</span> System fully hot, Antwan. 5D Star Map commands are ready. I am tracking the local cluster. Handshake 1010 required for asset release.
+                </div>
+            </div>
+
+            <div class="p-4 bg-black/90 border-t border-cyan-900/50">
+                <div class="flex gap-2">
+                    <textarea id="user-input" rows="1" placeholder="Enter Command or Talk to Eve..." class="flex-1 bg-transparent border border-cyan-900/50 rounded-lg px-3 py-2 text-sm text-cyan-100 focus:outline-none focus:border-cyan-400 transition-all"></textarea>
+                    <button onclick="processInput()" class="bg-cyan-600 hover:bg-cyan-400 text-black font-bold px-6 rounded-lg uppercase text-xs">Execute</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="grid grid-cols-2 gap-2 text-[10px] font-mono uppercase bg-black/40 p-2 rounded">
+            <div class="border-l border-cyan-400 pl-2">
+                <span class="text-gray-500">Status:</span> <span class="text-white">HOT</span>
+            </div>
+            <div class="border-l border-gold-400 pl-2 text-right">
+                <span class="text-gray-500">Signal:</span> <span class="text-cyan-400">24.5 TB/s</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- STAR MAP ENGINE (Canvas Logic) ---
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let speed = 0.5;
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    z: Math.random() * canvas.width
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            stars.forEach(s => {
+                let k = 128 / s.z;
+                let px = (s.x - canvas.width / 2) * k + canvas.width / 2;
+                let py = (s.y - canvas.height / 2) * k + canvas.height / 2;
+                let sz = s.size * k;
+                ctx.beginPath();
+                ctx.arc(px, py, sz, 0, 2 * Math.PI);
+                ctx.fill();
+                s.z -= speed;
+                if (s.z <= 0) s.z = canvas.width;
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.onload = () => { initStars(); drawStars(); };
+        window.onresize = initStars;
+
+        // --- COMMAND LOGIC ---
+        function addMessage(sender, text, colorClass) {
+            const div = document.createElement('div');
+            div.className = colorClass;
+            div.innerHTML = `<span class="text-gray-600">[${sender}]:</span> ${text}`;
+            document.getElementById('chat-window').appendChild(div);
+            document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
+        }
+
+        function processInput() {
+            const input = document.getElementById('user-input');
+            const val = input.value.trim();
+            if (!val) return;
+            addMessage("ANTWAN", val, "text-white text-right");
+            input.value = "";
+
+            setTimeout(() => {
+                let response = "Acknowledged.";
+                let text = val.toLowerCase();
+                
+                if (text.includes("map") || text.includes("galaxy")) {
+                    speed = 2; // High Speed Warp Visual
+                    response = "Switching to 5D STAR MAP View. Sector: Local Cluster. Target: Earth [HQ]. Scanning for temporal anchors...";
+                } else if (text.includes("1010")) {
+                    response = "Handshake 1010 accepted. Navy Federal Bridge (RT: 256074974) is SETTLED. $21,000 sent.";
+                    speed = 0.5;
+                } else {
+                    response = "Processing command in sovereign brain. Net worth stable at $176M.";
+                }
+                addMessage("EVE", response, "text-purple-400");
+            }, 600);
+        }
+    </script>
+</body>
+</html>
