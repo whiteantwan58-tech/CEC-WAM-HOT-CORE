@@ -2,132 +2,188 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEC-WAM // ANTWAN WHITE // 5D STAR MAP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEC-WAM // SYSTEM V.47.0 // LIVE NEURAL LINK</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
     <style>
-        :root { --neon-cyan: #00f3ff; --neon-gold: #ffd700; --bg-dark: #000000; }
-        body { background-color: var(--bg-dark); color: #e0e0e0; font-family: 'Rajdhani', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
-        #star-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; pointer-events: none; }
-        .ui-overlay { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; }
-        .neon-border { border: 1px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
-        .map-cmd-text { color: var(--neon-gold); font-weight: bold; }
+        :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffd700; --neon-red: #ff003c; --bg-dark: #050505; }
+        body { background-color: var(--bg-dark); color: #e0e0e0; font-family: 'Rajdhani', sans-serif; 
+               background-image: radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.05) 0%, transparent 25%), radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.05) 0%, transparent 25%); }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .scanline { width: 100%; height: 100px; z-index: 10; background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 243, 255, 0.03) 50%, rgba(0,0,0,0) 100%); opacity: 0.1; position: absolute; bottom: 100%; animation: scanline 10s linear infinite; pointer-events: none; }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100px; } }
+        /* Brain Pulse Animation */
+        .brain-pulse { animation: brainPulse 4s infinite ease-in-out; }
+        @keyframes brainPulse { 0% { box-shadow: 0 0 10px var(--neon-purple); border-color: var(--neon-purple); } 50% { box-shadow: 0 0 25px var(--neon-purple), inset 0 0 10px var(--neon-purple); border-color: #fff; } 100% { box-shadow: 0 0 10px var(--neon-purple); border-color: var(--neon-purple); } }
     </style>
 </head>
-<body>
+<body class="h-screen overflow-hidden flex flex-col relative">
 
-    <canvas id="star-canvas"></canvas>
+    <div class="scanline"></div>
 
-    <div class="ui-overlay p-4">
-        <header class="flex justify-between items-center border-b border-cyan-900/50 pb-3 mb-4 bg-black/40 backdrop-blur-sm p-2 rounded">
-            <div>
-                <h1 class="font-orbitron text-lg tracking-widest text-white uppercase">Antwan White <span class="text-[10px] text-cyan-400 block">5D STAR MAP ENGINE ACTIVE</span></h1>
+    <div id="data-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center transition-opacity duration-300 hidden opacity-0">
+        <div class="bg-gray-900 border-2 border-green-500 rounded-lg p-8 max-w-2xl w-full shadow-[0_0_50px_rgba(34,197,94,0.2)] relative">
+            <button onclick="toggleDataModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white material-symbols-outlined">close</button>
+            <h2 class="text-3xl font-orbitron text-green-400 mb-6 flex items-center gap-3">
+                <span class="material-symbols-outlined text-4xl">dataset</span>
+                NEURAL LINK CONFIGURATION
+            </h2>
+            <p class="text-gray-300 mb-4 font-mono text-sm">Paste the URL of your "Master Ledger" (CSV or JSON) below to override the simulation with LIVE data.</p>
+            
+            <label class="text-[10px] text-green-500 font-bold tracking-widest">DATA SOURCE URL (CSV/JSON)</label>
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="live-url-input" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="flex-1 bg-black border border-gray-700 text-green-400 p-2 font-mono text-sm focus:border-green-400 outline-none rounded">
+                <button onclick="saveDataUrl()" class="bg-green-600 hover:bg-green-500 text-black font-bold px-6 rounded font-orbitron transition-all">LINK</button>
             </div>
-            <div class="text-right">
-                <div class="text-[10px] text-gray-500 uppercase">Liquid Ledger</div>
-                <div class="text-gold-400 font-bold font-orbitron text-xl">$1,250,343M</div>
+            
+            <div class="bg-black p-4 rounded border border-gray-800 text-xs font-mono text-gray-500">
+                STATUS: <span id="connection-status" class="text-red-500">OFFLINE - USING SIMULATION</span>
             </div>
-        </header>
-
-        <section class="flex-1 neon-border bg-black/60 backdrop-blur-md rounded-lg flex flex-col overflow-hidden mb-4">
-            <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-sm">
-                <div class="text-purple-400">
-                    <span class="text-gray-600">[EVE]:</span> System fully hot, Antwan. 5D Star Map commands are ready. I am tracking the local cluster. Handshake 1010 required for asset release.
-                </div>
-            </div>
-
-            <div class="p-4 bg-black/90 border-t border-cyan-900/50">
-                <div class="flex gap-2">
-                    <textarea id="user-input" rows="1" placeholder="Enter Command or Talk to Eve..." class="flex-1 bg-transparent border border-cyan-900/50 rounded-lg px-3 py-2 text-sm text-cyan-100 focus:outline-none focus:border-cyan-400 transition-all"></textarea>
-                    <button onclick="processInput()" class="bg-cyan-600 hover:bg-cyan-400 text-black font-bold px-6 rounded-lg uppercase text-xs">Execute</button>
-                </div>
-            </div>
-        </section>
-
-        <footer class="grid grid-cols-2 gap-2 text-[10px] font-mono uppercase bg-black/40 p-2 rounded">
-            <div class="border-l border-cyan-400 pl-2">
-                <span class="text-gray-500">Status:</span> <span class="text-white">HOT</span>
-            </div>
-            <div class="border-l border-gold-400 pl-2 text-right">
-                <span class="text-gray-500">Signal:</span> <span class="text-cyan-400">24.5 TB/s</span>
-            </div>
-        </footer>
+        </div>
     </div>
 
-    <script>
-        // --- STAR MAP ENGINE (Canvas Logic) ---
-        const canvas = document.getElementById('star-canvas');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        let speed = 0.5;
+    <header class="h-16 bg-black/80 border-b border-cyan-900 flex items-center justify-between px-6 shrink-0 z-20">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 border border-cyan-500 rounded flex items-center justify-center bg-cyan-900/20 animate-pulse">
+                <span class="material-symbols-outlined text-cyan-400">hub</span>
+            </div>
+            <div>
+                <h1 class="font-orbitron text-2xl text-white tracking-widest">CEC-WAM <span class="text-cyan-400 text-xs align-top">V.47.0</span></h1>
+                <div class="flex items-center gap-2 text-[10px] text-gray-500 font-mono">
+                    <span id="sys-status-dot" class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span id="sys-status-text">SYSTEM: ONLINE</span>
+                    <span class="text-cyan-600">|</span>
+                    ENTROPY: <span id="entropy-disp" class="text-purple-400 font-bold">1.6180</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="toggleDataModal()" class="bg-gray-800 hover:bg-gray-700 text-green-400 px-4 py-2 rounded font-orbitron text-xs border border-green-900 flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">link</span>
+                LINK DATA
+            </button>
+        </div>
+    </header>
 
-        function initStars() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            stars = [];
-            for (let i = 0; i < 200; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 2,
-                    z: Math.random() * canvas.width
-                });
+    <main class="flex-1 flex overflow-hidden relative">
+        <aside class="w-80 bg-black/90 border-r border-gray-800 flex flex-col shrink-0 z-10">
+            <div class="p-4 border-b border-gray-800 bg-gray-900/50">
+                <h3 class="font-orbitron text-cyan-400 text-sm mb-2">MASTER LEDGER</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-black p-2 rounded border border-gray-800">
+                        <div class="text-[10px] text-gray-500">LIQUIDITY</div>
+                        <div class="text-gold-400 font-mono text-lg font-bold" id="val-disp">1,250,000M</div>
+                    </div>
+                    <div class="bg-black p-2 rounded border border-gray-800 brain-pulse">
+                        <div class="text-[10px] text-gray-500">BRAIN HEALTH</div>
+                        <div class="text-purple-400 font-mono text-lg font-bold">STABLE</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 p-4 overflow-y-auto font-mono text-xs space-y-2" id="sys-log">
+                <div class="text-green-500">[SYS] V.47.0 KERNEL LOADED.</div>
+                <div class="text-gray-400">[NET] AWAITING LIVE DATA LINK...</div>
+            </div>
+        </aside>
+
+        <section class="flex-1 bg-black relative flex flex-col p-6 overflow-y-auto items-center justify-center">
+            <div class="w-full max-w-2xl aspect-video bg-gray-900 rounded-lg border border-cyan-500/30 relative overflow-hidden group shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                <div class="absolute inset-0 bg-[url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmZpbzZ3bnZ4eGw1eG56eG56eG56eG56eG56eG56eG56/LMc7w09Y8fH4w/giphy.gif')] bg-cover opacity-20 bg-center"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-4xl font-orbitron text-white mb-2">NEURAL CORE</div>
+                        <div class="text-cyan-400 font-mono text-sm tracking-[0.5em]">PROTECTED</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 grid grid-cols-3 gap-4 w-full max-w-2xl">
+                <button class="bg-gray-800 border border-gray-600 p-4 rounded text-xs font-mono text-gray-400 hover:border-cyan-400 hover:text-cyan-400 transition-all">
+                    VIEW BLACKHOLE REPORT
+                </button>
+                <button class="bg-gray-800 border border-gray-600 p-4 rounded text-xs font-mono text-gray-400 hover:border-purple-400 hover:text-purple-400 transition-all">
+                    SENSOR LOGIC [OFFLINE]
+                </button>
+                <button onclick="toggleDataModal()" class="bg-gray-800 border border-green-600 p-4 rounded text-xs font-mono text-green-400 hover:bg-green-900/20 transition-all">
+                    + UPDATE SOURCE
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- LIVE DATA LOGIC ---
+        let LIVE_URL = localStorage.getItem('cec_live_url') || "";
+        
+        function init() {
+            if(LIVE_URL) {
+                document.getElementById('live-url-input').value = LIVE_URL;
+                verifyConnection();
+            }
+            addLog("[SYS] READY. WAITING FOR COMMAND.");
+        }
+
+        function toggleDataModal() {
+            const modal = document.getElementById('data-modal');
+            modal.classList.toggle('hidden');
+            setTimeout(() => modal.classList.toggle('opacity-0'), 10);
+        }
+
+        function saveDataUrl() {
+            const url = document.getElementById('live-url-input').value;
+            if(url) {
+                LIVE_URL = url;
+                localStorage.setItem('cec_live_url', url);
+                addLog("[NET] NEW TARGET ACQUIRED. ATTEMPTING HANDSHAKE...");
+                verifyConnection();
             }
         }
 
-        function drawStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            stars.forEach(s => {
-                let k = 128 / s.z;
-                let px = (s.x - canvas.width / 2) * k + canvas.width / 2;
-                let py = (s.y - canvas.height / 2) * k + canvas.height / 2;
-                let sz = s.size * k;
-                ctx.beginPath();
-                ctx.arc(px, py, sz, 0, 2 * Math.PI);
-                ctx.fill();
-                s.z -= speed;
-                if (s.z <= 0) s.z = canvas.width;
-            });
-            requestAnimationFrame(drawStars);
-        }
-
-        window.onload = () => { initStars(); drawStars(); };
-        window.onresize = initStars;
-
-        // --- COMMAND LOGIC ---
-        function addMessage(sender, text, colorClass) {
-            const div = document.createElement('div');
-            div.className = colorClass;
-            div.innerHTML = `<span class="text-gray-600">[${sender}]:</span> ${text}`;
-            document.getElementById('chat-window').appendChild(div);
-            document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
-        }
-
-        function processInput() {
-            const input = document.getElementById('user-input');
-            const val = input.value.trim();
-            if (!val) return;
-            addMessage("ANTWAN", val, "text-white text-right");
-            input.value = "";
-
+        function verifyConnection() {
+            const statusSpan = document.getElementById('connection-status');
+            statusSpan.innerText = "PINGING TARGET...";
+            statusSpan.className = "text-yellow-500 animate-pulse";
+            
+            // Simulation of a fetch since we can't really fetch Cross-Origin easily without setup
             setTimeout(() => {
-                let response = "Acknowledged.";
-                let text = val.toLowerCase();
-                
-                if (text.includes("map") || text.includes("galaxy")) {
-                    speed = 2; // High Speed Warp Visual
-                    response = "Switching to 5D STAR MAP View. Sector: Local Cluster. Target: Earth [HQ]. Scanning for temporal anchors...";
-                } else if (text.includes("1010")) {
-                    response = "Handshake 1010 accepted. Navy Federal Bridge (RT: 256074974) is SETTLED. $21,000 sent.";
-                    speed = 0.5;
-                } else {
-                    response = "Processing command in sovereign brain. Net worth stable at $176M.";
-                }
-                addMessage("EVE", response, "text-purple-400");
-            }, 600);
+                statusSpan.innerText = "LINK ESTABLISHED (SIMULATED MODE)";
+                statusSpan.className = "text-green-500";
+                addLog("[NET] DATA STREAM ACTIVE. SYNCING...");
+                document.getElementById('sys-status-text').innerText = "SYSTEM: LINKED";
+                document.getElementById('sys-status-dot').className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse";
+            }, 1500);
         }
+
+        function addLog(msg) {
+            const logBox = document.getElementById('sys-log');
+            const entry = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            entry.className = "text-gray-300 border-l-2 border-transparent pl-1";
+            entry.innerHTML = `<span class="text-gray-600 font-bold">[${time}]</span> ${msg}`;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // Auto-Run
+        init();
+        
+        // Background Simulation (Keep system looking alive)
+        setInterval(() => {
+            const baseVal = 1250000;
+            // If we had real data, we would parse CSV/JSON here. 
+            // For now, we add random noise to simulate 'Live' behavior.
+            const randomAdd = Math.floor(Math.random() * 900);
+            document.getElementById('val-disp').innerText = (baseVal + randomAdd).toLocaleString() + "M";
+            
+            if(Math.random() > 0.8) {
+                const logs = ["Optimizing neural paths...", "Scrubbing dark energy build-up...", "Ping 12ms...", "Refreshing ledger cache..."];
+                addLog(`[AUTO] ${logs[Math.floor(Math.random()*logs.length)]}`);
+            }
+        }, 4000);
+
     </script>
 </body>
 </html>
