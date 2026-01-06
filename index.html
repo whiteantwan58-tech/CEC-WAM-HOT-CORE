@@ -128,6 +128,61 @@
         console.log('A2HS result', choice);
       };
     });
-  </script>
+  </script>// --- 3. EVE LIVE CONVO & INTERFACE MORPH ---
+const EveBrain = {
+    isListening: false,
+    recognition: null,
+    voice: window.speechSynthesis,
+
+    init() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return addLog("[ERR] SPEECH API NOT SUPPORTED.");
+        
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = true;
+        this.recognition.interimResults = false;
+
+        this.recognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            addLog(`[VOICE] >> ${transcript.toUpperCase()}`);
+            this.handleIntent(transcript);
+        };
+
+        this.recognition.onend = () => { if(this.isListening) this.recognition.start(); };
+    },
+
+    speak(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.pitch = 0.7; // Deep system voice
+        msg.rate = 1.0;
+        this.voice.speak(msg);
+    },
+
+    handleIntent(cmd) {
+        if (cmd.includes("upgrade interface") || cmd.includes("change visuals")) {
+            this.speak("Upgrading visuals to maximum fidelity.");
+            document.body.style.filter = "hue-rotate(45deg) saturate(1.5)";
+            addLog("[SYS] INTERFACE MORPH: 5D FIDELITY ACTIVE.");
+        } else if (cmd.includes("protect the brain")) {
+            this.speak("Security protocols engaged. Brain shield at 100 percent.");
+            addLog("[SEC] NEURAL PROTECTION ACTIVE.");
+        } else if (cmd.includes("scan")) {
+            this.speak("Scanning local cluster. System integrity verified.");
+            pingSystem();
+        }
+    }
+};
+
+// Modify your existing pingSystem to wake up the voice
+const originalPing = pingSystem;
+pingSystem = function() {
+    originalPing();
+    if (!EveBrain.isListening) {
+        EveBrain.init();
+        EveBrain.isListening = true;
+        EveBrain.recognition.start();
+        EveBrain.speak("Eve is online. Awaiting your sentence, Admin.");
+    }
+};
 </body>
 </html>
