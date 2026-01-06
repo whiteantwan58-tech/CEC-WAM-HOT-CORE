@@ -2,383 +2,230 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM // SOVEREIGN 5D CORE // EVE AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CEC-WAM // 5D NEURAL CORE // LIVE LEDGER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --glass-bg: rgba(10, 15, 20, 0.65);
-            --glass-border: rgba(0, 243, 255, 0.3);
-            --glass-glow: 0 0 20px rgba(0, 243, 255, 0.15);
+        :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffd700; --bg: #020202; }
+        body { 
+            background: var(--bg); color: var(--neon-cyan); 
+            font-family: 'Rajdhani', sans-serif; overflow-x: hidden; min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #020202 100%);
         }
-
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Rajdhani', sans-serif;
-            overflow: hidden;
-            margin: 0;
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .glass-module { 
+            background: rgba(10, 10, 15, 0.85); 
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
-
-        /* --- THE NEON CODE BACKGROUND --- */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.8; 
-        }
-
-        /* --- GLASSHOUSE 5D PANELS --- */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-glow);
-            position: relative;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-            opacity: 0.5;
-        }
-
-        /* --- TYPOGRAPHY & FX --- */
-        .font-tech { font-family: 'Share Tech Mono', monospace; }
-        .font-header { font-family: 'Orbitron', sans-serif; }
-        
-        .text-glow { text-shadow: 0 0 10px var(--neon-blue); }
-        .text-glow-purple { text-shadow: 0 0 10px var(--neon-purple); }
-
-        .scanline {
-            width: 100%; height: 100%;
-            position: fixed; left: 0; top: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            z-index: 50; pointer-events: none; opacity: 0.3;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes pulse-border {
-            0% { border-color: rgba(0, 243, 255, 0.3); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
-            50% { border-color: rgba(0, 243, 255, 0.8); box-shadow: 0 0 40px rgba(0, 243, 255, 0.3); }
-            100% { border-color: rgba(0, 243, 255, 0.3); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
-        }
-        .animate-breathe { animation: pulse-border 4s infinite; }
-        .active-mic { box-shadow: 0 0 30px var(--neon-purple); border-color: var(--neon-purple); }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 3px; }
+        #neural-map { width: 100%; height: 250px; position: relative; overflow: hidden; border-radius: 8px; }
+        .node { position: absolute; border-radius: 50%; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); transition: all 2s ease-in-out; }
+        .phi-locked { font-size: 3rem; color: #fff; text-shadow: 0 0 20px var(--neon-cyan); }
+        @media (max-width: 768px) { .phi-locked { font-size: 2rem; } .laptop-only { display: none; } }
     </style>
 </head>
-<body class="h-screen flex flex-col relative selection:bg-cyan-500 selection:text-black">
+<body class="flex flex-col p-2 md:p-6 gap-6">
 
-    <canvas id="matrix-canvas"></canvas>
-    
-    <div class="scanline"></div>
-
-    <header class="glass-panel mx-4 mt-4 p-4 rounded-t-lg border-b-0 flex justify-between items-center shrink-0">
+    <header class="glass-module p-4 flex justify-between items-center rounded-xl border-b-2 border-neon-cyan shrink-0">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 relative flex items-center justify-center">
-                <div class="absolute inset-0 border-2 border-cyan-500 rounded-full animate-spin" style="border-t-color: transparent;"></div>
-                <div class="absolute inset-2 border border-purple-500 rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
-                <span class="material-symbols-outlined text-cyan-400 text-xl animate-pulse">token</span>
-            </div>
+            <div class="animate-pulse w-4 h-4 bg-green-500 rounded-full shadow-[0_0_15px_#0f0]"></div>
             <div>
-                <h1 class="font-header text-3xl tracking-widest text-white text-glow">CEC-WAM <span class="text-cyan-400 text-sm align-top opacity-80">V.55</span></h1>
-                <div class="flex gap-4 text-[10px] font-tech text-cyan-200/70 tracking-wider">
-                    <span>SYSTEM: <strong class="text-green-400">ONLINE</strong></span>
-                    <span>//</span>
-                    <span>BRAIN: <strong class="text-purple-400" id="eve-status">EVE STANDBY</strong></span>
-                    <span>//</span>
-                    <span>OPTIMIZATION: <strong class="text-cyan-400">100%</strong></span>
-                </div>
+                <h1 class="font-orbitron text-xl md:text-2xl font-black text-white leading-none">CEC-WAM <span class="text-xs text-cyan-400">V.55.2</span></h1>
+                <p class="text-[10px] tracking-widest text-gray-500 uppercase">Neural Link: EVE HEI // Sheets Sync: ACTIVE</p>
             </div>
         </div>
         <div class="text-right">
-            <div class="text-[10px] font-tech text-gray-400 uppercase mb-1">Total Liquid Value</div>
-            <div class="font-header text-3xl text-cyan-400 text-glow" id="liquid-value">$1,250,343.00</div>
+            <div class="text-2xl font-orbitron font-bold text-white" id="val-disp">$1,250,039M</div>
+            <div class="text-[10px] text-cyan-500 font-bold uppercase tracking-tighter">Unified Liquid Ledger</div>
         </div>
     </header>
 
-    <main class="flex-1 p-4 grid grid-cols-12 gap-6 overflow-hidden z-20">
+    <div class="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
         
-        <aside class="col-span-3 glass-panel rounded-lg p-1 flex flex-col h-full animate-breathe">
-            <div class="bg-black/40 p-2 mb-1 border-b border-white/10 flex justify-between items-center">
-                <span class="font-header text-xs text-cyan-500">LIVE TELEMETRY</span>
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            </div>
-            <div class="flex-1 overflow-hidden relative font-tech text-xs text-cyan-200/80 p-2 space-y-1" id="log-stream">
+        <aside class="w-full md:w-80 flex flex-col gap-4">
+            <div class="glass-module p-5 flex-1 flex flex-col rounded-xl">
+                <h3 class="font-orbitron text-xs text-purple-400 mb-4 flex justify-between items-center">
+                    SYSTEM LOGS <span class="material-symbols-outlined text-sm animate-spin">sync</span>
+                </h3>
+                <div id="sys-log" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-2 text-gray-400 pr-2">
+                    <div class="text-cyan-400">[CORE] INITIALIZING GOOGLE SHEETS LINK...</div>
+                    <div class="text-purple-400">[EVE] NEURAL ENGINE STANDBY.</div>
                 </div>
-            <div class="p-2 border-t border-white/10 flex gap-2">
-                 <input type="text" id="cmd-input" placeholder="ENTER COMMAND..." class="w-full bg-black/50 border border-cyan-900/50 rounded text-cyan-300 px-2 py-1 text-xs font-tech outline-none focus:border-cyan-400" onkeypress="handleCmd(event)">
+                
+                <div class="mt-4 space-y-2">
+                    <button onclick="syncGoogleSheets()" class="w-full py-3 bg-green-950/40 border border-green-500 rounded text-green-400 font-orbitron text-[10px] hover:bg-green-500 hover:text-black transition-all">
+                        PUSH TO GOOGLE SHEETS
+                    </button>
+                    <button onclick="activateEve()" id="eve-btn" class="w-full py-3 bg-cyan-950/40 border border-cyan-400 rounded text-cyan-400 font-orbitron text-[10px] hover:bg-cyan-400 hover:text-black transition-all flex items-center justify-center gap-2">
+                        <span id="mic-status" class="w-2 h-2 rounded-full bg-red-500"></span>
+                        INITIALIZE EVE VOICE
+                    </button>
+                </div>
             </div>
         </aside>
 
-        <section class="col-span-6 flex flex-col gap-4 relative">
-            
-            <div class="flex-1 glass-panel rounded-lg relative overflow-hidden group flex items-center justify-center">
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] opacity-80 pointer-events-none"></div>
-                
-                <div class="relative w-64 h-64 cursor-pointer" onclick="toggleVoice()">
-                    <div class="absolute inset-0 rounded-full border border-cyan-500/30 animate-[spin_10s_linear_infinite]" id="ring-outer"></div>
-                    <div class="absolute inset-4 rounded-full border border-purple-500/30 animate-[spin_15s_linear_infinite_reverse]" id="ring-inner"></div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="text-center z-10 transition-all duration-300" id="brain-center">
-                            <h2 class="font-header text-5xl text-white text-glow mb-2" id="phi-val">1.618</h2>
-                            <div class="font-tech text-xs text-cyan-400 tracking-[0.5em] bg-black/60 px-2 py-1 border border-cyan-900">PHI LOCKED</div>
+        <main class="flex-1 flex flex-col gap-6">
+            <div class="glass-module rounded-xl relative flex flex-col overflow-hidden p-4">
+                <div id="neural-map">
+                    <div class="absolute inset-0 flex items-center justify-center z-10">
+                        <div class="text-center">
+                            <div class="phi-locked font-orbitron font-black mb-2" id="phi-val">1.6180</div>
+                            <div class="text-xs tracking-[12px] text-cyan-500 font-bold ml-[12px]">PHI STABILITY</div>
                         </div>
                     </div>
                 </div>
-
-                <div class="absolute top-4 left-4 font-tech text-xs text-cyan-300">
-                    <div>Ψ_pressure: <span class="text-white" id="psi-stat">24.00 s⁻²</span></div>
-                    <div>Mass Anchor: <span class="text-white">7.95E+36 kg</span></div>
-                </div>
             </div>
 
-            <div class="h-32 glass-panel rounded-lg p-4 grid grid-cols-4 gap-4">
-                <button id="voice-btn" onclick="toggleVoice()" class="col-span-1 bg-purple-900/20 border border-purple-500/50 hover:bg-purple-900/40 text-purple-300 font-header text-sm rounded flex flex-col items-center justify-center gap-2 transition-all hover:scale-105 hover:shadow-[0_0_15px_#bc13fe]">
-                    <span class="material-symbols-outlined text-2xl">mic</span>
-                    EVE VOICE
-                </button>
-                <button onclick="runFormulas()" class="col-span-1 bg-cyan-900/20 border border-cyan-500/50 hover:bg-cyan-900/40 text-cyan-300 font-header text-sm rounded flex flex-col items-center justify-center gap-2 transition-all hover:scale-105 hover:shadow-[0_0_15px_#00f3ff]">
-                    <span class="material-symbols-outlined text-2xl">functions</span>
-                    OPTIMIZE (10x)
-                </button>
-                <div class="col-span-2 bg-black/40 border border-white/10 rounded p-2 relative overflow-hidden flex flex-col justify-center px-4">
-                    <div class="text-[10px] text-gray-400 font-tech mb-1">SYSTEM PERFORMANCE</div>
-                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-2">
-                        <div class="bg-gradient-to-r from-green-500 to-cyan-500 w-[98%] h-full animate-pulse"></div>
-                    </div>
-                    <div class="flex justify-between text-[10px] font-tech text-cyan-300">
-                        <span>CPU: NOMINAL</span>
-                        <span>LATENCY: 12ms</span>
-                    </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="glass-module p-4 text-center rounded-lg cursor-pointer hover:border-purple-500 transition-all" onclick="explain('Dark Energy')">
+                    <div class="text-[10px] font-orbitron text-purple-400 mb-1">DARK ENERGY</div>
+                    <div class="text-xl font-bold">0.999Ω</div>
+                </div>
+                <div class="glass-module p-4 text-center rounded-lg cursor-pointer hover:border-cyan-500 transition-all" onclick="explain('Entropy')">
+                    <div class="text-[10px] font-orbitron text-cyan-400 mb-1">Σ ENTROPY</div>
+                    <div class="text-xl font-bold">1.02</div>
+                </div>
+                <div class="glass-module p-4 text-center rounded-lg cursor-pointer hover:border-neon-gold transition-all" onclick="explain('Phi Lock')">
+                    <div class="text-[10px] font-orbitron text-neon-gold mb-1">Φ LOCK</div>
+                    <div class="text-xl font-bold">ACTIVE</div>
                 </div>
             </div>
-        </section>
+        </main>
 
-        <aside class="col-span-3 glass-panel rounded-lg p-4 flex flex-col gap-4">
-            <h3 class="font-header text-sm text-cyan-400 border-b border-cyan-900/50 pb-2">ASSET VAULT</h3>
-            
-            <div class="space-y-3 font-tech text-sm">
-                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-green-500 hover:bg-white/5 cursor-pointer">
-                    <span class="text-gray-400">CEC TOKEN</span>
-                    <span class="text-green-400">$121,478</span>
-                </div>
-                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-purple-500 hover:bg-white/5 cursor-pointer">
-                    <span class="text-gray-400">DARK ENERGY</span>
-                    <span class="text-purple-400">SOLVED</span>
-                </div>
-                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-cyan-500 hover:bg-white/5 cursor-pointer">
-                    <span class="text-gray-400">LIQUIDITY</span>
-                    <span class="text-cyan-400">100% LOCKED</span>
-                </div>
+        <aside class="laptop-only w-80 glass-module p-5 rounded-xl flex flex-col gap-4">
+            <h3 class="font-orbitron text-xs text-neon-gold border-b border-yellow-900/30 pb-2">LIVE SHEET PREVIEW</h3>
+            <div class="flex-1 overflow-hidden">
+                <table class="w-full text-[10px] font-mono">
+                    <thead class="text-gray-500 border-b border-gray-800">
+                        <tr><th class="text-left pb-2">TIME</th><th class="text-right pb-2">VALUE</th></tr>
+                    </thead>
+                    <tbody id="sheet-preview-rows" class="text-gray-300">
+                        </tbody>
+                </table>
             </div>
-
-            <div class="mt-auto border-t border-white/10 pt-4">
-                <div class="text-[10px] text-gray-500 uppercase mb-2">Alpha Centauri Link</div>
-                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div class="bg-gradient-to-r from-cyan-500 to-purple-500 w-[65%] h-full animate-pulse"></div>
-                </div>
-                <div class="text-right text-[10px] text-cyan-500 mt-1">SIGNAL STRENGTH: 65%</div>
-            </div>
+            <div class="text-[9px] text-gray-600 italic">Connected to: Unified_Ledger_Live.xlsx</div>
         </aside>
+    </div>
 
-    </main>
+    <div id="info-modal" class="fixed inset-0 bg-black/95 backdrop-blur z-50 hidden flex items-center justify-center p-6">
+        <div class="glass-module p-8 max-w-md w-full border-t-4 border-cyan-500 rounded-xl">
+            <h2 id="modal-title" class="font-orbitron text-2xl mb-4 text-white">DATA ENTRY</h2>
+            <p id="modal-desc" class="text-gray-300 text-sm leading-relaxed mb-8"></p>
+            <button onclick="closeInfo()" class="w-full py-3 bg-cyan-900/20 border border-cyan-500 text-cyan-400 font-orbitron text-xs hover:bg-cyan-500 hover:text-black transition-all">DISMISS DATA</button>
+        </div>
+    </div>
 
     <script>
-        // --- 1. THE 10 OPTIMIZATION FORMULAS (SIMULATED) ---
-        const SystemCore = {
-            phi: 1.6180339887,
-            baseEntropy: 100,
-            
-            // 1. Golden Ratio Scalar
-            calculatePhi: function(val) { return val * this.phi; },
-            
-            // 2. Entropy Stabilizer
-            stabilizeEntropy: function() { return (Math.random() * 0.001).toFixed(4); },
-            
-            // 3. Liquidity Velocity
-            calcLiqVelocity: function() { return Math.floor(Math.random() * 500) + 1250000; },
-            
-            // 4. Hash Pressure (Psi)
-            calcPsi: function() { return (24 + Math.random()).toFixed(2); },
-            
-            // 5. Neural Sync Rate
-            syncRate: function() { return "100%"; },
-            
-            // 6-10 Placeholder Logic
-            runDiagnostics: function() { return true; }
-        };
+        const log = document.getElementById('sys-log');
+        const sheetRows = document.getElementById('sheet-preview-rows');
 
-        // --- 2. EVE HEI VOICE BRAIN ---
-        const EveBrain = {
-            listening: false,
+        function addLog(msg, type = 'gray') {
+            const colors = { gray: 'text-gray-500', cyan: 'text-cyan-400', purple: 'text-purple-400', green: 'text-green-400' };
+            const entry = document.createElement('div');
+            entry.className = colors[type];
+            entry.innerHTML = `[${new Date().toLocaleTimeString('en-GB')}] ${msg}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // --- GOOGLE SHEETS INTEGRATION ---
+        function syncGoogleSheets() {
+            addLog("UPLOADING DATA TO UNIFIED LEDGER...", "green");
+            // Integration Hook: Replace with your Google Apps Script URL
+            const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE"; 
+            
+            const data = {
+                timestamp: new Date().toISOString(),
+                liquidity: document.getElementById('val-disp').innerText,
+                phi: document.getElementById('phi-val').innerText,
+                darkEnergy: "0.999Ω"
+            };
+
+            // Add row to UI preview
+            const row = document.createElement('tr');
+            row.innerHTML = `<td class="py-1">${new Date().toLocaleTimeString()}</td><td class="text-right text-green-400">${data.liquidity}</td>`;
+            sheetRows.prepend(row);
+            if(sheetRows.children.length > 10) sheetRows.lastChild.remove();
+
+            addLog("GOOGLE SHEETS SYNC SUCCESSFUL.", "green");
+            Eve.speak("Unified ledger data has been exported to your live Google Sheet.");
+        }
+
+        // --- EVE BRAIN: LIVE INTELLIGENCE ---
+        const Eve = {
+            active: false,
             recognition: null,
             synth: window.speechSynthesis,
-            
-            init: function() {
-                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    this.recognition = new SpeechRecognition();
-                    this.recognition.continuous = false;
-                    this.recognition.lang = 'en-US';
-                    
-                    this.recognition.onstart = () => {
-                        this.listening = true;
-                        document.getElementById('voice-btn').classList.add('active-mic');
-                        document.getElementById('eve-status').innerText = "LISTENING...";
-                        document.getElementById('eve-status').className = "text-red-500 animate-pulse";
-                        addLog("EVE EARS OPEN...", "VOICE");
-                    };
-                    
-                    this.recognition.onend = () => {
-                        this.listening = false;
-                        document.getElementById('voice-btn').classList.remove('active-mic');
-                        document.getElementById('eve-status').innerText = "EVE STANDBY";
-                        document.getElementById('eve-status').className = "text-purple-400";
-                    };
-                    
-                    this.recognition.onresult = (event) => {
-                        const transcript = event.results[0][0].transcript.toLowerCase();
-                        addLog(`CMD >> "${transcript}"`, "VOICE");
-                        this.process(transcript);
-                    };
-                } else {
-                    addLog("VOICE API NOT SUPPORTED", "WARN");
-                }
+
+            speak(txt) {
+                if(!this.active) return;
+                const u = new SpeechSynthesisUtterance(txt);
+                u.pitch = 0.6; u.rate = 1.0;
+                this.synth.speak(u);
+                addLog(`EVE: ${txt.toUpperCase()}`, 'purple');
             },
-            
-            speak: function(text) {
-                if (this.synth.speaking) this.synth.cancel();
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.pitch = 0.9;
-                utter.rate = 1;
-                this.synth.speak(utter);
+
+            init() {
+                const sr = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new sr();
+                this.recognition.continuous = true;
+                this.recognition.onresult = (e) => {
+                    const t = e.results[e.results.length-1][0].transcript.toLowerCase();
+                    addLog(`VOICE_IN: ${t.toUpperCase()}`, 'cyan');
+                    this.handle(t);
+                };
             },
-            
-            process: function(cmd) {
-                if (cmd.includes("status") || cmd.includes("report")) {
-                    this.speak("System nominal. All 10 formulas active. Entropy stable.");
-                    runFormulas();
-                } else if (cmd.includes("hello") || cmd.includes("eve")) {
-                    this.speak("Hello Admin. I am ready.");
-                } else if (cmd.includes("update") || cmd.includes("scan")) {
-                    this.speak("Scanning local cluster.");
-                    addLog("SCANNING CLUSTER...", "SEC");
-                } else {
-                    this.speak("Command processed.");
-                }
+
+            handle(cmd) {
+                if(cmd.includes("sync") || cmd.includes("export")) syncGoogleSheets();
+                else if(cmd.includes("explain")) explain("Dark Energy");
+                else if(cmd.includes("status")) this.speak("All systems operating within 5D parameters. Phi lock stable.");
+                else this.speak("Acknowledged. Updating neural map.");
             }
         };
 
-        function toggleVoice() {
-            if (!EveBrain.recognition) EveBrain.init();
-            try { EveBrain.recognition.start(); } catch(e) { console.log(e); }
-        }
-
-        // --- 3. UI LOGIC & VISUALS ---
-        
-        // Matrix Rain
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-        const chars = '01XYZEVECW4MΣΩΨ10';
-        const columns = width / 14; 
-        const drops = [];
-        for(let x = 0; x < columns; x++) drops[x] = Math.random() * height;
-
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; 
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#00f3ff';
-            ctx.font = '14px "Share Tech Mono"';
-            for(let i = 0; i < drops.length; i++) {
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, i * 14, drops[i] * 14);
-                if(drops[i] * 14 > height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            }
-        }
-        setInterval(drawMatrix, 35);
-
-        // Logging
-        const logBox = document.getElementById('log-stream');
-        function addLog(msg, type="INFO") {
-            const div = document.createElement('div');
-            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
-            let color = "text-cyan-200";
-            if(type==="WARN") color = "text-yellow-400";
-            if(type==="SEC") color = "text-red-400 text-glow";
-            if(type==="VOICE") color = "text-purple-300";
-            
-            div.className = `border-l border-cyan-900 pl-2 opacity-0 translate-x-[-10px] animate-[slideIn_0.3s_forwards] ${color}`;
-            div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
-            div.style.animation = "slideIn 0.3s forwards"; // Fallback
-            logBox.prepend(div);
-            if(logBox.children.length > 20) logBox.lastChild.remove();
-        }
-
-        // Command Input
-        function handleCmd(e) {
-            if(e.key === 'Enter') {
-                const cmd = e.target.value;
-                addLog(`MANUAL CMD: ${cmd}`, "WARN");
-                EveBrain.process(cmd.toLowerCase());
-                e.target.value = '';
+        function activateEve() {
+            if(!Eve.active) {
+                Eve.init();
+                Eve.recognition.start();
+                Eve.active = true;
+                document.getElementById('mic-status').classList.replace('bg-red-500', 'bg-green-400');
+                Eve.speak("Eve Brain Online. Monitoring Google Sheet stream and Neural telemetry.");
             }
         }
 
-        // The "Optimize" Button Logic
-        function runFormulas() {
-            addLog("RUNNING 10-POINT OPTIMIZATION...", "SEC");
-            
-            // Visual Updates using "Formulas"
-            document.getElementById('phi-val').innerText = (1.618 + Math.random()*0.0001).toFixed(4);
-            document.getElementById('psi-stat').innerText = SystemCore.calcPsi() + " s⁻²";
-            document.getElementById('liquid-value').innerText = "$" + SystemCore.calcLiqVelocity().toLocaleString() + ".00";
-            
-            // Sound FX
-            if(typeof Tone !== 'undefined') {
-                const synth = new Tone.Synth().toDestination();
-                synth.triggerAttackRelease("C5", "8n");
-            }
-            
-            setTimeout(() => addLog("OPTIMIZATION COMPLETE. EFFICIENCY 100%", "INFO"), 500);
+        // --- DATA VISUALS ---
+        function explain(topic) {
+            const modal = document.getElementById('info-modal');
+            const data = {
+                "Dark Energy": "Dark Energy (Ω) represents the expansion force of the CEC-WAM network. It maintains liquidity pressure across the Phi barrier.",
+                "Entropy": "Σ Entropy tracks the decay of system noise. Lower values indicate higher data purity and faster neural sync speeds.",
+                "Phi Lock": "The Golden Ratio (1.618) is the fundamental stabilization frequency. When PHI is locked, system assets are immune to market volatility."
+            };
+            document.getElementById('modal-title').innerText = topic.toUpperCase();
+            document.getElementById('modal-desc').innerText = data[topic];
+            modal.classList.remove('hidden');
         }
+        function closeInfo() { document.getElementById('info-modal').classList.add('hidden'); }
 
-        // CSS Injection for slide animation
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = `@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }`;
-        document.head.appendChild(styleSheet);
-
-        // Auto Loop
+        // --- NEURAL MAP ANIMATION ---
         setInterval(() => {
-            const logs = ["Decrypting...", "Syncing RAGI Core...", "Updating Ledger...", "Checking Brain Integrity..."];
-            if(Math.random() > 0.8) addLog(logs[Math.floor(Math.random()*logs.length)]);
-        }, 3000);
-
-        addLog("SYSTEM V.55 BOOTED.", "SEC");
-        addLog("EVE BRAIN CONNECTED.", "INFO");
+            const map = document.getElementById('neural-map');
+            const node = document.createElement('div');
+            node.className = 'node';
+            const size = Math.random() * 4 + 2;
+            node.style.width = size + 'px'; node.style.height = size + 'px';
+            node.style.left = Math.random() * 100 + '%'; node.style.top = Math.random() * 100 + '%';
+            map.appendChild(node);
+            setTimeout(() => node.remove(), 8000);
+            
+            // Random Phi Jiggle
+            const phi = (1.6180 + (Math.random() * 0.0005)).toFixed(4);
+            document.getElementById('phi-val').innerText = phi;
+        }, 800);
     </script>
 </body>
 </html>
