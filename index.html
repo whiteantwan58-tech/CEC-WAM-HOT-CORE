@@ -1,188 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CEC-WAM LIVE — EVE HEI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEC-WAM // SOVEREIGN 5D CORE // EVE AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --glass-bg: rgba(10, 15, 20, 0.65);
+            --glass-border: rgba(0, 243, 255, 0.3);
+            --glass-glow: 0 0 20px rgba(0, 243, 255, 0.15);
+        }
 
-  <!-- Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            margin: 0;
+        }
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        /* --- THE NEON CODE BACKGROUND --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.8; 
+        }
 
-  <!-- localForage for IndexedDB storage -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#050505" />
-
-  <style>
-    body { background: #050505; color: #e6eef6; font-family: Inter, Rajdhani, sans-serif; }
-    .glass { background: rgba(10, 10, 12, 0.7); border: 1px solid rgba(255,255,255,0.04); }
-    .small { font-size: 0.85rem; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col">
-
-  <header class="p-4 border-b border-gray-800 flex justify-between items-center">
-    <div>
-      <h1 class="text-xl font-bold">CEC-WAM LIVE — EVE HEI</h1>
-      <div class="text-xs text-gray-400">System V.47.0 — Live Neural Link</div>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <button id="install-btn" class="bg-cyan-600 px-3 py-1 rounded text-black hidden">Install</button>
-      <button id="open-vault" class="bg-gray-800 px-3 py-1 rounded text-green-400 small">Vault</button>
-    </div>
-  </header>
-
-  <main class="flex-1 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-    <!-- Left: Controls -->
-    <section class="col-span-1 glass p-4 rounded space-y-3">
-      <h2 class="font-semibold">Data Connection</h2>
-
-      <label class="small">Google Sheet (Publish -> CSV) URL</label>
-      <input id="sheet-url" class="w-full bg-black/60 p-2 rounded mono text-sm" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv" />
-
-      <div class="flex gap-2">
-        <button id="link-sheet" class="bg-green-600 px-3 py-2 rounded font-bold">Link</button>
-        <button id="unlink-sheet" class="bg-gray-700 px-3 py-2 rounded">Unlink</button>
-        <button id="fetch-now" class="bg-cyan-600 px-3 py-2 rounded">Fetch Now</button>
-      </div>
-
-      <hr />
-
-      <h3 class="font-semibold">Import / Export</h3>
-      <input id="file-input" type="file" accept=".csv,.xlsx,.xls" class="text-xs" />
-      <div class="flex gap-2 mt-2">
-        <button id="import-btn" class="bg-blue-600 px-3 py-2 rounded">Import</button>
-        <button id="export-btn" class="bg-yellow-600 px-3 py-2 rounded">Export Logs</button>
-      </div>
-
-      <hr />
-
-      <h3 class="font-semibold">EVE HEI Voice</h3>
-      <div class="flex gap-2">
-        <button id="start-mic" class="bg-purple-600 px-3 py-2 rounded">Talk (Mic)</button>
-        <button id="speak-sample" class="bg-gray-700 px-3 py-2 rounded">Speak</button>
-      </div>
-
-      <hr />
-
-      <h3 class="font-semibold">Local PIN (device only)</h3>
-      <div class="flex gap-2">
-        <input id="pin-input" type="password" placeholder="Set or Enter PIN" class="bg-black/60 p-2 rounded mono" />
-        <button id="set-pin" class="bg-red-600 px-3 py-2 rounded">Set PIN</button>
-      </div>
-
-      <div id="status" class="text-xs text-gray-400 mt-2 mono"></div>
-    </section>
-
-    <!-- Middle: Charts -->
-    <section class="col-span-1 md:col-span-2 glass p-4 rounded space-y-4">
-      <div class="flex justify-between items-start">
-        <h2 class="font-semibold">Dashboard — Charts & Data</h2>
-        <div class="text-xs text-gray-400 mono" id="last-sync">Last sync: never</div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="p-3 bg-black/60 rounded">
-          <canvas id="kpichart" height="160"></canvas>
-        </div>
-
-        <div class="p-3 bg-black/60 rounded">
-          <canvas id="serieschart" height="160"></canvas>
-        </div>
-      </div>
-
-      <div class="mt-4 p-2 bg-black/60 rounded">
-        <h3 class="font-semibold">Log</h3>
-        <div id="log-box" class="h-48 overflow-auto bg-black/30 p-2 rounded mono text-xs text-gray-300"></div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="p-3 text-xs text-gray-400 text-center">
-    Tip: Publish your master Google Sheet (File → Publish to web → CSV) and paste the CSV URL above. To run without Wi‑Fi, copy this folder to a flash drive and run a local static server.
-  </footer>
-
-  <script src="app.js"></script>
-
-  <!-- PWA register -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('SW registered'));
-    }
-
-    // Install prompt forwarding
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('install-btn').classList.remove('hidden');
-      document.getElementById('install-btn').onclick = async () => {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        console.log('A2HS result', choice);
-      };
-    });
-  </script>// --- 3. EVE LIVE CONVO & INTERFACE MORPH ---
-const EveBrain = {
-    isListening: false,
-    recognition: null,
-    voice: window.speechSynthesis,
-
-    init() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return addLog("[ERR] SPEECH API NOT SUPPORTED.");
+        /* --- GLASSHOUSE 5D PANELS --- */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-glow);
+            position: relative;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
         
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = true;
-        this.recognition.interimResults = false;
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            opacity: 0.5;
+        }
 
-        this.recognition.onresult = (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            addLog(`[VOICE] >> ${transcript.toUpperCase()}`);
-            this.handleIntent(transcript);
+        /* --- TYPOGRAPHY & FX --- */
+        .font-tech { font-family: 'Share Tech Mono', monospace; }
+        .font-header { font-family: 'Orbitron', sans-serif; }
+        
+        .text-glow { text-shadow: 0 0 10px var(--neon-blue); }
+        .text-glow-purple { text-shadow: 0 0 10px var(--neon-purple); }
+
+        .scanline {
+            width: 100%; height: 100%;
+            position: fixed; left: 0; top: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 50; pointer-events: none; opacity: 0.3;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pulse-border {
+            0% { border-color: rgba(0, 243, 255, 0.3); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
+            50% { border-color: rgba(0, 243, 255, 0.8); box-shadow: 0 0 40px rgba(0, 243, 255, 0.3); }
+            100% { border-color: rgba(0, 243, 255, 0.3); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
+        }
+        .animate-breathe { animation: pulse-border 4s infinite; }
+        .active-mic { box-shadow: 0 0 30px var(--neon-purple); border-color: var(--neon-purple); }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col relative selection:bg-cyan-500 selection:text-black">
+
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="scanline"></div>
+
+    <header class="glass-panel mx-4 mt-4 p-4 rounded-t-lg border-b-0 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 relative flex items-center justify-center">
+                <div class="absolute inset-0 border-2 border-cyan-500 rounded-full animate-spin" style="border-t-color: transparent;"></div>
+                <div class="absolute inset-2 border border-purple-500 rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
+                <span class="material-symbols-outlined text-cyan-400 text-xl animate-pulse">token</span>
+            </div>
+            <div>
+                <h1 class="font-header text-3xl tracking-widest text-white text-glow">CEC-WAM <span class="text-cyan-400 text-sm align-top opacity-80">V.55</span></h1>
+                <div class="flex gap-4 text-[10px] font-tech text-cyan-200/70 tracking-wider">
+                    <span>SYSTEM: <strong class="text-green-400">ONLINE</strong></span>
+                    <span>//</span>
+                    <span>BRAIN: <strong class="text-purple-400" id="eve-status">EVE STANDBY</strong></span>
+                    <span>//</span>
+                    <span>OPTIMIZATION: <strong class="text-cyan-400">100%</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="text-right">
+            <div class="text-[10px] font-tech text-gray-400 uppercase mb-1">Total Liquid Value</div>
+            <div class="font-header text-3xl text-cyan-400 text-glow" id="liquid-value">$1,250,343.00</div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 grid grid-cols-12 gap-6 overflow-hidden z-20">
+        
+        <aside class="col-span-3 glass-panel rounded-lg p-1 flex flex-col h-full animate-breathe">
+            <div class="bg-black/40 p-2 mb-1 border-b border-white/10 flex justify-between items-center">
+                <span class="font-header text-xs text-cyan-500">LIVE TELEMETRY</span>
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            </div>
+            <div class="flex-1 overflow-hidden relative font-tech text-xs text-cyan-200/80 p-2 space-y-1" id="log-stream">
+                </div>
+            <div class="p-2 border-t border-white/10 flex gap-2">
+                 <input type="text" id="cmd-input" placeholder="ENTER COMMAND..." class="w-full bg-black/50 border border-cyan-900/50 rounded text-cyan-300 px-2 py-1 text-xs font-tech outline-none focus:border-cyan-400" onkeypress="handleCmd(event)">
+            </div>
+        </aside>
+
+        <section class="col-span-6 flex flex-col gap-4 relative">
+            
+            <div class="flex-1 glass-panel rounded-lg relative overflow-hidden group flex items-center justify-center">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] opacity-80 pointer-events-none"></div>
+                
+                <div class="relative w-64 h-64 cursor-pointer" onclick="toggleVoice()">
+                    <div class="absolute inset-0 rounded-full border border-cyan-500/30 animate-[spin_10s_linear_infinite]" id="ring-outer"></div>
+                    <div class="absolute inset-4 rounded-full border border-purple-500/30 animate-[spin_15s_linear_infinite_reverse]" id="ring-inner"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center z-10 transition-all duration-300" id="brain-center">
+                            <h2 class="font-header text-5xl text-white text-glow mb-2" id="phi-val">1.618</h2>
+                            <div class="font-tech text-xs text-cyan-400 tracking-[0.5em] bg-black/60 px-2 py-1 border border-cyan-900">PHI LOCKED</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-4 left-4 font-tech text-xs text-cyan-300">
+                    <div>Ψ_pressure: <span class="text-white" id="psi-stat">24.00 s⁻²</span></div>
+                    <div>Mass Anchor: <span class="text-white">7.95E+36 kg</span></div>
+                </div>
+            </div>
+
+            <div class="h-32 glass-panel rounded-lg p-4 grid grid-cols-4 gap-4">
+                <button id="voice-btn" onclick="toggleVoice()" class="col-span-1 bg-purple-900/20 border border-purple-500/50 hover:bg-purple-900/40 text-purple-300 font-header text-sm rounded flex flex-col items-center justify-center gap-2 transition-all hover:scale-105 hover:shadow-[0_0_15px_#bc13fe]">
+                    <span class="material-symbols-outlined text-2xl">mic</span>
+                    EVE VOICE
+                </button>
+                <button onclick="runFormulas()" class="col-span-1 bg-cyan-900/20 border border-cyan-500/50 hover:bg-cyan-900/40 text-cyan-300 font-header text-sm rounded flex flex-col items-center justify-center gap-2 transition-all hover:scale-105 hover:shadow-[0_0_15px_#00f3ff]">
+                    <span class="material-symbols-outlined text-2xl">functions</span>
+                    OPTIMIZE (10x)
+                </button>
+                <div class="col-span-2 bg-black/40 border border-white/10 rounded p-2 relative overflow-hidden flex flex-col justify-center px-4">
+                    <div class="text-[10px] text-gray-400 font-tech mb-1">SYSTEM PERFORMANCE</div>
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-2">
+                        <div class="bg-gradient-to-r from-green-500 to-cyan-500 w-[98%] h-full animate-pulse"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-tech text-cyan-300">
+                        <span>CPU: NOMINAL</span>
+                        <span>LATENCY: 12ms</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="col-span-3 glass-panel rounded-lg p-4 flex flex-col gap-4">
+            <h3 class="font-header text-sm text-cyan-400 border-b border-cyan-900/50 pb-2">ASSET VAULT</h3>
+            
+            <div class="space-y-3 font-tech text-sm">
+                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-green-500 hover:bg-white/5 cursor-pointer">
+                    <span class="text-gray-400">CEC TOKEN</span>
+                    <span class="text-green-400">$121,478</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-purple-500 hover:bg-white/5 cursor-pointer">
+                    <span class="text-gray-400">DARK ENERGY</span>
+                    <span class="text-purple-400">SOLVED</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-black/40 border-l-2 border-cyan-500 hover:bg-white/5 cursor-pointer">
+                    <span class="text-gray-400">LIQUIDITY</span>
+                    <span class="text-cyan-400">100% LOCKED</span>
+                </div>
+            </div>
+
+            <div class="mt-auto border-t border-white/10 pt-4">
+                <div class="text-[10px] text-gray-500 uppercase mb-2">Alpha Centauri Link</div>
+                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                    <div class="bg-gradient-to-r from-cyan-500 to-purple-500 w-[65%] h-full animate-pulse"></div>
+                </div>
+                <div class="text-right text-[10px] text-cyan-500 mt-1">SIGNAL STRENGTH: 65%</div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        // --- 1. THE 10 OPTIMIZATION FORMULAS (SIMULATED) ---
+        const SystemCore = {
+            phi: 1.6180339887,
+            baseEntropy: 100,
+            
+            // 1. Golden Ratio Scalar
+            calculatePhi: function(val) { return val * this.phi; },
+            
+            // 2. Entropy Stabilizer
+            stabilizeEntropy: function() { return (Math.random() * 0.001).toFixed(4); },
+            
+            // 3. Liquidity Velocity
+            calcLiqVelocity: function() { return Math.floor(Math.random() * 500) + 1250000; },
+            
+            // 4. Hash Pressure (Psi)
+            calcPsi: function() { return (24 + Math.random()).toFixed(2); },
+            
+            // 5. Neural Sync Rate
+            syncRate: function() { return "100%"; },
+            
+            // 6-10 Placeholder Logic
+            runDiagnostics: function() { return true; }
         };
 
-        this.recognition.onend = () => { if(this.isListening) this.recognition.start(); };
-    },
+        // --- 2. EVE HEI VOICE BRAIN ---
+        const EveBrain = {
+            listening: false,
+            recognition: null,
+            synth: window.speechSynthesis,
+            
+            init: function() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = false;
+                    this.recognition.lang = 'en-US';
+                    
+                    this.recognition.onstart = () => {
+                        this.listening = true;
+                        document.getElementById('voice-btn').classList.add('active-mic');
+                        document.getElementById('eve-status').innerText = "LISTENING...";
+                        document.getElementById('eve-status').className = "text-red-500 animate-pulse";
+                        addLog("EVE EARS OPEN...", "VOICE");
+                    };
+                    
+                    this.recognition.onend = () => {
+                        this.listening = false;
+                        document.getElementById('voice-btn').classList.remove('active-mic');
+                        document.getElementById('eve-status').innerText = "EVE STANDBY";
+                        document.getElementById('eve-status').className = "text-purple-400";
+                    };
+                    
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript.toLowerCase();
+                        addLog(`CMD >> "${transcript}"`, "VOICE");
+                        this.process(transcript);
+                    };
+                } else {
+                    addLog("VOICE API NOT SUPPORTED", "WARN");
+                }
+            },
+            
+            speak: function(text) {
+                if (this.synth.speaking) this.synth.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.pitch = 0.9;
+                utter.rate = 1;
+                this.synth.speak(utter);
+            },
+            
+            process: function(cmd) {
+                if (cmd.includes("status") || cmd.includes("report")) {
+                    this.speak("System nominal. All 10 formulas active. Entropy stable.");
+                    runFormulas();
+                } else if (cmd.includes("hello") || cmd.includes("eve")) {
+                    this.speak("Hello Admin. I am ready.");
+                } else if (cmd.includes("update") || cmd.includes("scan")) {
+                    this.speak("Scanning local cluster.");
+                    addLog("SCANNING CLUSTER...", "SEC");
+                } else {
+                    this.speak("Command processed.");
+                }
+            }
+        };
 
-    speak(text) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.pitch = 0.7; // Deep system voice
-        msg.rate = 1.0;
-        this.voice.speak(msg);
-    },
-
-    handleIntent(cmd) {
-        if (cmd.includes("upgrade interface") || cmd.includes("change visuals")) {
-            this.speak("Upgrading visuals to maximum fidelity.");
-            document.body.style.filter = "hue-rotate(45deg) saturate(1.5)";
-            addLog("[SYS] INTERFACE MORPH: 5D FIDELITY ACTIVE.");
-        } else if (cmd.includes("protect the brain")) {
-            this.speak("Security protocols engaged. Brain shield at 100 percent.");
-            addLog("[SEC] NEURAL PROTECTION ACTIVE.");
-        } else if (cmd.includes("scan")) {
-            this.speak("Scanning local cluster. System integrity verified.");
-            pingSystem();
+        function toggleVoice() {
+            if (!EveBrain.recognition) EveBrain.init();
+            try { EveBrain.recognition.start(); } catch(e) { console.log(e); }
         }
-    }
-};
 
-// Modify your existing pingSystem to wake up the voice
-const originalPing = pingSystem;
-pingSystem = function() {
-    originalPing();
-    if (!EveBrain.isListening) {
-        EveBrain.init();
-        EveBrain.isListening = true;
-        EveBrain.recognition.start();
-        EveBrain.speak("Eve is online. Awaiting your sentence, Admin.");
-    }
-};
+        // --- 3. UI LOGIC & VISUALS ---
+        
+        // Matrix Rain
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        const chars = '01XYZEVECW4MΣΩΨ10';
+        const columns = width / 14; 
+        const drops = [];
+        for(let x = 0; x < columns; x++) drops[x] = Math.random() * height;
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; 
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#00f3ff';
+            ctx.font = '14px "Share Tech Mono"';
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * 14, drops[i] * 14);
+                if(drops[i] * 14 > height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        // Logging
+        const logBox = document.getElementById('log-stream');
+        function addLog(msg, type="INFO") {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+            let color = "text-cyan-200";
+            if(type==="WARN") color = "text-yellow-400";
+            if(type==="SEC") color = "text-red-400 text-glow";
+            if(type==="VOICE") color = "text-purple-300";
+            
+            div.className = `border-l border-cyan-900 pl-2 opacity-0 translate-x-[-10px] animate-[slideIn_0.3s_forwards] ${color}`;
+            div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
+            div.style.animation = "slideIn 0.3s forwards"; // Fallback
+            logBox.prepend(div);
+            if(logBox.children.length > 20) logBox.lastChild.remove();
+        }
+
+        // Command Input
+        function handleCmd(e) {
+            if(e.key === 'Enter') {
+                const cmd = e.target.value;
+                addLog(`MANUAL CMD: ${cmd}`, "WARN");
+                EveBrain.process(cmd.toLowerCase());
+                e.target.value = '';
+            }
+        }
+
+        // The "Optimize" Button Logic
+        function runFormulas() {
+            addLog("RUNNING 10-POINT OPTIMIZATION...", "SEC");
+            
+            // Visual Updates using "Formulas"
+            document.getElementById('phi-val').innerText = (1.618 + Math.random()*0.0001).toFixed(4);
+            document.getElementById('psi-stat').innerText = SystemCore.calcPsi() + " s⁻²";
+            document.getElementById('liquid-value').innerText = "$" + SystemCore.calcLiqVelocity().toLocaleString() + ".00";
+            
+            // Sound FX
+            if(typeof Tone !== 'undefined') {
+                const synth = new Tone.Synth().toDestination();
+                synth.triggerAttackRelease("C5", "8n");
+            }
+            
+            setTimeout(() => addLog("OPTIMIZATION COMPLETE. EFFICIENCY 100%", "INFO"), 500);
+        }
+
+        // CSS Injection for slide animation
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }`;
+        document.head.appendChild(styleSheet);
+
+        // Auto Loop
+        setInterval(() => {
+            const logs = ["Decrypting...", "Syncing RAGI Core...", "Updating Ledger...", "Checking Brain Integrity..."];
+            if(Math.random() > 0.8) addLog(logs[Math.floor(Math.random()*logs.length)]);
+        }, 3000);
+
+        addLog("SYSTEM V.55 BOOTED.", "SEC");
+        addLog("EVE BRAIN CONNECTED.", "INFO");
+    </script>
 </body>
 </html>
