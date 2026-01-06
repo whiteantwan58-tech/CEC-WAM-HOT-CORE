@@ -3,155 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEC-WAM // 3026 AD // NEURAL MASTER CORE</title>
+    <title>CEC-WAM // 2026 REAL-TIME // SOVEREIGN CORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
     <style>
-        :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffd700; --bg: #000; }
-        body { background: var(--bg); color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace; overflow: hidden; margin: 0; }
-        .glass { background: rgba(0, 20, 30, 0.9); border: 1px solid var(--neon-cyan); backdrop-filter: blur(25px); border-radius: 15px; box-shadow: 0 0 50px rgba(0, 243, 255, 0.1); }
-        #star-map { position: fixed; inset: 0; z-index: -1; }
-        .phi-display { font-size: clamp(3rem, 10vw, 6rem); color: #fff; text-shadow: 0 0 30px var(--neon-cyan); }
-        .hidden { display: none !important; }
-        .eve-visual { width: 120px; height: 120px; border: 3px solid var(--neon-gold); border-radius: 50%; box-shadow: 0 0 40px var(--neon-gold); position: relative; overflow: hidden; }
-        .eve-pulse { position: absolute; inset: 0; background: radial-gradient(circle, var(--neon-gold) 0%, transparent 70%); opacity: 0.2; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.1; } 50% { transform: scale(1.1); opacity: 0.3; } 100% { transform: scale(0.8); opacity: 0.1; } }
+        :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffd700; --bg: #020202; }
+        body { 
+            background: var(--bg); color: var(--neon-cyan); 
+            font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #0a0a0f 0%, #000 100%);
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+        
+        /* 5D NEON BORDERS */
+        .glass-module { 
+            background: rgba(0, 15, 20, 0.85); 
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1), inset 0 0 10px rgba(0, 243, 255, 0.1);
+            backdrop-filter: blur(20px); border-radius: 4px; position: relative;
+        }
+        .glass-module::before {
+            content: ''; position: absolute; inset: -1px; border-radius: 4px;
+            padding: 1px; background: linear-gradient(45deg, var(--neon-cyan), transparent, var(--neon-purple));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude; pointer-events: none;
+        }
+
+        /* DATA VIBE */
+        .phi-vibe { font-size: clamp(3rem, 12vw, 6rem); color: #fff; text-shadow: 0 0 40px var(--neon-cyan); }
+        .tab-btn { opacity: 0.5; transition: 0.3s; border-bottom: 2px solid transparent; }
+        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+
+        /* STARFIELD */
+        #star-map { position: fixed; inset: 0; z-index: -1; opacity: 0.6; }
+        .key-hint { font-size: 8px; color: var(--neon-gold); text-transform: uppercase; margin-top: 4px; display: block; }
     </style>
 </head>
-<body onload="launchCore()">
-    <div id="star-map"><canvas id="matrix-canvas"></canvas></div>
+<body onload="launchSovereign()">
+
+    <div id="star-map"></div>
 
     <div id="lock-screen" class="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center">
-        <div onclick="biometricUnlock()" class="cursor-pointer mb-10 text-neon-cyan animate-pulse">
+        <div onclick="biometricUnlock()" class="cursor-pointer mb-8 text-neon-cyan animate-pulse">
             <span class="material-symbols-outlined" style="font-size: 100px;">cyclone</span>
+            <p class="text-[8px] tracking-[10px] mt-4 text-center">CLICK TO SYNC</p>
         </div>
-        <input type="password" id="access-code" class="bg-transparent border-b-2 border-cyan-900 p-3 text-center text-neon-cyan text-xl outline-none font-orbitron" placeholder="NEURAL_AUTH_1010" oninput="if(this.value=='1010')biometricUnlock()">
-        <p class="mt-4 text-[10px] text-gray-700 tracking-[10px]">SOVEREIGN_ARCHITECT_ONLY</p>
+        <div class="flex gap-2">
+            <input type="password" id="access-code" class="bg-transparent border border-cyan-900 p-4 text-center text-neon-cyan font-orbitron text-xl outline-none" placeholder="1010" oninput="if(this.value=='1010'||this.value=='8926')biometricUnlock()">
+        </div>
     </div>
 
-    <div id="main-system" class="hidden h-screen flex flex-col p-4 gap-4">
-        <header class="h-24 glass flex justify-between items-center px-10 border-b-4 border-neon-gold shrink-0">
-            <div class="flex items-center gap-8">
-                <div class="eve-visual"><div class="eve-pulse"></div><div class="w-full h-full flex items-center justify-center font-orbitron text-neon-gold text-2xl">EVE</div></div>
+    <div id="main-system" class="hidden h-screen flex flex-col p-2 md:p-6 gap-4">
+        <header class="glass-module p-6 flex justify-between items-center border-b-2 shrink-0">
+            <div class="flex items-center gap-6">
+                <div id="eve-face" class="w-16 h-16 rounded-full border-2 border-neon-gold flex items-center justify-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-neon-gold opacity-10 animate-pulse"></div>
+                    <span class="material-symbols-outlined text-neon-gold">support_agent</span>
+                </div>
                 <div>
-                    <h1 class="font-orbitron text-3xl font-black text-white italic">CEC-WAM V.1000</h1>
-                    <p class="text-[10px] text-neon-gold tracking-[6px] uppercase">Neural Conscience Active // dimensional Map Synced</p>
+                    <h1 class="font-orbitron text-2xl font-black text-white italic">CEC-WAM V.2026</h1>
+                    <p class="text-[10px] text-neon-gold tracking-[4px] uppercase" id="live-date">JANUARY 2026 // SYNCING...</p>
                 </div>
             </div>
             <div class="text-right">
-                <div class="text-4xl font-orbitron font-bold text-white" id="val-disp">$1,250,039M</div>
-                <div class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Nov 06 Unified Ledger Live</div>
+                <div class="text-4xl font-orbitron font-bold text-white leading-none" id="val-disp">$1,250,039M</div>
+                <span class="key-hint">Total Master Liquidity // Nov 06 - TODAY</span>
             </div>
         </header>
 
-        <nav class="flex gap-6 px-4 text-[11px] font-orbitron overflow-x-auto bg-black/40 py-2 rounded-lg">
-            <button onclick="tab('hud')" class="text-white border-b-2 border-neon-cyan pb-1">HUD_CORE</button>
-            <button onclick="tab('gen')" class="text-gray-500 hover:text-cyan-400 transition-colors">GEN_STUDIO</button>
-            <button onclick="tab('ledger')" class="text-gray-500 hover:text-cyan-400 transition-colors">UNIFIED_LEDGER</button>
-            <button onclick="tab('tracker')" class="text-gray-500 hover:text-cyan-400 transition-colors">TAX_TASK_FLOW</button>
+        <nav class="flex gap-8 px-6 py-2 overflow-x-auto no-scrollbar z-10">
+            <button onclick="nav('hud')" id="t-hud" class="tab-btn active font-orbitron text-xs">01_CORE_HUD</button>
+            <button onclick="nav('ledger')" id="t-ledger" class="tab-btn font-orbitron text-xs">02_MASTER_LEDGER</button>
+            <button onclick="nav('gen')" id="t-gen" class="tab-btn font-orbitron text-xs">03_CONTENT_GEN</button>
+            <button onclick="nav('money')" id="t-money" class="tab-btn font-orbitron text-xs text-neon-gold">04_MONEY_MOVES</button>
         </nav>
 
         <main class="flex-1 flex gap-4 overflow-hidden">
             <section id="p-hud" class="flex-1 flex flex-col md:flex-row gap-4">
-                <aside class="w-96 glass p-6 flex flex-col shrink-0">
-                    <h3 class="font-orbitron text-[11px] text-neon-purple mb-4 border-b border-purple-900 pb-2 uppercase">Neural Telemetry Data</h3>
-                    <div id="sys-log" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-3 text-green-700"></div>
-                    <button onclick="activateEve()" class="mt-6 p-4 bg-cyan-950 border-2 border-neon-cyan text-neon-cyan font-orbitron text-xs rounded-xl hover:bg-neon-cyan hover:text-black transition-all">INITIALIZE VOICE SYNC LINK</button>
+                <aside class="w-80 glass-module p-4 flex flex-col shrink-0">
+                    <h3 class="font-orbitron text-[10px] text-neon-purple mb-4 border-b border-purple-900 pb-1">NEURAL_TELEMETRY</h3>
+                    <div id="sys-log" class="flex-1 overflow-y-auto text-[11px] font-mono space-y-2 text-green-700"></div>
+                    <button onclick="activateEve()" class="mt-4 p-4 bg-cyan-950/20 border border-neon-cyan text-neon-cyan font-orbitron text-[10px]">INITIALIZE EVE VOICE</button>
                 </aside>
-                <div class="flex-1 glass p-10 flex flex-col items-center justify-center relative rounded-2xl overflow-hidden">
-                    <div class="text-center z-10">
-                        <div class="phi-display font-orbitron font-black" id="phi-val">1.618033</div>
-                        <div class="text-[10px] tracking-[25px] text-neon-cyan font-bold uppercase mt-8">Phi Universal Stabilizer</div>
-                    </div>
-                    <div class="absolute bottom-10 w-full px-20 grid grid-cols-3 gap-10 text-center">
-                        <div class="border-t border-cyan-900 pt-4"><div class="text-[10px] text-gray-500 uppercase">Dark Energy</div><div class="text-purple-400 font-bold text-lg">0.999Ω</div></div>
-                        <div class="border-t border-cyan-900 pt-4"><div class="text-[10px] text-gray-500 uppercase">Mars Orbit</div><div class="text-white font-bold text-lg">225M KM</div></div>
-                        <div class="border-t border-cyan-900 pt-4"><button onclick="syncForce()" class="text-green-500 font-bold text-[10px] hover:text-white">FORCE_SYNC_LEDGER</button></div>
+
+                <div class="flex-1 glass-module flex flex-col items-center justify-center relative">
+                    <div class="phi-vibe font-orbitron font-black" id="phi-val">1.6180</div>
+                    <span class="key-hint tracking-[15px]">Phi Stability Constant</span>
+                    
+                    <div class="absolute bottom-8 w-full px-12 grid grid-cols-3 gap-6 text-center">
+                        <div><span class="text-[9px] text-gray-500 block">DARK ENERGY</span><span class="text-purple-400 font-bold">0.999Ω</span><span class="key-hint">Expansion Force</span></div>
+                        <div><span class="text-[9px] text-gray-500 block">ENTROPY</span><span class="text-cyan-400 font-bold">1.02Σ</span><span class="key-hint">System Purity</span></div>
+                        <div><span class="text-[9px] text-gray-500 block">LEDGER_LINK</span><span class="text-green-500 font-bold">ACTIVE</span><span class="key-hint">Google Sync</span></div>
                     </div>
                 </div>
             </section>
 
-            <section id="p-gen" class="hidden flex-1 grid grid-cols-2 gap-6 p-4">
-                <div class="glass p-8 rounded-2xl flex flex-col">
-                    <h3 class="font-orbitron text-xl text-white mb-6 uppercase flex items-center gap-3"><span class="material-symbols-outlined text-neon-purple">auto_stories</span> E-Book Gen</h3>
-                    <textarea class="flex-1 bg-black/60 border border-gray-800 rounded p-4 text-sm text-gray-300 font-mono mb-6" placeholder="Eve: Generate 5D E-Book from Nov 6 Ledger Data..."></textarea>
-                    <button onclick="eveGen('E-Book')" class="w-full py-4 bg-purple-950 text-white font-orbitron border border-neon-purple rounded-xl hover:bg-neon-purple transition-all">GENERATE & WATERMARK</button>
-                </div>
-                <div class="glass p-8 rounded-2xl flex flex-col">
-                    <h3 class="font-orbitron text-xl text-white mb-6 uppercase flex items-center gap-3"><span class="material-symbols-outlined text-red-500">movie</span> YT Studio</h3>
-                    <div class="flex-1 bg-black/60 rounded-xl border border-dashed border-gray-700 flex items-center justify-center text-gray-600 font-mono text-xs">VIDEO PREVIEW: NOV 06 GROWTH TIMELINE</div>
-                    <button onclick="eveGen('YouTube Video')" class="w-full mt-6 py-4 bg-red-950 text-red-400 font-orbitron border border-red-600 rounded-xl hover:bg-red-600 hover:text-black transition-all">PUSH WIRELESSLY TO YT</button>
+            <section id="p-money" class="hidden flex-1 glass-module p-8 overflow-y-auto rounded-xl">
+                <h2 class="font-orbitron text-2xl text-neon-gold mb-6">DAILY MONEY MOVES // ALGO_PICK</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-white/5 border border-neon-gold rounded">
+                        <h4 class="text-white font-bold mb-2 uppercase text-sm">Stock/Crypto Under $20</h4>
+                        <ul class="text-xs space-y-2 text-gray-400">
+                            <li>● SCANNING LOW-CAP DEFI PROTOCOLS...</li>
+                            <li>● EVE PICK: <span class="text-neon-gold">PSI_STABILITY_INDEX (PSI)</span></li>
+                            <li>● ACTION: Accumulate beneath 1.618 threshold.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-white/5 border border-neon-cyan rounded">
+                        <h4 class="text-white font-bold mb-2 uppercase text-sm">Digital Asset Generation</h4>
+                        <ul class="text-xs space-y-2 text-gray-400">
+                            <li>● Strategy: Automated E-Book Watermarking.</li>
+                            <li>● Target: Kindle Direct Publishing (KDP).</li>
+                            <li>● Eve: Generating "The Phi Manual" for export.</li>
+                        </ul>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // --- CORE SYSTEM BOOT ---
-        function launchCore() {
-            startStarMap();
-            addLog("KERNEL 1000 AD LOADED.");
-            addLog("API ACTIVE: AIzaSyCi... & AIzaSyCu...");
-            addLog("LEDGER SYNC: NOV 6 BASELINE ESTABLISHED.");
+        function launchSovereign() {
+            startStars();
+            updateTime();
+            setInterval(updateTime, 1000);
+            addLog("SYSTEM BOOT: JANUARY 2026.");
+            addLog("TETHERED TO MASTER_LEDGER.xlsx");
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('live-date').innerText = now.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).toUpperCase();
         }
 
         function biometricUnlock() {
-            document.body.style.backgroundColor = "#0f0";
-            setTimeout(() => {
-                document.body.style.backgroundColor = "#000";
-                document.getElementById('lock-screen').classList.add('hidden');
-                document.getElementById('main-system').classList.remove('hidden');
-                addLog("IDENTITY CONFIRMED. DIMENSIONAL CORE ONLINE.");
-                if(window.EveActive) speak("Welcome back, Architect. 1000-year interface initialized.");
-            }, 150);
+            document.getElementById('lock-screen').classList.add('hidden');
+            document.getElementById('main-system').classList.remove('hidden');
+            if(window.EveActive) speak("Architect recognized. System date set to 2026.");
+            addLog("AUTH: BIOMETRIC_SUCCESS.");
         }
 
-        function tab(name) {
+        function nav(name) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('p-' + name).classList.remove('hidden');
-            addLog(`NAVIGATING TO PROTOCOL: ${name.toUpperCase()}`);
+            document.getElementById('t-' + name).classList.add('active');
         }
 
-        // --- EVE NEURAL ENGINE ---
         function activateEve() {
             window.EveActive = true;
-            speak("Eve Neural Engine Online. Monitoring live YouTube stream and Google Workspace.");
-            addLog("EVE COHERENCE: 100%. AWAITING ARCHITECT COMMANDS.");
+            document.getElementById('eve-face').style.borderColor = "var(--neon-cyan)";
+            speak("Eve HEI Online. Real-time data stream established. Awaiting your sentence.");
+            addLog("EVE: COHERENT AND LISTENING.");
         }
 
-        function speak(t) { const u = new SpeechSynthesisUtterance(t); u.pitch = 0.5; window.speechSynthesis.speak(u); }
+        function speak(t) { const u = new SpeechSynthesisUtterance(t); u.pitch = 0.6; window.speechSynthesis.speak(u); }
+        function addLog(m) { const d = document.createElement('div'); d.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}`; document.getElementById('sys-log').prepend(d); }
 
-        function eveGen(type) {
-            addLog(`EVE: GENERATING ${type.toUpperCase()}... PROTECTING FORMULAS.`);
-            setTimeout(() => { 
-                alert(`SUCCESS: ${type} Generated, Watermarked, and pushed to Master Ledger.`);
-                addLog(`GEN_PROTOCOL: FILE TRANSMITTED WIRELESSLY.`);
-            }, 2500);
-        }
-
-        // --- LIVE DATA FLOW ---
-        function syncForce() { addLog("FORCE SYNCING WORKSPACE DATA [NOV 06 - TODAY]...", "cyan"); }
-        function addLog(m) { const d = document.createElement('div'); d.innerHTML = `[${new Date().toLocaleTimeString('en-GB')}] ${m}`; document.getElementById('sys-log').prepend(d); }
-
-        function startStarMap() {
+        function startStars() {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({alpha:true});
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('star-map').appendChild(renderer.domElement);
-            
-            const starPoints = [];
-            for(let i=0; i<6000; i++) { starPoints.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000)); }
-            const starGeo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(starPoints, 3));
-            const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x00f3ff, size: 0.7}));
+            const starGeo = new THREE.BufferGeometry();
+            const points = [];
+            for(let i=0; i<8000; i++) points.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000));
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+            const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x00f3ff, size: 0.5}));
             scene.add(stars); camera.position.z = 1;
-            function anim() { stars.rotation.y += 0.0004; renderer.render(scene, camera); requestAnimationFrame(anim); }
+            function anim() { stars.rotation.y += 0.0003; renderer.render(scene, camera); requestAnimationFrame(anim); }
             anim();
         }
 
-        setInterval(() => { document.getElementById('phi-val').innerText = (1.618033 + (Math.random() * 0.000005)).toFixed(6); }, 1000);
+        setInterval(() => { document.getElementById('phi-val').innerText = (1.6180 + (Math.random() * 0.0004)).toFixed(4); }, 1500);
     </script>
 </body>
 </html>
