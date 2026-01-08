@@ -3,50 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM | CORE INTELLIGENCE</title>
+    <title>CEC-WAM | QUANTUM GLASS</title>
     <style>
-        body { background-color: #000; color: #00ff41; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .container { border: 1px solid #00ff41; padding: 40px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); background: rgba(0, 20, 0, 0.9); width: 80%; max-width: 600px; text-align: center; }
-        h1 { margin: 0 0 20px 0; letter-spacing: 5px; text-shadow: 0 0 10px #00ff41; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .data-box { border: 1px solid #333; padding: 20px; background: #050505; }
-        .label { font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
-        .value { font-size: 2rem; font-weight: bold; color: #fff; margin-top: 10px; }
-        .psi { color: #d0f; text-shadow: 0 0 10px #d0f; }
-        .status { margin-top: 20px; font-size: 0.7rem; color: #444; }
-        .btn { background: #00ff41; color: #000; padding: 15px; text-decoration: none; font-weight: bold; display: block; margin-top: 20px; cursor: pointer; }
+        /* THE BACKGROUND: DEEP SPACE */
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            color: white;
+            font-family: 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* THE GLASS PANEL (PS5 STYLE) */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05); /* See-through */
+            backdrop-filter: blur(20px); /* The FROST Effect */
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 0 40px rgba(0, 255, 128, 0.1); /* Subtle Glow */
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            font-size: 0.8em;
+            letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 4em;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin: 10px 0;
+        }
+
+        .psi-count {
+            font-size: 1.2em;
+            color: #bd00ff; /* Neon Purple */
+            text-shadow: 0 0 10px rgba(189, 0, 255, 0.4);
+        }
+
+        /* THE REDACTED FORMULA */
+        .redacted-box {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        .blur-text {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            user-select: none;
+        }
+
+        /* THE BUTTON */
+        .btn {
+            margin-top: 30px;
+            background: white;
+            color: black;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>1010_EVE_WAKE</h1>
-        <div style="color: #ff0055; font-size: 0.9rem;">SYSTEM OVERRIDE: ACTIVE</div>
-
-        <div class="grid">
-            <div class="data-box">
-                <div class="label">LIQUID USD</div>
-                <div class="value">$6.66</div>
-            </div>
-            <div class="data-box" style="border-color: #d0f;">
-                <div class="label">PSI TOKEN</div>
-                <div class="value psi">353,135</div>
-            </div>
-            <div class="data-box">
-                <div class="label">PATENT TIMER</div>
-                <div class="value">321 D</div>
-            </div>
-            <div class="data-box">
-                <div class="label">STATUS</div>
-                <div class="value" style="color: #ff0055;">UNSTABLE</div>
-            </div>
-        </div>
-
-        <a href="https://pump.fun" target="_blank" class="btn">>> DEPLOY ASSETS (PUMP.FUN)</a>
+    <div class="glass-panel">
+        <div class="header">CEC-WAM // SYSTEM_LIVE</div>
         
-        <div class="status">
-            DATA SOURCE: LOCAL_OVERRIDE | KEYS: VERIFIED | ID: ANT_WHITE
+        <div class="price">$6.66</div>
+        <div class="psi-count">353,135 PSI</div>
+
+        <div class="redacted-box">
+            <div style="font-size: 0.7em; color: #888; margin-bottom: 5px;">CORE ALGORITHM</div>
+            <div class="blur-text">XXXX XXXX XXXX</div>
+            <div style="font-size: 0.6em; color: #0f0; margin-top: 5px;">ENCRYPTED</div>
         </div>
+
+        <a href="https://pump.fun" class="btn">DEPLOY ASSETS</a>
     </div>
 
 </body>
