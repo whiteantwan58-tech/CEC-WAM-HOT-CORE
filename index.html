@@ -2,32 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CEC-WAM System // GSG WAN</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CEC-WAM 5D Interface</title>
+
+  <!-- FAVICON & META IF YOU WANT LATER -->
+  <style>
+    /* ===== SPACE BACKGROUND ===== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Orbitron", sans-serif;
+      background: black;
+      color: white;
+    }
+
+    #space-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      opacity: 0.8;
+    }
+
+    .glass-container {
+      backdrop-filter: blur(15px);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin: 2rem auto;
+      padding: 2rem;
+      width: 90%;
+      max-width: 1200px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.3);
+      text-align:center;
+    }
+
+    h1, h2 {
+      color: #00f0ff;
+      text-shadow: 0 0 7px #00f0ff;
+    }
+
+    .metric {
+      font-size: 1.3rem;
+      margin: 0.7rem 0;
+      color: #00ff9f;
+    }
+
+    #data-panels {
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      text-align: center;
+      font-size: 1.1rem;
+      border: 1px solid rgba(0,255,255,0.1);
+    }
+  </style>
+
 </head>
 <body>
-  <video autoplay loop muted id="bg-video">
-    <source src="assets/space-bg.mp4" type="video/mp4" />
-  </video>
+
+  <!-- SPACE BACKGROUND IMAGE (add yours into /assets or host externally) -->
+  <img id="space-bg" src="https://images.pexels.com/photos/2158/sky-space-dark-galaxy.jpg" alt="space background">
 
   <div class="glass-container">
-    <h1>🦅 CEC-WAM SYSTEM</h1>
-    <h2>Tier 1 Investment Opportunity: GSG WAN</h2>
+    <h1>🛸 CEC-WAM 5D Holographic UI</h1>
+    <h2>Status: ACTIVE</h2>
 
-    <div class="core-box">
-      <canvas id="coreCanvas"></canvas>
-      <div class="metrics">
-        <div class="metric">SYSTEM: <span class="green">ONLINE</span></div>
-        <div class="metric">VISUALS: <span class="green">5D ACTIVE</span></div>
-      </div>
-    </div>
+    <div class="metric">System Online ✔️</div>
+    <div class="metric">Visual Layer: 5D </div>
+    <div class="metric">Star Navigation Live</div>
 
-    <div id="data-panels">
-      <!-- Injected from JS -->
-    </div>
+    <div id="data-panels"></div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // MOCK PSI TRACKER DATA
+    const psiData = [
+      { title: "Psi Alpha", status: "Active" },
+      { title: "Psi Beta", status: "Stable" },
+      { title: "Psi Delta", status: "Fluctuating" },
+      { title: "Psi Extra", status: "No Data" },
+      { title: "Star Nav", status: "Tracking" }
+    ];
+
+    const container = document.getElementById("data-panels");
+    psiData.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "panel";
+      div.innerHTML = `<strong>${item.title}</strong><br>${item.status}`;
+      container.appendChild(div);
+    });
+  </script>
+
 </body>
 </html>
