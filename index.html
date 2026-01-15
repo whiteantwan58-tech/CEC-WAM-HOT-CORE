@@ -1,139 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>CEC-WAM // 1006.MASTER CORE // 5D SYNC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #ffd700; --cyan: #00f3ff; --purple: #bc13fe; }
-        body { background: #050505; color: white; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
-        #quantum-canvas { position: fixed; top: 0; left: 0; z-index: 0; opacity: 0.2; pointer-events: none; }
-        .master-panel { position: relative; z-index: 10; background: rgba(0,0,0,0.85); border: 1px solid var(--cyan); backdrop-filter: blur(10px); }
-        .glow-gold { text-shadow: 0 0 10px var(--gold); color: var(--gold); }
-        .terminal-log { font-family: monospace; font-size: 10px; color: #00ff41; height: 150px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 10px; border: 1px solid #222; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEC-WAM System // GSG WAN</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <video autoplay loop muted id="bg-video">
+    <source src="assets/space-bg.mp4" type="video/mp4" />
+  </video>
 
-<canvas id="quantum-canvas"></canvas>
+  <div class="glass-container">
+    <h1>🦅 CEC-WAM SYSTEM</h1>
+    <h2>Tier 1 Investment Opportunity: GSG WAN</h2>
 
-<div class="h-screen flex flex-col p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center border-b border-cyan-900 pb-4 mb-6">
-        <div>
-            <h1 class="font-orbitron text-2xl tracking-tighter">CEC-WAM // <span class="glow-gold">MASTER CORE</span></h1>
-            <p class="text-[10px] text-cyan-400">NEURAL CONSCIENCE V5.0 // DIMENSIONAL MAP SYNCED</p>
-        </div>
-        <div class="text-right">
-            <div class="text-3xl font-bold glow-gold">$1,250,039,000</div>
-            <div class="text-[10px] text-gray-500">UNIFIED LEDGER LIVE // PHI: 1.618</div>
-        </div>
+    <div class="core-box">
+      <canvas id="coreCanvas"></canvas>
+      <div class="metrics">
+        <div class="metric">SYSTEM: <span class="green">ONLINE</span></div>
+        <div class="metric">VISUALS: <span class="green">5D ACTIVE</span></div>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="grid grid-cols-12 gap-6 flex-1">
-        <!-- Side Stats -->
-        <div class="col-span-3 space-y-4">
-            <div class="master-panel p-4 rounded">
-                <h3 class="text-xs text-gray-500 mb-2">UNIVERSAL CONSTANTS</h3>
-                <div class="text-sm font-mono">G: <span class="text-cyan-400">0.00</span></div>
-                <div class="text-sm font-mono">DARK ENERGY: <span class="text-purple-400">0.999Ω</span></div>
-                <div class="text-sm font-mono">BTC CLEARING: <span class="text-yellow-500">1.33 (PENDING)</span></div>
-            </div>
-            
-            <button id="voice-btn" class="w-full bg-cyan-600 hover:bg-cyan-400 text-black font-bold py-4 rounded font-orbitron transition-all">
-                🎙 ACTIVATE VOICE COMMAND
-            </button>
-            <div id="voice-status" class="text-[10px] text-center text-gray-500 uppercase tracking-widest">Mic Standby</div>
-        </div>
-
-        <!-- Central 5D Visual -->
-        <div class="col-span-9 master-panel rounded-lg p-6 flex flex-col">
-            <div class="flex-1 flex items-center justify-center relative">
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="w-64 h-64 border-4 border-cyan-500 rounded-full animate-pulse opacity-20"></div>
-                </div>
-                <div class="text-center">
-                    <div class="text-6xl font-orbitron mb-2">φ</div>
-                    <div class="text-2xl font-bold tracking-widest text-cyan-400">1.618.033</div>
-                    <p class="text-xs text-gray-400 uppercase">Universal Stabilizer</p>
-                </div>
-            </div>
-
-            <!-- Terminal -->
-            <div class="terminal-log" id="log">
-                [SYS] Quantum Entanglement Layer Initialized...<br>
-                [SYS] 10 Formulas Applied to Ledger...<br>
-                [EVE] Awaiting Voice Authorization...
-            </div>
-        </div>
+    <div id="data-panels">
+      <!-- Injected from JS -->
     </div>
-</div>
+  </div>
 
-<script>
-    // 1. QUANTUM ENTANGLEMENT VISUAL
-    const canvas = document.getElementById('quantum-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    let dots = [];
-    for(let i=0; i<100; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: Math.random()-0.5, vy: Math.random()-0.5});
-    function animate() {
-        ctx.clearRect(0,0,canvas.width, canvas.height);
-        ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 0.2;
-        dots.forEach(d => {
-            d.x += d.vx; d.y += d.vy;
-            if(d.x<0 || d.x>canvas.width) d.vx*=-1;
-            if(d.y<0 || d.y>canvas.height) d.vy*=-1;
-            dots.forEach(d2 => {
-                let dist = Math.hypot(d.x-d2.x, d.y-d2.y);
-                if(dist < 150) { ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
-            });
-        });
-        requestAnimationFrame(animate);
-    }
-    animate();
-
-    // 2. VOICE RECOGNITION (EVE INTERFACE)
-    const voiceBtn = document.getElementById('voice-btn');
-    const voiceStatus = document.getElementById('voice-status');
-    const log = document.getElementById('log');
-
-    if ('webkitSpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.lang = 'en-US';
-
-        voiceBtn.onclick = () => {
-            recognition.start();
-            voiceStatus.innerText = "Listening...";
-            voiceStatus.style.color = "#00f3ff";
-        };
-
-        recognition.onresult = (event) => {
-            const command = event.results[0][0].transcript.toLowerCase();
-            log.innerHTML += `<br><span style="color:white">[YOU]: ${command}</span>`;
-            
-            if (command.includes("status")) {
-                speak("System status is optimal. Net worth 1.25 billion dollars. BTC clearing at 98 percent.");
-            } else if (command.includes("transfer")) {
-                speak("Initiating transfer protocol. Please confirm on your Solana hardware wallet.");
-            } else {
-                speak("Command received. Updating living calculator.");
-            }
-            voiceStatus.innerText = "Mic Standby";
-            voiceStatus.style.color = "";
-        };
-    }
-
-    function speak(text) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.pitch = 0.8; msg.rate = 1.1;
-        window.speechSynthesis.speak(msg);
-        log.innerHTML += `<br><span style="color:var(--purple)">[EVE]: ${text}</span>`;
-        log.scrollTop = log.scrollHeight;
-    }
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
