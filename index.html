@@ -1,111 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CEC-WAM 5D Interface</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CEC-WAM 5D Interface</title>
 
-  <!-- FAVICON & META IF YOU WANT LATER -->
-  <style>
-    /* ===== SPACE BACKGROUND ===== */
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: "Orbitron", sans-serif;
-      background: black;
-      color: white;
-    }
-
-    #space-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      opacity: 0.8;
-    }
-
-    .glass-container {
-      backdrop-filter: blur(15px);
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 15px;
-      border: 1px solid rgba(255,255,255,0.1);
-      margin: 2rem auto;
-      padding: 2rem;
-      width: 90%;
-      max-width: 1200px;
-      box-shadow: 0 0 20px rgba(0,255,255,0.3);
-      text-align:center;
-    }
-
-    h1, h2 {
-      color: #00f0ff;
-      text-shadow: 0 0 7px #00f0ff;
-    }
-
-    .metric {
-      font-size: 1.3rem;
-      margin: 0.7rem 0;
-      color: #00ff9f;
-    }
-
-    #data-panels {
-      margin-top: 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .panel {
-      background: rgba(255,255,255,0.1);
-      padding: 1rem;
-      border-radius: 10px;
-      backdrop-filter: blur(8px);
-      text-align: center;
-      font-size: 1.1rem;
-      border: 1px solid rgba(0,255,255,0.1);
-    }
-  </style>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+    background: black;
+  }
+  #three-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  .hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 15px;
+    color: #00ffcc;
+    border: 1px solid rgba(0,255,255,0.2);
+  }
+  .hud h1 { margin: 0; font-size: 1.6rem; text-shadow: 0 0 8px #00f0ff;}
+  .panel {
+    margin-top: 12px;
+    font-size: 1.1rem;
+    border-top: 1px solid rgba(0,255,255,0.3);
+    padding-top: 8px;
+  }
+</style>
 
 </head>
 <body>
 
-  <!-- SPACE BACKGROUND IMAGE (add yours into /assets or host externally) -->
-  <img id="space-bg" src="https://images.pexels.com/photos/2158/sky-space-dark-galaxy.jpg" alt="space background">
+<div id="three-container"></div>
 
-  <div class="glass-container">
-    <h1>🛸 CEC-WAM 5D Holographic UI</h1>
-    <h2>Status: ACTIVE</h2>
+<div class="hud">
+  <h1>🛸 CEC-WAM 5D Interface</h1>
+  <div id="stats"></div>
+</div>
 
-    <div class="metric">System Online ✔️</div>
-    <div class="metric">Visual Layer: 5D </div>
-    <div class="metric">Star Navigation Live</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+<script>
 
-    <div id="data-panels"></div>
-  </div>
+let scene, camera, renderer;
 
-  <script>
-    // MOCK PSI TRACKER DATA
-    const psiData = [
-      { title: "Psi Alpha", status: "Active" },
-      { title: "Psi Beta", status: "Stable" },
-      { title: "Psi Delta", status: "Fluctuating" },
-      { title: "Psi Extra", status: "No Data" },
-      { title: "Star Nav", status: "Tracking" }
-    ];
+function initStarfield() {
+  scene = new THREE.Scene();
 
-    const container = document.getElementById("data-panels");
-    psiData.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "panel";
-      div.innerHTML = `<strong>${item.title}</strong><br>${item.status}`;
-      container.appendChild(div);
-    });
-  </script>
+  camera = new THREE.PerspectiveCamera(
+    75, window.innerWidth/window.innerHeight, 0.1, 1000
+  );
+
+  renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.getElementById('three-container').appendChild(renderer.domElement);
+
+  const starsGeometry = new THREE.BufferGeometry();
+  const starCount = 10000;
+  const starVertices = [];
+
+  for (let i = 0; i < starCount; i++) {
+    starVertices.push(
+      THREE.MathUtils.randFloatSpread(2000),
+      THREE.MathUtils.randFloatSpread(2000),
+      THREE.MathUtils.randFloatSpread(2000)
+    );
+  }
+
+  starsGeometry.setAttribute(
+    'position', new THREE.Float32BufferAttribute(starVertices, 3)
+  );
+
+  const starsMaterial = new THREE.PointsMaterial({ color: 0x8888ff });
+  const starField = new THREE.Points(starsGeometry, starsMaterial);
+  scene.add(starField);
+
+  camera.position.z = 1;
+
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+initStarfield();
+
+</script>
+
+<script>
+const psiData = [
+  { title: "Psi Alpha", status: "Active" },
+  { title: "Psi Beta", status: "Stable" },
+  { title: "Psi Delta", status: "Fluctuating" }
+];
+
+const stats = document.getElementById("stats");
+psiData.forEach(item => {
+  const div = document.createElement("div");
+  div.className = "panel";
+  div.innerText = `${item.title}: ${item.status}`;
+  stats.appendChild(div);
+});
+</script>
 
 </body>
 </html>
