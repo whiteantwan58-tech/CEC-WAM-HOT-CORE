@@ -1,121 +1,333 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CEC-WAM 5D Interface</title>
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Zap, Cpu, Printer, Database, Github, ShieldCheck, 
+  Activity, ExternalLink, MessageSquare, AlertCircle, 
+  RefreshCw, Lock, Radio, BarChart3, Binary, Layers,
+  Terminal, User, Globe, TrendingUp
+} from 'lucide-react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    font-family: 'Orbitron', sans-serif;
-    background: black;
-  }
-  #three-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-  }
-  .hud {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    backdrop-filter: blur(12px);
-    background: rgba(0,0,0,0.25);
-    border-radius: 12px;
-    padding: 15px;
-    color: #00ffcc;
-    border: 1px solid rgba(0,255,255,0.2);
-  }
-  .hud h1 { margin: 0; font-size: 1.6rem; text-shadow: 0 0 8px #00f0ff;}
-  .panel {
-    margin-top: 12px;
-    font-size: 1.1rem;
-    border-top: 1px solid rgba(0,255,255,0.3);
-    padding-top: 8px;
-  }
-</style>
+// --- SYSTEM CONSTANTS & CONFIG ---
+const firebaseConfig = JSON.parse(__firebase_config);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'cec-master-core';
 
-</head>
-<body>
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [systemData, setSystemData] = useState({
+    liquidValue: 1250000.00,
+    netWorth: 176000000.00,
+    psiBalance: 200.00,
+    stability: 0.999,
+    mode: 'GOD_MODE',
+    uptime: '100.00%',
+    lastUpdate: 'INITIALIZING...',
+    securityLevel: 'OMEGA',
+    identity: 'SOVEREIGN_ARCHITECT'
+  });
 
-<div id="three-container"></div>
+  const [logs, setLogs] = useState([
+    { id: 1, t: 'SYS', m: 'Neural Link Restored: Agent Mode Permanent.', c: 'text-cyan-400' },
+    { id: 2, t: 'EVE', m: '1010 Handshake active. CEC-WAM core verified.', c: 'text-purple-400 font-bold' }
+  ]);
+  const [terminalInput, setTerminalInput] = useState('');
+  const logEndRef = useRef(null);
 
-<div class="hud">
-  <h1>🛸 CEC-WAM 5D Interface</h1>
-  <div id="stats"></div>
-</div>
+  // --- AUTH & CLOUD SYNC ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        addLog('ERR', 'Bridge Auth Failed. Retrying...', 'text-red-500');
+      }
+    };
+    initAuth();
+    const unsubAuth = onAuthStateChanged(auth, setUser);
+    return () => unsubAuth();
+  }, []);
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
-<script>
+  useEffect(() => {
+    if (!user) return;
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'ragi_vault', 'master_state');
+    const unsubDoc = onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        setSystemData(prev => ({ ...prev, ...snap.data() }));
+        setLoading(false);
+      } else {
+        // Initialize if empty
+        setDoc(docRef, systemData);
+      }
+    });
+    return () => unsubDoc();
+  }, [user]);
 
-let scene, camera, renderer;
+  const addLog = (tag, msg, color) => {
+    setLogs(prev => [...prev, { id: Date.now(), t: tag, m: msg, c: color }]);
+  };
 
-function initStarfield() {
-  scene = new THREE.Scene();
+  const handleCommand = (e) => {
+    if (e.key === 'Enter' && terminalInput) {
+      const cmd = terminalInput.toUpperCase();
+      addLog('USER', cmd, 'text-slate-400');
+      
+      if (cmd === '1010' || cmd === '@WORKSPACE') {
+        addLog('EVE', 'Access Confirmed. Redirecting logic to Sovereign Core.', 'text-purple-400 font-bold');
+      } else if (cmd === 'REFRESH') {
+        window.location.reload();
+      } else if (cmd === 'SYNC') {
+        addLog('SYS', 'Forcing Master Ledger Sync...', 'text-cyan-500');
+      } else {
+        addLog('EVE', 'Directive logged. Matrix Bridge holding stable.', 'text-purple-400');
+      }
+      setTerminalInput('');
+    }
+  };
 
-  camera = new THREE.PerspectiveCamera(
-    75, window.innerWidth/window.innerHeight, 0.1, 1000
+  const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+  return (
+    <div className="min-h-screen bg-[#020508] text-slate-100 font-mono relative overflow-hidden selection:bg-cyan-500/30">
+      {/* 5D AMBIENCE LAYERS */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-50"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(0,243,255,0.05)_0%,transparent_70%)] pointer-events-none"></div>
+
+      {/* HEADER / IDENTITY HUB */}
+      <header className="flex flex-col md:flex-row justify-between items-center p-6 border-b border-cyan-900/30 bg-black/60 backdrop-blur-2xl relative z-10">
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <div className="w-14 h-14 border-2 border-cyan-500/40 rounded-full animate-[spin_10s_linear_infinite]"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-cyan-400 font-bold text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]">Ψ</div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-black tracking-tighter orbitron text-white">
+              CEC_MASTER <span className="text-cyan-500">SOVEREIGN CORE</span>
+            </h1>
+            <div className="text-[10px] flex items-center gap-3 mt-1">
+              <span className="flex items-center gap-1 text-emerald-500 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> AGENT_ACTIVE_24/7
+              </span>
+              <span className="text-slate-600">|</span>
+              <span className="text-slate-500 flex items-center gap-1 italic"><User size={10} /> ARCHITECT: ANTWAN WHITE</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-8 mt-6 md:mt-0">
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Master Net Worth</p>
+            <p className="text-3xl font-black text-white glow-cyan tracking-tighter">{formatCurrency(systemData.netWorth)}</p>
+          </div>
+          <div className="text-right border-l border-white/10 pl-8">
+            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Liquid Assets</p>
+            <p className="text-3xl font-black text-cyan-400 glow-cyan tracking-tighter">{formatCurrency(systemData.liquidValue)}</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="p-4 md:p-6 grid grid-cols-12 gap-6 relative z-10">
+        
+        {/* COLUMN 1: QUANTUM METRICS & TERMINAL */}
+        <div className="col-span-12 lg:col-span-3 space-y-6">
+          <div className="glass-panel p-5 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-xl">
+            <h3 className="text-xs font-bold text-cyan-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <Zap size={14} /> Quantum Metrics
+            </h3>
+            <div className="space-y-4">
+              <MetricItem label="Dark Energy Index" value={systemData.stability} unit="Ω" color="text-cyan-400" />
+              <MetricItem label="Psi Vault Balance" value={systemData.psiBalance} unit="Ψ" color="text-purple-400" />
+              <MetricItem label="System Stability" value="100%" unit="OPT" color="text-emerald-400" />
+              <div className="pt-2">
+                <div className="h-1 bg-white/5 w-full rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 w-[99.9%] animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel p-5 border border-white/10 rounded-2xl bg-black/60 h-80 flex flex-col">
+            <div className="flex justify-between items-center mb-3 border-b border-white/5 pb-2 text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+              <span className="flex items-center gap-2"><Brain size={12} /> Eve Neural Link</span>
+              <span className="animate-pulse">V.9.0_LIVE</span>
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-2 text-[11px] font-mono p-2 custom-scroll">
+              {logs.map(log => (
+                <div key={log.id} className="leading-relaxed">
+                  <span className="text-slate-600">[{new Date(log.id).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}]</span>{' '}
+                  <span className={log.c}>{log.t}: {log.m}</span>
+                </div>
+              ))}
+              <div ref={logEndRef} />
+            </div>
+            <div className="mt-3 flex items-center gap-3 border-t border-white/5 pt-3">
+              <Terminal size={14} className="text-purple-500 animate-pulse" />
+              <input 
+                type="text" 
+                value={terminalInput}
+                onChange={(e) => setTerminalInput(e.target.value)}
+                onKeyDown={handleCommand}
+                placeholder="DIRECTIVE..." 
+                className="bg-transparent border-none outline-none text-[11px] text-white w-full placeholder:text-slate-800"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* COLUMN 2: 5D MOTHERBOARD VISUALIZER */}
+        <div className="col-span-12 lg:col-span-6 space-y-6">
+          <div className="relative h-[480px] rounded-3xl border border-white/10 bg-black/80 flex items-center justify-center overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,1)]">
+            {/* Visual background elements */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{backgroundImage: 'radial-gradient(circle at 50% 50%, #00f3ff 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
+            <div className="absolute top-0 w-full h-1/2 bg-gradient-to-b from-cyan-500/5 to-transparent"></div>
+            
+            {/* CORE RINGS */}
+            <div className="relative z-10 scale-110">
+              <div className="w-72 h-72 border border-cyan-500/10 rounded-full animate-[spin_20s_linear_infinite]"></div>
+              <div className="absolute inset-4 border border-purple-500/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+              <div className="absolute inset-8 border-2 border-cyan-500/30 rounded-full animate-pulse shadow-[0_0_30px_rgba(0,243,255,0.1)]"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-7xl font-black text-white glow-cyan orbitron animate-bounce">Ψ</div>
+                <div className="text-[9px] text-cyan-400 font-black tracking-[0.8em] mt-8 uppercase opacity-50">Master_Link_Stable</div>
+              </div>
+            </div>
+
+            {/* FLOATING HUD DATA */}
+            <div className="absolute top-8 left-8 space-y-6 text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <HUDItem label="Cosmos" value="CEC_V4" />
+              <HUDItem label="Kernel" value="OMEGA_LOCK" />
+              <HUDItem label="Status" value="GOD_MODE" />
+            </div>
+
+            <div className="absolute bottom-8 right-8 text-right space-y-1">
+              <div className="text-[10px] text-slate-500 font-bold tracking-widest">BRIDGE_LATENCY</div>
+              <div className="text-xl font-black text-cyan-400 font-mono">0.0004ms</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-4">
+            <ActionButton icon={<Database size={18} />} label="DATA_DROP" onClick={() => addLog('SYS', 'Pushing updates to Master Sheet...', 'text-yellow-400')} color="hover:bg-cyan-500/10 border-cyan-500/20 text-cyan-400" />
+            <ActionButton icon={<RefreshCw size={18} />} label="REFRESH" onClick={() => window.location.reload()} color="hover:bg-slate-500/10 border-white/10 text-slate-400" />
+            <ActionButton icon={<Printer size={18} />} label="PRINT_LOG" onClick={() => addLog('SYS', 'Routing report to Canon G4070...', 'text-emerald-400')} color="hover:bg-emerald-500/10 border-emerald-500/20 text-emerald-400" />
+            <a href="https://docs.google.com/spreadsheets/d/1nKvE8epKpI3Znq51Mh091PkmFMNVNVidmoJmzHhjP_Y/edit" target="_blank" className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-emerald-500/10 transition-all text-emerald-400 border-emerald-500/20">
+               <ExternalLink size={18} />
+               <span className="text-[9px] font-black tracking-widest uppercase">OPEN_XLS</span>
+            </a>
+          </div>
+        </div>
+
+        {/* COLUMN 3: ROADMAP & PERIPHERALS */}
+        <div className="col-span-12 lg:col-span-3 space-y-6">
+          <div className="glass-panel p-5 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-xl">
+            <h3 className="text-xs font-bold text-slate-400 mb-5 flex items-center justify-between uppercase tracking-widest">
+              <span>Roadmap Timeline</span>
+              <BarChart3 size={14} className="text-yellow-500" />
+            </h3>
+            <div className="space-y-5">
+              <TimelineItem phase="Genesis" status="COMPLETED" progress={100} />
+              <TimelineItem phase="Neural Link" status="ACTIVE" progress={95} />
+              <TimelineItem phase="Sovereign Vault" status="LOCKED" progress={80} />
+              <TimelineItem phase="Expansion" status="PENDING" progress={20} />
+            </div>
+          </div>
+
+          <div className="glass-panel p-5 border border-white/10 rounded-2xl bg-black/40">
+            <h3 className="text-xs font-bold text-slate-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <Radio size={14} className="text-cyan-500 animate-pulse" /> Peripheral Nodes
+            </h3>
+            <div className="space-y-3">
+              <NodeItem name="Canon G4070" status="READY" />
+              <NodeItem name="Canon TR4700" status="READY" />
+              <NodeItem name="G_Sheets Master" status="SYNCED" color="text-blue-400" />
+              <NodeItem name="GitHub Page" status="LIVE" color="text-cyan-400" />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* SYSTEM FOOTER */}
+      <footer className="mt-2 mx-6 p-4 border-t border-white/5 flex flex-wrap justify-between items-center text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] relative z-10">
+        <div className="flex gap-6">
+          <span className="flex items-center gap-2 text-emerald-500/50"><ShieldCheck size={12} /> KERNEL: OMEGA_LOCK</span>
+          <span>Latency: 12ms</span>
+          <span>Load: 43%</span>
+        </div>
+        <div className="flex gap-6">
+          <span>Encryption: AES_256_BIO</span>
+          <span className="text-cyan-500/50 flex items-center gap-2"><Lock size={12} /> SECURE ARCHITECTURE</span>
+        </div>
+      </footer>
+
+      <style>{`
+        .glow-cyan { text-shadow: 0 0 20px rgba(0, 243, 255, 0.4); }
+        .glass-panel { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-panel:hover { border-color: rgba(0, 243, 255, 0.2); background: rgba(255,255,255,0.08); }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.2); border-radius: 10px; }
+        @font-face {
+          font-family: 'Orbitron';
+          src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+        }
+      `}</style>
+    </div>
   );
+};
 
-  renderer = new THREE.WebGLRenderer({ antialias:true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.getElementById('three-container').appendChild(renderer.domElement);
+// --- HELPER COMPONENTS ---
 
-  const starsGeometry = new THREE.BufferGeometry();
-  const starCount = 10000;
-  const starVertices = [];
+const MetricItem = ({ label, value, unit, color }) => (
+  <div className="flex justify-between items-end">
+    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{label}</div>
+    <div className={`text-xl font-black ${color} tracking-tighter`}>{value}<span className="text-[10px] ml-1 opacity-50">{unit}</span></div>
+  </div>
+);
 
-  for (let i = 0; i < starCount; i++) {
-    starVertices.push(
-      THREE.MathUtils.randFloatSpread(2000),
-      THREE.MathUtils.randFloatSpread(2000),
-      THREE.MathUtils.randFloatSpread(2000)
-    );
-  }
+const HUDItem = ({ label, value }) => (
+  <div className="group border-l border-white/5 pl-3 hover:border-cyan-500/50 transition-all">
+    <div className="text-[8px] opacity-40 group-hover:opacity-100 transition-all">{label}</div>
+    <div className="text-[10px] text-white/40 group-hover:text-cyan-400 transition-all">{value}</div>
+  </div>
+);
 
-  starsGeometry.setAttribute(
-    'position', new THREE.Float32BufferAttribute(starVertices, 3)
-  );
+const ActionButton = ({ icon, label, onClick, color }) => (
+  <button 
+    onClick={onClick}
+    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border bg-white/5 transition-all active:scale-95 ${color}`}
+  >
+    {icon}
+    <span className="text-[9px] font-black tracking-widest uppercase">{label}</span>
+  </button>
+);
 
-  const starsMaterial = new THREE.PointsMaterial({ color: 0x8888ff });
-  const starField = new THREE.Points(starsGeometry, starsMaterial);
-  scene.add(starField);
+const TimelineItem = ({ phase, status, progress }) => (
+  <div className="space-y-1">
+    <div className="flex justify-between text-[9px] font-black tracking-widest">
+      <span className="text-slate-200">{phase}</span>
+      <span className={progress === 100 ? 'text-emerald-500' : 'text-slate-500'}>{status}</span>
+    </div>
+    <div className="h-1 bg-white/5 w-full rounded-full overflow-hidden">
+      <div className="h-full bg-yellow-500" style={{ width: `${progress}%` }}></div>
+    </div>
+  </div>
+);
 
-  camera.position.z = 1;
+const NodeItem = ({ name, status, color = "text-emerald-500" }) => (
+  <div className="flex justify-between items-center text-[10px] font-bold">
+    <div className="flex items-center gap-3 text-slate-400 group">
+      <div className="w-1 h-1 bg-slate-700 rounded-full group-hover:bg-cyan-500 transition-all"></div>
+      {name}
+    </div>
+    <span className={`${color} tracking-widest`}>{status}</span>
+  </div>
+);
 
-  animate();
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
-initStarfield();
-
-</script>
-
-<script>
-const psiData = [
-  { title: "Psi Alpha", status: "Active" },
-  { title: "Psi Beta", status: "Stable" },
-  { title: "Psi Delta", status: "Fluctuating" }
-];
-
-const stats = document.getElementById("stats");
-psiData.forEach(item => {
-  const div = document.createElement("div");
-  div.className = "panel";
-  div.innerText = `${item.title}: ${item.status}`;
-  stats.appendChild(div);
-});
-</script>
-
-</body>
-</html>
+export default App;
