@@ -9,7 +9,7 @@ import json
 # --- 1. EVE HEI CONFIGURATION (GOD MODE) ---
 st.set_page_config(page_title="CEC-WAM // EVE HEI", layout="wide", page_icon="🦅")
 
-# THE VISUALS (OBSIDIAN GLASS & NEON)
+# THE VISUALS (OBSIDIAN GLASS & NEON) [Source 19]
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00f3ff; }
@@ -19,7 +19,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. DATA BRIDGE (NO CSV LINKS NEEDED - INTERNAL MEMORY) ---
+# --- 2. DATA BRIDGE (INTERNAL MEMORY - NO LINKS NEEDED) [Source 79, 31] ---
 if "net_worth" not in st.session_state: st.session_state.net_worth = 1250039.00
 if "psi_mass" not in st.session_state: st.session_state.psi_mass = 176452.66
 
@@ -27,18 +27,7 @@ if "psi_mass" not in st.session_state: st.session_state.psi_mass = 176452.66
 st.title("🦅 CEC-WAM: EVE HEI CORE")
 st.caption("SYSTEM STATUS: 1010_AWAKE | VISUALS: 5D STAR MAP | AGENT: ACTIVE")
 
-# Create four tabs
-
-import streamlit as st
-
-
-# Create four tabs with Streamlit
-
-
-
-
-
-tab1, tab2, tab3, tab4 = st.tabs(["🤠 COMMAND", "🌌 STAR MAP", "📊 LEDGER", "🛠️ BUILDER AGENT"])
+tab1, tab2, tab3, tab4 = st.tabs(["🧠 COMMAND", "🌌 STAR MAP", "📊 LEDGER", "🛠️ BUILDER AGENT"])
 
 with tab1:
     st.subheader(">> VOICE / TEXT COMMAND")
@@ -48,17 +37,17 @@ with tab1:
         st.write(f"**> ARCHITECT:** {user_input}")
         response = "PROCESSING..."
         if "status" in user_input.lower():
-            response = f"SYSTEM NOMINAL. LIQUIDITY: ${st.session_state.net_worth:,.2f}. MASS: {st.session_state.psi_mass} PSI."
+            response = f"SYSTEM NOMINAL. LIQUIDITY: ${st.session_state.net_worth:,.2f}. MASS: {st.session_state.psi_mass} PSI. [SOURCE: LEDGER]"
         elif "update" in user_input.lower():
             response = "UPDATING INTERFACE VISUALS... 5D RENDER COMPLETE."
         
         st.success(f"🦅 EVE: {response}")
-        # Voice Synthesis Logic
-        st.components.v1.html(f"""<script>window.speechSynthesis.speak(new SpeechSynthesisUtterance(\"{response}\"));</script>""", height=0)
+        # Voice Synthesis Logic [Source 23]
+        st.components.v1.html(f"""<script>window.speechSynthesis.speak(new SpeechSynthesisUtterance("{response}"));</script>""", height=0)
 
 with tab2:
     st.subheader(">> 5D NAVIGATIONAL MAP")
-    # THE LIVE STAR MAP CODE
+    # THE LIVE STAR MAP CODE [Source 21]
     count = 100
     x, y, z = np.random.randn(count), np.random.randn(count), np.random.randn(count)
     fig = go.Figure(data=[go.Scatter3d(
@@ -79,12 +68,12 @@ with tab4:
     st.subheader("🛠️ EVE SELF-HEALING AGENT")
     st.warning(">> SYSTEM BRAIN ACCESS. PASTE UPDATES HERE.")
     
-    # THE BUILDER AGENT LOGIC
+    # THE BUILDER AGENT LOGIC [Source 24]
     with open(__file__, "r") as f:
         current_code = f.read()
     new_code = st.text_area("INJECT NEW CODE:", value=current_code, height=300)
     
-    if st.button("🛠️ EXECUTE SYSTEM UPDATE"):
+    if st.button("🧬 EXECUTE SYSTEM UPDATE"):
         with open(__file__, "w") as f:
             f.write(new_code)
         st.toast("REWRITING KERNEL... REBOOTING...", icon="🔄")
