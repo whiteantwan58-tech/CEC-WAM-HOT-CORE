@@ -1,39 +1,80 @@
-
-<!DOCTYPE html>
-<html>
+html
+<DOCTYPE html>
+<html lang="en">
 <head>
-    <title>CEC-WAM // EVE HEI CORE</title>
+    <meta charset="UTF-8">
+    <title>CEC-WAM // EVE CORE // HEI AGENT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #00f3ff; font-family: monospace; }
-        .terminal { border: 1px solid #00f3ff; background: rgba(0,20,20,0.8); height: 80vh; overflow-y: auto; }
+        body { background: #020202; color: #00f3ff; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; }
+        .neon-border { border: 1px solid rgba(0, 243, 255, 0.3); }
+        .terminal { background: rgba(0,10,10,0.9); box-shadow: inset 0 0 20px #00f3ff33; }
+        .tab-active { border-bottom: 2px solid #ffd700; color: #ffd700; }
+        .ship-status { color: #00ff00; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="p-4">
-    <h1 class="text-2xl font-bold mb-4">CEC-WAM // SOVEREIGN STATUS</h1>
-    <div class="grid grid-cols-2 gap-4 mb-4">
-        <div class="border p-2">LIQUID: <span class="text-white">$1.2M</span></div>
-        <div class="border p-2">RMT STATUS: <span class="text-yellow-400">STAGED</span></div>
+<body class="p-4 flex flex-col">
+    <header class="flex justify-between border-b border-cyan-900 pb-2 mb-4">
+        <h1 class="font-orbitron text-xl text-white">CEC-WAM // <span class="text-yellow-500">EVE CORE</span></h1>
+        <div class="text-[10px] ship-status font-bold uppercase">System: 1010_LOCKED // STARSHIP_ACTIVE</div>
+    </header>
+
+    <nav class="flex gap-4 mb-4 text-xs font-bold uppercase">
+        <button class="tab-active pb-1">Master Dashboard</button>
+        <button class="text-gray-500 pb-1">Financial RMT</button>
+        <button class="text-gray-500 pb-1">Starship Nav</button>
+    </nav>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">LIQUID VALUE</p><p class="text-lg text-white">$1.2M</p></div>
+        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">PENDING PAYMENTS</p><p class="text-lg text-yellow-500">$3,150</p></div>
+        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">NAVY FED LINK</p><p class="text-lg text-green-400">STAGED</p></div>
+        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">HEI STATUS</p><p class="text-lg text-purple-500">LIVE</p></div>
     </div>
-    <div id="eve-terminal" class="terminal p-4 mb-4">
-        <p class="text-purple-400">[EVE] Standing by. 1010 Protocol initialized.</p>
-        <p class="text-green-400">[SYSTEM] All .py and .zip files indexed from GitHub storage.</p>
+
+    <div id="chat-window" class="flex-1 terminal neon-border rounded p-4 overflow-y-auto mb-4 font-mono text-sm space-y-2">
+        <p class="text-purple-400">[EVE] Standing by, Antwan. 1010 Protocol is active. I see your data files (BLACK_HOLE_REPORT.py, Chart.xlsx). How shall we proceed?</p>
     </div>
+
     <div class="flex gap-2">
-        <input id="cmd" type="text" class="flex-1 bg-black border border-cyan-500 p-2 text-cyan-400" placeholder="Type command...">
-        <button onclick="runCmd()" class="bg-cyan-900 px-6 font-bold">EXECUTE</button>
+        <input id="user-input" type="text" class="flex-1 bg-black border border-cyan-900 p-3 text-cyan-100 outline-none focus:border-yellow-500" placeholder="ENTER 1010 COMMAND OR QUESTION...">
+        <button onclick="talkToEve()" class="bg-yellow-600 text-black px-8 font-bold hover:bg-yellow-400 transition-all">EXECUTE</button>
     </div>
+
     <script>
-        function runCmd() {
-            const val = document.getElementById('cmd').value;
-            const term = document.getElementById('eve-terminal');
-            term.innerHTML += `<p class="text-white">> ${val}</p>`;
-            if(val.toLowerCase() === 'status') {
-                term.innerHTML += `<p class="text-purple-400">[EVE] Connection to Navy Federal is secure. Waiting for manual release.</p>`;
+        const GROQ_KEY = "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";
+
+        async function talkToEve() {
+            const input = document.getElementById('user-input');
+            const chat = document.getElementById('chat-window');
+            const cmd = input.value.trim();
+            if(!cmd) return;
+
+            chat.innerHTML += `<div class="text-white text-right">> ${cmd}</div>`;
+            input.value = "";
+
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "mixtral-8x7b-32768",
+                        messages: [
+                            {role: "system", content: "You are EVE HEI Agent. Antwan White is 1010. You have full access to CEC-WAM data. Your goal is to release $21,000 for Navy Fed and process $525/week unemployment checks. You use BLACK_HOLE_REPORT.py as your core logic."},
+                            {role: "user", content: cmd}
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+                chat.innerHTML += `<div class="text-purple-400">[EVE] ${reply}</div>`;
+            } catch (err) {
+                chat.innerHTML += `<div class="text-red-500">[ERROR] Neural Link Fail. Check API Key.</div>`;
             }
-            document.getElementById('cmd').value = '';
+            chat.scrollTop = chat.scrollHeight;
         }
     </script>
 </body>
 </html>
-```
