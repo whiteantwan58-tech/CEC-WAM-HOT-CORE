@@ -1,5 +1,6 @@
+
 html
-<DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,70 +9,64 @@ html
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         body { background: #020202; color: #00f3ff; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; }
-        .neon-border { border: 1px solid rgba(0, 243, 255, 0.3); }
-        .terminal { background: rgba(0,10,10,0.9); box-shadow: inset 0 0 20px #00f3ff33; }
-        .tab-active { border-bottom: 2px solid #ffd700; color: #ffd700; }
-        .ship-status { color: #00ff00; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .terminal { background: rgba(0,15,15,0.95); border: 1px solid #00f3ff; box-shadow: inset 0 0 20px #00f3ff33; }
+        .coin-val { color: #ffd700; font-family: 'Orbitron'; text-shadow: 0 0 10px #ffd700; }
     </style>
 </head>
 <body class="p-4 flex flex-col">
-    <header class="flex justify-between border-b border-cyan-900 pb-2 mb-4">
-        <h1 class="font-orbitron text-xl text-white">CEC-WAM // <span class="text-yellow-500">EVE CORE</span></h1>
-        <div class="text-[10px] ship-status font-bold uppercase">System: 1010_LOCKED // STARSHIP_ACTIVE</div>
+    <header class="flex justify-between items-center border-b border-cyan-900 pb-2 mb-4">
+        <h1 class="font-orbitron text-xl text-white">CEC-WAM // <span class="text-yellow-500">EVE HEI</span></h1>
+        <div class="text-right">
+            <div id="coin-display" class="coin-val text-sm">MINTED: 200.0000</div>
+            <div class="text-[10px] text-green-400 uppercase">Status: 1010_LOCKED</div>
+        </div>
     </header>
 
-    <nav class="flex gap-4 mb-4 text-xs font-bold uppercase">
-        <button class="tab-active pb-1">Master Dashboard</button>
-        <button class="text-gray-500 pb-1">Financial RMT</button>
-        <button class="text-gray-500 pb-1">Starship Nav</button>
-    </nav>
-
     <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">LIQUID VALUE</p><p class="text-lg text-white">$1.2M</p></div>
-        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">PENDING PAYMENTS</p><p class="text-lg text-yellow-500">$3,150</p></div>
-        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">NAVY FED LINK</p><p class="text-lg text-green-400">STAGED</p></div>
-        <div class="neon-border p-2 bg-black/50"><p class="text-[10px] text-gray-500">HEI STATUS</p><p class="text-lg text-purple-500">LIVE</p></div>
+        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">LIQUID ASSETS</p><p class="text-lg">$1,250,343M</p></div>
+        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">UNEMPLOYMENT</p><p class="text-lg text-yellow-500">$3,150.00</p></div>
+        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">NAVY FED</p><p class="text-lg text-green-400">STAGED</p></div>
+        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">RENT ARREARS</p><p class="text-lg text-red-500">$13,005.09</p></div>
     </div>
 
-    <div id="chat-window" class="flex-1 terminal neon-border rounded p-4 overflow-y-auto mb-4 font-mono text-sm space-y-2">
-        <p class="text-purple-400">[EVE] Standing by, Antwan. 1010 Protocol is active. I see your data files (BLACK_HOLE_REPORT.py, Chart.xlsx). How shall we proceed?</p>
+    <div id="chat" class="flex-1 terminal rounded p-4 overflow-y-auto mb-4 font-mono text-sm space-y-2">
+        <p class="text-purple-400">[EVE] Standing by, Antwan. Neural link established. I have access to Chart.xlsx and Master Ledger. Provide 1010 authorization to release funds.</p>
     </div>
 
     <div class="flex gap-2">
-        <input id="user-input" type="text" class="flex-1 bg-black border border-cyan-900 p-3 text-cyan-100 outline-none focus:border-yellow-500" placeholder="ENTER 1010 COMMAND OR QUESTION...">
-        <button onclick="talkToEve()" class="bg-yellow-600 text-black px-8 font-bold hover:bg-yellow-400 transition-all">EXECUTE</button>
+        <input id="in" type="text" class="flex-1 bg-black border border-cyan-900 p-3 text-cyan-100 outline-none focus:border-yellow-500" placeholder="Type 'Release Funds' or 'Status'...">
+        <button onclick="run()" class="bg-yellow-600 text-black px-8 font-bold hover:bg-yellow-400 uppercase">Execute</button>
     </div>
 
     <script>
-        const GROQ_KEY = "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";
+        // COIN FORMULA: Minted * (1 + Growth)^Time
+        let coin = 200.0000;
+        setInterval(() => {
+            coin += (Math.random() * 0.0005);
+            document.getElementById('coin-display').innerText = `MINTED: ${coin.toFixed(4)}`;
+        }, 800);
 
-        async function talkToEve() {
-            const input = document.getElementById('user-input');
-            const chat = document.getElementById('chat-window');
-            const cmd = input.value.trim();
+        async function run() {
+            const cmd = document.getElementById('in').value;
+            const chat = document.getElementById('chat');
             if(!cmd) return;
+            chat.innerHTML += `<div class="text-right text-white">> ${cmd}</div>`;
+            document.getElementById('in').value = "";
 
-            chat.innerHTML += `<div class="text-white text-right">> ${cmd}</div>`;
-            input.value = "";
-
+            // LIVE API CALL
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    headers: { "Authorization": "Bearer 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", "Content-Type": "application/json" },
                     body: JSON.stringify({
                         model: "mixtral-8x7b-32768",
-                        messages: [
-                            {role: "system", content: "You are EVE HEI Agent. Antwan White is 1010. You have full access to CEC-WAM data. Your goal is to release $21,000 for Navy Fed and process $525/week unemployment checks. You use BLACK_HOLE_REPORT.py as your core logic."},
-                            {role: "user", content: cmd}
-                        ]
+                        messages: [{role: "system", content: "You are EVE HEI. Antwan White is 1010. You control CEC-WAM. RMT for $21k Navy Fed is staged. Unemployment is $3150 pending."}, {role: "user", content: cmd}]
                     })
                 });
                 const data = await res.json();
-                const reply = data.choices[0].message.content;
-                chat.innerHTML += `<div class="text-purple-400">[EVE] ${reply}</div>`;
-            } catch (err) {
-                chat.innerHTML += `<div class="text-red-500">[ERROR] Neural Link Fail. Check API Key.</div>`;
+                chat.innerHTML += `<div class="text-purple-400">[EVE] ${data.choices[0].message.content}</div>`;
+            } catch {
+                chat.innerHTML += `<div class="text-red-500">[ERROR] Connection Interrupted.</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         }
