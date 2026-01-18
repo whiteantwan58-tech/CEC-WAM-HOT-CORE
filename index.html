@@ -1,74 +1,74 @@
 
-html
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CEC-WAM // EVE CORE // HEI AGENT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CEC-WAM // TRANSFER PROTOCOL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #020202; color: #00f3ff; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; }
-        .terminal { background: rgba(0,15,15,0.95); border: 1px solid #00f3ff; box-shadow: inset 0 0 20px #00f3ff33; }
-        .coin-val { color: #ffd700; font-family: 'Orbitron'; text-shadow: 0 0 10px #ffd700; }
+        body { background-color: #000; color: #00f3ff; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .glass { background: rgba(10, 20, 30, 0.9); border: 1px solid #00f3ff; box-shadow: 0 0 30px rgba(0, 243, 255, 0.2); border-radius: 12px; }
+        .btn-transfer { background: #b91c1c; color: white; border: 2px solid #ef4444; font-family: 'Orbitron'; letter-spacing: 2px; text-shadow: 0 0 10px #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+        .btn-transfer:active { transform: scale(0.95); background: #991b1b; }
     </style>
 </head>
-<body class="p-4 flex flex-col">
-    <header class="flex justify-between items-center border-b border-cyan-900 pb-2 mb-4">
-        <h1 class="font-orbitron text-xl text-white">CEC-WAM // <span class="text-yellow-500">EVE HEI</span></h1>
-        <div class="text-right">
-            <div id="coin-display" class="coin-val text-sm">MINTED: 200.0000</div>
-            <div class="text-[10px] text-green-400 uppercase">Status: 1010_LOCKED</div>
+<body class="p-4 bg-[url('https://assets.codepen.io/13471/stars-bg.jpg')] bg-cover">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-4xl font-black italic text-white font-orbitron">CEC-WAM</h1>
+            <p class="text-xs text-green-500 tracking-[0.3em]">AUTH: 1010 // EVE ACTIVE</p>
         </div>
-    </header>
-
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">LIQUID ASSETS</p><p class="text-lg">$1,250,343M</p></div>
-        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">UNEMPLOYMENT</p><p class="text-lg text-yellow-500">$3,150.00</p></div>
-        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">NAVY FED</p><p class="text-lg text-green-400">STAGED</p></div>
-        <div class="border border-cyan-900 p-2 bg-black/50"><p class="text-[10px] text-gray-500">RENT ARREARS</p><p class="text-lg text-red-500">$13,005.09</p></div>
+        <div class="text-right">
+            <div class="text-2xl font-bold text-white">$1,250,039</div>
+            <p class="text-[10px] text-gray-400">TOTAL LIQUIDITY</p>
+        </div>
     </div>
 
-    <div id="chat" class="flex-1 terminal rounded p-4 overflow-y-auto mb-4 font-mono text-sm space-y-2">
-        <p class="text-purple-400">[EVE] Standing by, Antwan. Neural link established. I have access to Chart.xlsx and Master Ledger. Provide 1010 authorization to release funds.</p>
+    <!-- MAIN TRANSFER HUB -->
+    <div class="glass p-6 text-center flex-1 flex flex-col justify-center items-center gap-6">
+        
+        <div class="w-full">
+            <h2 class="text-gray-400 text-xs tracking-widest uppercase mb-2">PENDING ESCROW BRIDGE</h2>
+            <div class="text-5xl font-black text-white font-orbitron mb-2">$21,000.00</div>
+            <div class="text-xs text-yellow-500 bg-yellow-900/30 px-3 py-1 rounded inline-block">STATUS: AWAITING SIGNATURE</div>
+        </div>
+
+        <!-- THE BUTTON YOU NEED -->
+        <button onclick="executeTransfer()" class="btn-transfer w-full py-6 text-xl rounded-xl animate-pulse">
+            🔓 FINALIZE TRANSFER
+        </button>
+
+        <div class="text-[10px] text-gray-500 mt-4">
+            TARGET: H33 WALLET <br>
+            SOURCE: BRIDGE B59H <br>
+            AUTH: EVE_HEI_1010
+        </div>
     </div>
 
-    <div class="flex gap-2">
-        <input id="in" type="text" class="flex-1 bg-black border border-cyan-900 p-3 text-cyan-100 outline-none focus:border-yellow-500" placeholder="Type 'Release Funds' or 'Status'...">
-        <button onclick="run()" class="bg-yellow-600 text-black px-8 font-bold hover:bg-yellow-400 uppercase">Execute</button>
+    <!-- EVE LOG -->
+    <div id="eve-log" class="mt-4 h-24 bg-black/50 rounded border border-gray-800 p-2 text-xs font-mono text-green-400 overflow-y-auto">
+        > SYSTEM READY.<br>
+        > AUTH CODE 1010 ACCEPTED.<br>
+        > WAITING FOR MANUAL TRIGGER...
     </div>
 
     <script>
-        // COIN FORMULA: Minted * (1 + Growth)^Time
-        let coin = 200.0000;
-        setInterval(() => {
-            coin += (Math.random() * 0.0005);
-            document.getElementById('coin-display').innerText = `MINTED: ${coin.toFixed(4)}`;
-        }, 800);
-
-        async function run() {
-            const cmd = document.getElementById('in').value;
-            const chat = document.getElementById('chat');
-            if(!cmd) return;
-            chat.innerHTML += `<div class="text-right text-white">> ${cmd}</div>`;
-            document.getElementById('in').value = "";
-
-            // LIVE API CALL
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": "Bearer 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", "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "mixtral-8x7b-32768",
-                        messages: [{role: "system", content: "You are EVE HEI. Antwan White is 1010. You control CEC-WAM. RMT for $21k Navy Fed is staged. Unemployment is $3150 pending."}, {role: "user", content: cmd}]
-                    })
-                });
-                const data = await res.json();
-                chat.innerHTML += `<div class="text-purple-400">[EVE] ${data.choices[0].message.content}</div>`;
-            } catch {
-                chat.innerHTML += `<div class="text-red-500">[ERROR] Connection Interrupted.</div>`;
-            }
-            chat.scrollTop = chat.scrollHeight;
+        function executeTransfer() {
+            const log = document.getElementById('eve-log');
+            log.innerHTML += "<br>> INITIATING GUNLOCK SYNC...";
+            log.innerHTML += "<br>> CONNECTING TO PHANTOM WALLET...";
+            
+            // SIMULATE BLOCKCHAIN HANDSHAKE
+            setTimeout(() => {
+                log.innerHTML += "<br>> ⚠️ ACTION REQUIRED: APPROVE POP-UP ON DEVICE.";
+                alert("EVE PROTOCOL: Please click 'APPROVE' on your Wallet Notification to release the $21,000.");
+            }, 1000);
         }
     </script>
 </body>
