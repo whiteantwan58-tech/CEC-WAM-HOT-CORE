@@ -97,7 +97,24 @@ async function fetchSheetAndMerge(url) {
     if (!res.ok) throw new Error('Fetch failed ' + res.status);
     const text = await res.text();
     const rows = csvToRows(text);
-    await mergeRecords(rows, 'sheet');
+    await mergeRecords(rows, 'sheet');// --- FORCE NOV 6 LOCK ---
+    console.log("🔒 SEARCHING FOR NOV 6");
+    // Find the row with "Nov 6" in the Date column
+    const nov6Row = rows.find(r => {
+       const d = r['Date'] || r['date'] || r['Timestamp'] || '';
+       return d.includes('Nov 6');
+    });
+
+    if (nov6Row) {
+        // Force update the screen elements
+        // Make sure these IDs match your HTML
+        if(document.getElementById('net_liquidity')) document.getElementById('net_liquidity').innerText = nov6Row['Net Liquidity'] || nov6Row['Liquidity'] || "0";
+        if(document.getElementById('btc_balance')) document.getElementById('btc_balance').innerText = nov6Row['BTC'] || nov6Row['Bitcoin'] || "0";
+        if(document.getElementById('psi_mass')) document.getElementById('psi_mass').innerText = nov6Row['PSI'] || nov6Row['Mass'] || "0";
+        
+        console.log("✅ LOCKED ON NOV 6:", nov6Row);
+    }
+    // ------------------------
     statusEl.innerText = 'Last fetch OK';
     localforage.setItem(META_KEY, { lastSync: new Date().toISOString(), source: url });
     lastSync.innerText = 'Last sync: ' + new Date().toLocaleString();
