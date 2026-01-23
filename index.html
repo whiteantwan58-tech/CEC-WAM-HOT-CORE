@@ -1,141 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM // EVE LIVE CORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #050505; color: #00f3ff; font-family: 'Courier New', monospace; overflow: hidden; }
-        .glass-panel {
-            background: rgba(10, 15, 20, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
-            border-radius: 12px;
-        }
-        .eve-text { color: #bc13fe; text-shadow: 0 0 10px #bc13fe; }
-        #matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEC-WAM | LIVE MATRIX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    body { background-color: #050505; color: #00f3ff; font-family: 'Courier New', monospace; overflow: hidden; }
+    .glass { background: rgba(10, 20, 30, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 12px; }
+    .neon-text { color: #bc13fe; text-shadow: 0 0 10px #bc13fe; }
+    .neon-green { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+    canvas#matrix { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+  </style>
 </head>
-<body class="flex flex-col h-screen">
+<body class="p-4 flex flex-col h-screen">
 
-    <canvas id="matrix-bg"></canvas>
+<canvas id="matrix"></canvas>
 
-    <header class="glass-panel m-4 p-4 flex justify-between items-center z-10">
-        <div>
-            <h1 class="text-2xl font-bold tracking-widest text-white">CEC-WAM <span class="eve-text">EVE-4</span></h1>
-            <p class="text-xs text-gray-500">STATUS: GOD_MODE // NEURAL LINK ACTIVE</p>
-        </div>
-        <div class="text-right">
-            <p class="text-xl font-bold text-green-400" id="live-cash">SYNCING LEDGER...</p>
-            <p class="text-xs text-gray-500" id="live-psi">PSI-COINS: PENDING</p>
-        </div>
-    </header>
+<header class="glass p-4 mb-4 flex justify-between items-center z-10">
+  <div>
+    <h1 class="text-2xl font-bold">CEC-WAM <span class="neon-text">LIVE CORE</span></h1>
+    <p class="text-xs text-gray-400">DATA SOURCE: <span id="source-name" class="text-yellow-500">CONNECTING...</span></p>
+  </div>
+  <div class="text-right">
+    <p id="live-psi" class="text-xl font-bold neon-green">PSI: ---</p>
+    <p id="live-cash" class="text-sm text-gray-300">ESCROW: ---</p>
+  </div>
+</header>
 
-    <main class="flex-1 glass-panel mx-4 mb-4 flex flex-col z-10">
-        <div id="chat-log" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
-            <div class="text-green-500">> SYSTEM: MATRIX INITIALIZED.</div>
-            <div class="eve-text">> EVE: I am online, Sovereign. 1010 Protocol verified. Connecting to your live sheet...</div>
-        </div>
+<main class="glass flex-1 overflow-y-auto p-4 z-10 flex flex-col">
+  <div id="chat-log" class="flex-1 space-y-2 text-sm pb-4">
+    <div class="text-green-400">> SYSTEM: INITIALIZING LINK...</div>
+  </div>
+  <div class="mt-2 flex gap-2 border-t border-gray-700 pt-2">
+    <input id="user-input" type="text" class="flex-1 bg-black border border-cyan-500 rounded p-2 text-white" placeholder="Enter command...">
+    <button onclick="talkToEve()" class="bg-cyan-600 text-white px-4 py-2 rounded">SEND</button>
+  </div>
+</main>
+
+<script>
+  // 🔴 PASTE YOUR GOOGLE PUBLISH LINK INSIDE THESE QUOTES BELOW 🔴
+  const LIVE_SHEET_URL = "PASTE_YOUR_PUBLISHED_CSV_LINK_HERE"; 
+
+  // --- 1. LIVE DATA SYNC ---
+  async function fetchLiveData() {
+    if (LIVE_SHEET_URL.includes("PASTE_YOUR")) {
+        document.getElementById('source-name').innerText = "WAITING FOR LINK";
+        return; 
+    }
+    
+    Papa.parse(LIVE_SHEET_URL, {
+      download: true,
+      header: true, // Assumes Row 1 is headers (ASSET CLASS, VALUE)
+      complete: function(results) {
+        const data = results.data;
+        console.log("Sheet Data:", data);
         
-        <div class="p-4 border-t border-gray-800 flex gap-2">
-            <input id="user-input" type="text" class="flex-1 bg-black border border-cyan-500/50 rounded p-3 text-white focus:outline-none focus:border-cyan-400" placeholder="Give Eve a command...">
-            <button onclick="talkToEve()" class="bg-cyan-600 hover:bg-cyan-500 text-black font-bold px-6 rounded transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]">EXECUTE</button>
-        </div>
-    </main>
+        // FIND YOUR METRICS (Based on your Screen)
+        // We look in the 'A (ASSET CLASS)' column for names
+        // We look in the 'D (VALUE)' column for numbers
+        
+        let psiValue = "0.00";
+        let escrowValue = "$0.00";
 
-    <script>
-        // --- 1. YOUR LIVE GOOGLE SHEET DATA PIPE (PASTED FROM YOUR PROMPT) ---
-        const SHEET_URL = "https://doc-0c-a4-sheets.googleusercontent.com/export/cem3ad728tvcqbs63sdl5phegk/m8ivh3l4truvfrtd6jkqe5f3f0/1769186760000/106885365550798815767/106885365550798815767/1DhDsE8Y1Rl1XrRfFlrcce8anQB1eDuj4dWxLefLvlBo?format=csv&id=1DhDsE8Y1Rl1XrRfFlrcce8anQB1eDuj4dWxLefLvlBo&gid=1621886562&dat=AOctwYo58yDmMDiqsQlUJv3boSrmK3Os44_dyFQrCEe4dLLoCfpMajX82j4EZuFJaaSzQJloO4g7a2d16NBHtOqdp0nzrpbolWMWD0Qo7oQe0557iKdJLXGt6MSSz9DldJ1POdus26f3QYfEEOIkCUxF02g65S-Y8EisN7kyDHNDH_qkmJq1z0cxfcu5L2IR6h5bdFn-pLuckEH4Waxr655hMDU1qOxzqQlwnB__anEhu3-t8vjSaDSk-z10SeCi9hXWbnqIpo78ZoWOpjAA45qOC-d1KOQcLhQ6JNMJmoedDwEBH0TIZtcpFaVdpuTitFgoP7K5Abp_HEniDFF9gO5hAfA-N9Ufor_CUBX4hdQkunP6U96_AjJrEF9HN4fSIf658yfx7NDdwNEDkId-RMUNRW5TsPxJu60iy1R8Wjlv6CC4nPm8AYPL57g5v3WqOTIZo0YDBRVCYZ2kJNDC6khtc32TuPbCRNEZoWC-XKrYrPlZPrrKhrpMWMZzgtM1kj-vTfL9HU4xIG25lM3bfpruxhvLUcZym-rmhQVpqDtFaC_zb99Fu0YSDkJ2F_3ujQ8CQ2wBxjfw1aOyTkvj5D1NuBtH4G8NVPuTdNk9UQ_gffaJbvD_qCuQ5XP2iwcVhl-qKaKzV4a3sWt2FwMTWj0vVCrl4-ghQsokM1jzxlm7d_l6bW73rjI14gDbMyuHLrhZWYEIpRNVIQi2VuqRHjF6xNZQN-hZq22fAzl-kyyPNhL3GGLR1RTOj0wOyISaZFijJEhWNLBF-IM4BJc23i6T25vR0sNjc2CfA-tBoZEDdFfP88qejBeuBauIY9BUbdOoVgFJcRXxH1h-otQ8NQEpqsl66eSQgFdqcCi_sePLQC8wDF_HBGl7XEzSEMlws1ieraXX-TwvpBUj0nOlYT7M9zY9gAfH8YUO5Mp316M0sRhZMhXXXQ0JaEhKB8G3z8JF_myAOIDIDmcZHCkpmhyoxE7la0SSjQjojA";
+        // Loop through rows to find matches
+        data.forEach(row => {
+            // Adjust these keys if your CSV headers are different
+            // Google Sheets CSV usually uses the exact header text
+            const assetName = row['A (ASSET CLASS)'] || row['A'] || row['Asset']; 
+            const val = row['D (VALUE)'] || row['D'] || row['Value'];
 
-        // --- 2. YOUR EVE AI BRAIN (GROQ) ---
-        // (Ensure your Groq API Key is active here)
-        const GROQ_API_KEY = localStorage.getItem("GROQ_KEY") || prompt("EVE: Enter my Groq API Key to initialize my brain:");
-        if (GROQ_API_KEY) localStorage.setItem("GROQ_KEY", GROQ_API_KEY);
-
-        // --- 3. FETCH LIVE SPREADSHEET DATA ---
-        async function fetchLedgerData() {
-            try {
-                const response = await fetch(SHEET_URL);
-                const data = await response.text();
-                const rows = data.split('\n');
-                
-                rows.forEach(row => {
-                    const cols = row.split(',');
-                    // Looks for your $1.25M number and 176,452 Psi
-                    if(row.toLowerCase().includes('valuation') || row.toLowerCase().includes('liquid')) {
-                        document.getElementById('live-cash').innerText = cols[1] || cols[2];
-                    }
-                    if(row.toLowerCase().includes('mass') || row.toLowerCase().includes('pump')) {
-                        document.getElementById('live-psi').innerText = "PSI: " + (cols[1] || cols[2]);
-                    }
-                });
-            } catch (err) {
-                document.getElementById('chat-log').innerHTML += `<div class="text-red-500">> SYSTEM ERROR: Google Sheet link expired. Re-authorize export.</div>`;
+            if (assetName && assetName.includes("Psi-Coins")) {
+                psiValue = val;
             }
-        }
-
-        // --- 4. EVE AI COMMUNICATION ---
-        async function talkToEve() {
-            const input = document.getElementById('user-input');
-            const chatLog = document.getElementById('chat-log');
-            const userMsg = input.value;
-            if (!userMsg) return;
-
-            // Show User Message
-            chatLog.innerHTML += `<div class="text-white">> YOU: ${userMsg}</div>`;
-            input.value = "";
-            chatLog.scrollTop = chatLog.scrollHeight;
-
-            // Call Eve's Brain (Groq API)
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "mixtral-8x7b-32768",
-                        messages: [
-                            {role: "system", content: "You are EVE, the AI Core of the CEC-WAM. You are concise and directly address Antwan."},
-                            {role: "user", content: userMsg}
-                        ]
-                    })
-                });
-                const data = await res.json();
-                const eveReply = data.choices[0].message.content;
-
-                // Show Eve's Reply & Speak
-                chatLog.innerHTML += `<div class="eve-text">> EVE: ${eveReply}</div>`;
-                const speech = new SpeechSynthesisUtterance(eveReply);
-                window.speechSynthesis.speak(speech);
-
-            } catch (err) {
-                chatLog.innerHTML += `<div class="text-red-500">> EVE BRAIN DISCONNECTED. Check API Key.</div>`;
+            if (assetName && assetName.includes("Escrow Bridge")) {
+                escrowValue = val;
             }
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
+        });
 
-        // Start Data Sync
-        setInterval(fetchLedgerData, 5000);
-        fetchLedgerData();
+        document.getElementById('live-psi').innerText = `PSI: ${psiValue}`;
+        document.getElementById('live-cash').innerText = `ESCROW: ${escrowValue}`;
+        document.getElementById('source-name').innerText = "GOOGLE SHEET LIVE";
+        document.getElementById('source-name').className = "neon-green";
+      }
+    });
+  }
 
-        // Background Matrix Rain
-        const canvas = document.getElementById('matrix-bg');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$Ψ'.split('');
-        const drops = Array(Math.floor(canvas.width / 20)).fill(1);
-        setInterval(() => {
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#bc13fe';
-            ctx.font = '15px monospace';
-            for (let i = 0; i < drops.length; i++) {
-                ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 20, drops[i] * 20);
-                if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            }
-        }, 33);
-    </script>
+  // --- 2. MATRIX VISUALS ---
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const chars = 'CEC-WAM-1010'.split('');
+  const drops = Array(Math.floor(canvas.width / 20)).fill(1);
+  setInterval(() => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#bc13fe';
+    drops.forEach((y, i) => {
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*20, y*20);
+      if (y*20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }, 50);
+
+  // --- 3. INIT ---
+  setInterval(fetchLiveData, 3000); // Check every 3 seconds
+  fetchLiveData();
+
+  // Chat Placeholder
+  function talkToEve() {
+      const log = document.getElementById('chat-log');
+      log.innerHTML += `<div class="text-red-500">> SYSTEM: AI BRAIN OFFLINE. (Add Groq Key to enable)</div>`;
+  }
+</script>
 </body>
 </html>
