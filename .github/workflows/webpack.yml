@@ -1,28 +1,35 @@
-name: NodeJS with Webpack
+name: Sync Google Sheet to Repo
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  repository_dispatch:
+    types: [sheet_update]
 
 jobs:
-  build:
+  refresh-data:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
     steps:
-    - uses: actions/checkout@v4
+      - name: 📥 Checkout Repo
+        uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: Build
-      run: |
-        npm install
-        npx webpack
+      - name: 📦 Install Dependencies
+        run: |
+          pip install pandas requests
+
+      - name: 🔄 Fetch Google Sheet as CSV
+        # REPLACES 'CEC_WAM_MASTER_LEDGER_LIVE.csv' with fresh data
+        # Requires your Sheet to be 'Published to Web' (CSV format) OR use a GSheets API script
+        run: |
+          curl -L "https://docs.google.com/spreadsheets/d/1kATdquP5z38mPFNhAQDZU2X3B4-pjJuycXT_-Sqh0UE863lmU3ACpyNm/export?format=csv&gid=0" -o CEC_WAM_MASTER_LEDGER_LIVE.csv
+
+      - name: 💾 Commit & Push Changes
+        run: |
+          git config --global user.name "EVE-4 Auto-Bot"
+          git config --global user.email "bot@crown-ops.com"
+          git add CEC_WAM_MASTER_LEDGER_LIVE.csv
+          git commit -m "⚡ LIVE UPDATE: Synced from Master Ledger" || echo "No changes to commit"
+          git push
