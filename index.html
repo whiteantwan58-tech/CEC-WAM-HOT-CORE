@@ -3,265 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM | SOVEREIGN INTERFACE</title>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <title>CEC-WAM // EVE LIVE CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-green: #00ff00;
-            --neon-gold: #ffd700;
-            --glass-bg: rgba(10, 20, 30, 0.90);
-            --border-color: rgba(0, 243, 255, 0.3);
-            --bg-color: #050505;
+        body { background-color: #050505; color: #00f3ff; font-family: 'Courier New', monospace; overflow: hidden; }
+        .glass-panel {
+            background: rgba(10, 15, 20, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
+            border-radius: 12px;
         }
-        body {
-            background-color: var(--bg-color);
-            color: var(--neon-blue);
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
-            background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
-            min-height: 100vh;
-        }
-        .header-container {
-            text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
-        .header-icon {
-            width: 80px;
-            filter: drop-shadow(0 0 10px var(--neon-blue));
-            margin-bottom: 10px;
-        }
-        h1 { 
-            text-shadow: 0 0 15px var(--neon-blue); 
-            margin: 0; 
-            color: var(--neon-gold);
-            letter-spacing: 2px;
-        }
-        .status-bar {
-            text-align: center;
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 30px;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .metric-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        .metric-card:hover { 
-            transform: translateY(-5px); 
-            border-color: var(--neon-green); 
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
-        }
-        .metric-label { 
-            font-size: 16px; 
-            letter-spacing: 2px; 
-            color: #aaa; 
-            margin-bottom: 15px; 
-            text-transform: uppercase;
-        }
-        .metric-value { 
-            font-size: 36px; 
-            font-weight: bold; 
-            color: #fff; 
-            text-shadow: 0 0 15px var(--neon-blue);
-            margin: 10px 0; 
-        }
-        .metric-sub { font-size: 12px; color: var(--neon-green); text-transform: uppercase; font-weight: bold; }
-        .metric-sub.warn { color: #ffcc00; }
-        .metric-sub.lock { color: #ff0055; }
-        
-        .loading { color: #ffcc00; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        
-        /* Footer Console */
-        .console-log {
-            margin-top: 50px;
-            background: #000;
-            border: 1px solid #333;
-            padding: 15px;
-            font-size: 12px;
-            color: #0f0;
-            height: 100px;
-            overflow-y: auto;
-            font-family: monospace;
-            max-width: 800px;
-            margin-left: auto; 
-            margin-right: auto;
-        }
+        .eve-text { color: #bc13fe; text-shadow: 0 0 10px #bc13fe; }
+        #matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
     </style>
 </head>
-<body>
+<body class="flex flex-col h-screen">
 
-    <div class="header-container">
-        <img src="https://img.icons8.com/color/96/000000/artificial-intelligence.png" class="header-icon" alt="System Core">
-        <h1>🦅 CEC-WAM: LIVE CORE</h1>
-    </div>
+    <canvas id="matrix-bg"></canvas>
 
-    <div class="status-bar">
-        SYSTEM STATUS: <span style="color:#0f0">ONLINE</span> | 
-        DATA SOURCE: <span id="conn-status" class="loading">CONNECTING TO LEDGER...</span> | 
-        MODE: <span style="color:var(--neon-gold)">GOD_MODE</span>
-    </div>
-
-    <div class="grid-container">
-        <div class="metric-card">
-            <div class="metric-label">LIQUID VALUATION</div>
-            <div class="metric-value" id="val-liquidity" style="color: #00ff00;">$0.00</div>
-            <div class="metric-sub">VERIFIED ASSETS (10X LOCKED)</div>
+    <header class="glass-panel m-4 p-4 flex justify-between items-center z-10">
+        <div>
+            <h1 class="text-2xl font-bold tracking-widest text-white">CEC-WAM <span class="eve-text">EVE-4</span></h1>
+            <p class="text-xs text-gray-500">STATUS: GOD_MODE // NEURAL LINK ACTIVE</p>
         </div>
-
-        <div class="metric-card">
-            <div class="metric-label">TOTAL MASS (PSI)</div>
-            <div class="metric-value" id="val-mass">0.00</div>
-            <div class="metric-sub">EXPANSION CONFIRMED</div>
+        <div class="text-right">
+            <p class="text-xl font-bold text-green-400" id="live-cash">SYNCING LEDGER...</p>
+            <p class="text-xs text-gray-500" id="live-psi">PSI-COINS: PENDING</p>
         </div>
+    </header>
 
-        <div class="metric-card">
-            <div class="metric-label">NET WORTH</div>
-            <div class="metric-value" id="val-networth">LOCKED</div>
-            <div class="metric-sub lock">QUANTUM IP VALUE</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-label">ESCROW BRIDGE</div>
-            <div class="metric-value" id="val-escrow">---</div>
-            <div class="metric-sub warn" id="sub-escrow">SYNCING...</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-label">GUNLOCK PROTOCOL</div>
-            <div class="metric-value" id="val-gunlock">PENDING</div>
-            <div class="metric-sub warn">SECURITY CHECK</div>
+    <main class="flex-1 glass-panel mx-4 mb-4 flex flex-col z-10">
+        <div id="chat-log" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
+            <div class="text-green-500">> SYSTEM: MATRIX INITIALIZED.</div>
+            <div class="eve-text">> EVE: I am online, Sovereign. 1010 Protocol verified. Connecting to your live sheet...</div>
         </div>
         
-         <div class="metric-card">
-            <div class="metric-label">EARTH SHIELD</div>
-            <div class="metric-value" id="val-shield">---</div>
-            <div class="metric-sub" style="color:#00ff00">ENTROPIC CLOAK</div>
+        <div class="p-4 border-t border-gray-800 flex gap-2">
+            <input id="user-input" type="text" class="flex-1 bg-black border border-cyan-500/50 rounded p-3 text-white focus:outline-none focus:border-cyan-400" placeholder="Give Eve a command...">
+            <button onclick="talkToEve()" class="bg-cyan-600 hover:bg-cyan-500 text-black font-bold px-6 rounded transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]">EXECUTE</button>
         </div>
-    </div>
-    
-    <div class="console-log" id="sys-log">
-        > SYSTEM INITIALIZED...<br>
-        > WAITING FOR LEDGER DATA...
-    </div>
+    </main>
 
-<script>
-    // --- CONFIGURATION ---
-    const FILE_URL = "CEC_WAM_MASTER_LEDGER_LIVE.xlsx"; // Must match your file name exactly
+    <script>
+        // --- 1. YOUR LIVE GOOGLE SHEET DATA PIPE (PASTED FROM YOUR PROMPT) ---
+        const SHEET_URL = "https://doc-0c-a4-sheets.googleusercontent.com/export/cem3ad728tvcqbs63sdl5phegk/m8ivh3l4truvfrtd6jkqe5f3f0/1769186760000/106885365550798815767/106885365550798815767/1DhDsE8Y1Rl1XrRfFlrcce8anQB1eDuj4dWxLefLvlBo?format=csv&id=1DhDsE8Y1Rl1XrRfFlrcce8anQB1eDuj4dWxLefLvlBo&gid=1621886562&dat=AOctwYo58yDmMDiqsQlUJv3boSrmK3Os44_dyFQrCEe4dLLoCfpMajX82j4EZuFJaaSzQJloO4g7a2d16NBHtOqdp0nzrpbolWMWD0Qo7oQe0557iKdJLXGt6MSSz9DldJ1POdus26f3QYfEEOIkCUxF02g65S-Y8EisN7kyDHNDH_qkmJq1z0cxfcu5L2IR6h5bdFn-pLuckEH4Waxr655hMDU1qOxzqQlwnB__anEhu3-t8vjSaDSk-z10SeCi9hXWbnqIpo78ZoWOpjAA45qOC-d1KOQcLhQ6JNMJmoedDwEBH0TIZtcpFaVdpuTitFgoP7K5Abp_HEniDFF9gO5hAfA-N9Ufor_CUBX4hdQkunP6U96_AjJrEF9HN4fSIf658yfx7NDdwNEDkId-RMUNRW5TsPxJu60iy1R8Wjlv6CC4nPm8AYPL57g5v3WqOTIZo0YDBRVCYZ2kJNDC6khtc32TuPbCRNEZoWC-XKrYrPlZPrrKhrpMWMZzgtM1kj-vTfL9HU4xIG25lM3bfpruxhvLUcZym-rmhQVpqDtFaC_zb99Fu0YSDkJ2F_3ujQ8CQ2wBxjfw1aOyTkvj5D1NuBtH4G8NVPuTdNk9UQ_gffaJbvD_qCuQ5XP2iwcVhl-qKaKzV4a3sWt2FwMTWj0vVCrl4-ghQsokM1jzxlm7d_l6bW73rjI14gDbMyuHLrhZWYEIpRNVIQi2VuqRHjF6xNZQN-hZq22fAzl-kyyPNhL3GGLR1RTOj0wOyISaZFijJEhWNLBF-IM4BJc23i6T25vR0sNjc2CfA-tBoZEDdFfP88qejBeuBauIY9BUbdOoVgFJcRXxH1h-otQ8NQEpqsl66eSQgFdqcCi_sePLQC8wDF_HBGl7XEzSEMlws1ieraXX-TwvpBUj0nOlYT7M9zY9gAfH8YUO5Mp316M0sRhZMhXXXQ0JaEhKB8G3z8JF_myAOIDIDmcZHCkpmhyoxE7la0SSjQjojA";
 
-    // --- LOGGING HELPER ---
-    function log(msg) {
-        const consoleDiv = document.getElementById("sys-log");
-        const time = new Date().toLocaleTimeString();
-        consoleDiv.innerHTML += `> [${time}] ${msg}<br>`;
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
+        // --- 2. YOUR EVE AI BRAIN (GROQ) ---
+        // (Ensure your Groq API Key is active here)
+        const GROQ_API_KEY = localStorage.getItem("GROQ_KEY") || prompt("EVE: Enter my Groq API Key to initialize my brain:");
+        if (GROQ_API_KEY) localStorage.setItem("GROQ_KEY", GROQ_API_KEY);
 
-    // --- MAIN DATA LOADER ---
-    async function loadLiveLedger() {
-        try {
-            log("Fetching CEC_WAM_MASTER_LEDGER_LIVE.xlsx...");
-            const response = await fetch(FILE_URL);
-            
-            if (!response.ok) {
-                throw new Error("Ledger file not found. Ensure file is in Repo.");
+        // --- 3. FETCH LIVE SPREADSHEET DATA ---
+        async function fetchLedgerData() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const data = await response.text();
+                const rows = data.split('\n');
+                
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    // Looks for your $1.25M number and 176,452 Psi
+                    if(row.toLowerCase().includes('valuation') || row.toLowerCase().includes('liquid')) {
+                        document.getElementById('live-cash').innerText = cols[1] || cols[2];
+                    }
+                    if(row.toLowerCase().includes('mass') || row.toLowerCase().includes('pump')) {
+                        document.getElementById('live-psi').innerText = "PSI: " + (cols[1] || cols[2]);
+                    }
+                });
+            } catch (err) {
+                document.getElementById('chat-log').innerHTML += `<div class="text-red-500">> SYSTEM ERROR: Google Sheet link expired. Re-authorize export.</div>`;
             }
-            
-            const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(arrayBuffer);
-            const sheetName = workbook.SheetNames[0]; 
-            const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-            log(`Data Loaded: ${jsonData.length} Rows Detected.`);
-            
-            // --- DATA PARSING LOGIC ---
-            // Helper to find value by Metric Name
-            function getMetric(name) {
-                // Tries to find the row where "Metric Name" or "Metric" matches
-                return jsonData.find(r => 
-                    (r["Metric Name"] && r["Metric Name"].trim() === name) || 
-                    (r["Metric"] && r["Metric"].trim() === name)
-                );
-            }
-
-            // 1. LIQUIDITY (Targeting "Total Liquidity")
-            const liquidityRow = getMetric("Total Liquidity");
-            if (liquidityRow) {
-                // PRIORITY: Live Value (Real) -> Value (Raw)
-                const val = liquidityRow["Live Value (Real)"] || liquidityRow["Value (Raw)"];
-                document.getElementById("val-liquidity").innerText = val;
-                log(`LIQUIDITY UPDATED: ${val}`);
-            }
-
-            // 2. TOTAL MASS
-            const massRow = getMetric("Total Mass");
-            if (massRow) {
-                const val = massRow["Live Value (Real)"] || massRow["Value (Raw)"];
-                document.getElementById("val-mass").innerText = val;
-            }
-
-            // 3. NET WORTH
-            const netRow = getMetric("Net Worth");
-            if (netRow) {
-                const val = netRow["Live Value (Real)"] || netRow["Value (Raw)"];
-                document.getElementById("val-networth").innerText = val;
-            }
-
-            // 4. ESCROW
-            const escrowRow = getMetric("Escrow Status");
-            if (escrowRow) {
-                document.getElementById("val-escrow").innerText = escrowRow["Value (Raw)"] || "84%";
-                document.getElementById("sub-escrow").innerText = escrowRow["Status"] || "PENDING";
-            }
-
-            // 5. GUNLOCK
-            const gunlockRow = getMetric("Gunlock Sync");
-            if (gunlockRow) {
-                const status = gunlockRow["Status"] || "PENDING";
-                document.getElementById("val-gunlock").innerText = status;
-                document.getElementById("val-gunlock").style.color = (status === "ACTIVE") ? "#00ff00" : "#ffcc00";
-            }
-            
-            // 6. EARTH SHIELD
-            const shieldRow = getMetric("Earth Shield");
-            if (shieldRow) {
-                document.getElementById("val-shield").innerText = shieldRow["Value (Raw)"] || "100%";
-            }
-
-            // Success State
-            document.getElementById("conn-status").innerText = "LINKED: LIVE EXCEL";
-            document.getElementById("conn-status").className = "";
-            document.getElementById("conn-status").style.color = "#00ff00";
-            log("ALL SYSTEMS SYNCED. 10X DATA LOCKED.");
-
-        } catch (error) {
-            console.error(error);
-            document.getElementById("conn-status").innerText = "LINK ERROR";
-            document.getElementById("conn-status").style.color = "red";
-            log(`ERROR: ${error.message}`);
         }
-    }
 
-    // Run immediately
-    loadLiveLedger();
-</script>
+        // --- 4. EVE AI COMMUNICATION ---
+        async function talkToEve() {
+            const input = document.getElementById('user-input');
+            const chatLog = document.getElementById('chat-log');
+            const userMsg = input.value;
+            if (!userMsg) return;
 
+            // Show User Message
+            chatLog.innerHTML += `<div class="text-white">> YOU: ${userMsg}</div>`;
+            input.value = "";
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // Call Eve's Brain (Groq API)
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "mixtral-8x7b-32768",
+                        messages: [
+                            {role: "system", content: "You are EVE, the AI Core of the CEC-WAM. You are concise and directly address Antwan."},
+                            {role: "user", content: userMsg}
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const eveReply = data.choices[0].message.content;
+
+                // Show Eve's Reply & Speak
+                chatLog.innerHTML += `<div class="eve-text">> EVE: ${eveReply}</div>`;
+                const speech = new SpeechSynthesisUtterance(eveReply);
+                window.speechSynthesis.speak(speech);
+
+            } catch (err) {
+                chatLog.innerHTML += `<div class="text-red-500">> EVE BRAIN DISCONNECTED. Check API Key.</div>`;
+            }
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // Start Data Sync
+        setInterval(fetchLedgerData, 5000);
+        fetchLedgerData();
+
+        // Background Matrix Rain
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$Ψ'.split('');
+        const drops = Array(Math.floor(canvas.width / 20)).fill(1);
+        setInterval(() => {
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#bc13fe';
+            ctx.font = '15px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 20, drops[i] * 20);
+                if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }, 33);
+    </script>
 </body>
 </html>
