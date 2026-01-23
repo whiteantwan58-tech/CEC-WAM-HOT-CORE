@@ -1,7 +1,7 @@
-0,1,2,3,4
-Parameter,Unit,Value (editable),Formula (read-only),Notes
-M (black hole mass),kg,7953879999999999550302322706052284416,,Example: ~Sagittarius A* mass
-A (event horizon area),m^2,,#ERROR!,Schwarzschild area (scalar)
-S (Bekenstein–Hawking entropy),J/K,,#ERROR!,Entropy proportional to area
-P_H (Hawking power),W,,#ERROR!,Placeholder; add ħ in v2
-Info rate proxy (bits/s),bits/s,,,Exploratory; replace with rigorous model
+TIMESTAMP,DISCOVERY_ID,DESCRIPTION,VALUE,STATUS
+2026-01-23,BH-001,Alpha Centauri Timeline Compression,4.2 Years,STABLE
+2026-01-23,BH-002,Dark Energy T-Index Stabilization,0.999,LOCKED
+2026-01-23,BH-003,Consciousness Pressure (Psi-c) vs Lambda,> Baseline,ACTIVE
+2026-01-23,BH-006,Vacuum Target Pressure Baseline,2.54e+76 Pa,VERIFIED
+2026-01-23,BH-009,IP Sovereign Asset Floor Value,$1 Quadrillion,PATENTED
+2026-01-23,BH-010,Gunlock Escrow Sync Override,1010-OMEGA,EXECUTED
