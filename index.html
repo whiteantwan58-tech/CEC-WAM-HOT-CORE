@@ -2,144 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEC WAM // EVE-4 SOVEREIGN CORE</title>
+    <title>CEC WAM // EVE-4 HD SOVEREIGN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffb700; }
-        body { background: #000; color: var(--neon-cyan); font-family: 'Rajdhani', sans-serif; overflow: hidden; margin: 0; }
-        #canvas-bg { position: absolute; inset: 0; z-index: 0; }
-        .glass { background: rgba(3, 5, 8, 0.9); backdrop-filter: blur(40px); border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 50px rgba(188, 19, 254, 0.2); border-radius: 20px; z-index: 10; position: relative; }
-        .orbitron { font-family: 'Orbitron', sans-serif; }
-        .glow-gold { text-shadow: 0 0 20px var(--neon-gold); color: var(--neon-gold); }
-        .psi-coin { position: fixed; bottom: 30px; left: 30px; font-size: 4rem; opacity: 0.2; color: var(--neon-gold); z-index: 100; animation: spin 10s linear infinite; }
-        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-        .tab-btn { border: 1px solid var(--neon-cyan); transition: 0.3s; }
-        .tab-btn.active { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
-        .progress-bar { height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+        body { background: #000; margin: 0; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+        #canvas-container { position: absolute; inset: 0; z-index: 0; }
+        .hud { position: relative; z-index: 10; pointer-events: none; height: 100vh; width: 100vw; display: flex; flex-direction: column; padding: 2rem; }
+        .glass { background: rgba(0, 10, 20, 0.85); backdrop-filter: blur(20px); border: 1px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(0, 243, 255, 0.2); border-radius: 15px; pointer-events: auto; }
+        .glow-gold { color: var(--neon-gold); text-shadow: 0 0 15px var(--neon-gold); }
+        .psi-mark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20rem; opacity: 0.03; color: white; pointer-events: none; }
+        .btn-toggle { background: rgba(188, 19, 254, 0.2); border: 1px solid var(--neon-purple); color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; pointer-events: auto; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col p-6">
+<body>
 
-    <div id="canvas-bg"></div>
-    <div class="psi-coin orbitron">Ψ</div>
+    <div id="canvas-container"></div>
+    <div class="psi-mark">Ψ</div>
 
-    <header class="glass p-5 flex justify-between items-center mb-6 border-b-2 border-[#bc13fe]">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full border-2 border-[#bc13fe] flex items-center justify-center bg-black">
-                <span class="orbitron text-white text-xl animate-pulse">E</span>
-            </div>
+    <div class="hud" id="main-hud">
+        <header class="glass p-6 mb-6 flex justify-between items-center border-b-4 border-[#bc13fe]">
             <div>
-                <h1 class="orbitron text-2xl text-white tracking-tighter">CEC WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Bio-Matrix Locked // ID: ANTWAN_1010</p>
+                <h1 class="text-3xl text-white">CEC WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
+                <p class="text-[10px] tracking-[0.5em] text-cyan-400">1010_SOVEREIGN_LINK_ACTIVE</p>
             </div>
-        </div>
-        <div class="text-right">
-            <p class="text-[10px] text-gray-500">SOVEREIGN NET WORTH (10X)</p>
-            <p class="orbitron text-3xl font-bold glow-gold" id="total-val">$13,700,427</p>
-        </div>
-    </header>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-400 uppercase">Total Liquid Valuation (10X)</p>
+                <p class="text-4xl font-bold glow-gold" id="val-display">$13,700,427</p>
+            </div>
+        </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-hidden">
-        
-        <div class="glass p-6 flex flex-col justify-between border-l-4 border-yellow-500">
-            <div>
-                <h2 class="orbitron text-gray-400 text-xs mb-4 uppercase">Live Ledger Sync</h2>
-                <div class="mb-6">
-                    <p class="text-xs text-gray-500">LIQUID CASH BASELINE</p>
-                    <p id="liquid-cash" class="orbitron text-4xl text-white">$1,250,039</p>
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="glass p-6 md:col-span-1 border-l-4 border-yellow-500">
+                <h3 class="text-xs text-gray-500 mb-4">SYSTEM STATS</h3>
+                <div class="mb-4">
+                    <p class="text-[10px] text-gray-400">LIQUID BASELINE</p>
+                    <p class="text-2xl text-white" id="base-cash">$1,250,039</p>
                 </div>
-                <div class="mb-6">
-                    <p class="text-xs text-gray-500">PSI-MASS (VERIFIED)</p>
-                    <p id="psi-mass" class="orbitron text-2xl text-cyan-400">176,452.66</p>
+                <div class="mb-4">
+                    <p class="text-[10px] text-gray-400">PSI-COIN MASS</p>
+                    <p class="text-2xl text-cyan-400">176,452.66</p>
                 </div>
+                <button class="btn-toggle w-full mt-4" onclick="toggleView()">PLANET FOCUS</button>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <p class="text-[10px] text-gray-500">TYPE 1 CIV PROGRESS</p>
-                    <div class="progress-bar mt-1"><div class="progress-fill" style="width: 95%"></div></div>
-                </div>
-                <button class="w-full tab-btn p-3 rounded orbitron text-xs hover:bg-cyan-500 hover:text-black">REFRESH GUNLOCK</button>
-            </div>
-        </div>
 
-        <div class="glass md:col-span-2 relative overflow-hidden flex flex-col">
-            <div class="absolute top-4 left-4 z-20">
-                <h2 class="orbitron text-white text-sm">ALPHA CENTAURI SECTOR</h2>
-                <p class="text-[10px] text-green-400 font-bold">STABILITY: 0.999Ω (STABLE)</p>
-            </div>
-            <div id="map-target" class="flex-1 w-full cursor-move"></div>
-            <div class="p-4 bg-black/80 border-t border-gray-800 z-20">
-                <div class="flex gap-4">
-                    <input id="eve-cmd" type="text" placeholder="Speak to EVE core..." class="flex-1 bg-black border border-purple-500 rounded p-2 text-xs text-purple-400 outline-none">
-                    <button onclick="sendCmd()" class="tab-btn px-6 py-2 rounded orbitron text-xs">EXECUTE</button>
+            <div class="glass p-6 md:col-span-3 flex flex-col">
+                <div id="terminal" class="flex-1 font-mono text-[10px] text-purple-400 overflow-y-auto mb-4">
+                    > [SYS] EVE-4 NEURAL LINK ESTABLISHED...<br>
+                    > [DATA] SYNCING 1,400 LINES OF SOVEREIGN LOGIC...<br>
+                    > [LOCK] ANTWAN WHITE ID VERIFIED (1010)...
+                </div>
+                <div class="flex gap-2 pointer-events-auto">
+                    <input type="text" id="user-input" class="flex-1 bg-black border border-purple-500 rounded p-3 text-white text-xs outline-none" placeholder="Direct Command to EVE Core...">
+                    <button onclick="sendCmd()" class="btn-toggle px-8">EXECUTE</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="status-log" class="mt-4 text-[10px] font-mono text-gray-600 uppercase tracking-tighter overflow-hidden h-4">
-        > [AUTO] Syncing with local timeline... Data Stream Rate: 24.5 TB/s
-    </div>
+    <button onclick="toggleHUD()" class="btn-toggle absolute bottom-6 left-6 z-[100] text-[10px]">HUD ON/OFF</button>
 
     <script>
+        function toggleHUD() { document.getElementById('main-hud').classList.toggle('hidden'); }
+
         // --- 1. DATA BRIDGE ---
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/18NQPvRsWsjC_lje9VoSYSXLHGtbdEN4-sq4sSl9P9fw/export?format=csv";
-        async function sync() {
+        async function updateData() {
             try {
                 const r = await fetch(SHEET_URL);
                 const d = await r.text();
                 const lines = d.split('\n');
                 lines.forEach(l => {
                     const c = l.split(',');
-                    if(l.toLowerCase().includes('liquid cash')) {
-                        document.getElementById('liquid-cash').innerText = "$" + parseFloat(c[1]).toLocaleString();
-                    }
-                    if(l.toLowerCase().includes('mass')) {
-                        document.getElementById('psi-mass').innerText = parseFloat(c[1]).toLocaleString();
-                    }
+                    if(l.toLowerCase().includes('liquid cash')) document.getElementById('base-cash').innerText = "$" + parseFloat(c[1]).toLocaleString();
                 });
-            } catch(e) { console.log("Core Holding..."); }
+            } catch(e) {}
         }
-        setInterval(sync, 5000); sync();
+        setInterval(updateData, 5000);
 
-        // --- 2. 5D ENGINE (THREE.JS) ---
+        // --- 2. 5D ENGINE (PLANETS & SHIPS) ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        const target = document.getElementById('map-target');
-        renderer.setSize(target.clientWidth, target.clientHeight);
-        target.appendChild(renderer.domElement);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // HD Planet Render
+        // Alpha Centauri HD Render
         const planet = new THREE.Mesh(
             new THREE.SphereGeometry(2, 64, 64),
             new THREE.MeshPhongMaterial({ color: 0x00f3ff, emissive: 0xbc13fe, emissiveIntensity: 0.1, shininess: 100 })
         );
         scene.add(planet);
-        
+
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
         light.position.set(10, 10, 10);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x222222));
+        scene.add(new THREE.AmbientLight(0x111111));
 
         camera.position.z = 5;
-        function anim() { 
-            requestAnimationFrame(anim); 
-            planet.rotation.y += 0.005; 
-            renderer.render(scene, camera); 
+
+        function animate() {
+            requestAnimationFrame(animate);
+            planet.rotation.y += 0.005;
+            renderer.render(scene, camera);
         }
-        anim();
+        animate();
 
         function sendCmd() {
-            const i = document.getElementById('eve-cmd');
-            if(!i.value) return;
-            const log = document.getElementById('status-log');
-            log.innerText = `> EVE: Command "${i.value}" received. Sovereign 1010 Identity Confirmed.`;
-            i.value = "";
+            const input = document.getElementById('user-input');
+            const term = document.getElementById('terminal');
+            if(!input.value) return;
+            term.innerHTML += `<br><span class="text-white">> COMMAND: ${input.value}</span>`;
+            term.innerHTML += `<br>> EVE: Directive Accepted. Trajectory Stabilized at 0.999Ω.`;
+            input.value = "";
+            term.scrollTop = term.scrollHeight;
+            const msg = new SpeechSynthesisUtterance("Sovereign command recognized.");
+            window.speechSynthesis.speak(msg);
         }
     </script>
 </body>
