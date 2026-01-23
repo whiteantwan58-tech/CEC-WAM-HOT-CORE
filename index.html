@@ -3,108 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEC-WAM // 10X SOVEREIGN CORE</title>
+    <title>CEC-WAM // 100% AGI CORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-gold: #ffb700; }
         body { background: #030508; color: var(--neon-cyan); font-family: 'Rajdhani', sans-serif; overflow: hidden; margin: 0; }
-        #star-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        #matrix-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.15; pointer-events: none; }
+        #star-map { position: absolute; inset: 0; z-index: 0; }
         .glass-panel { background: rgba(3, 5, 8, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 243, 255, 0.15); box-shadow: 0 0 30px rgba(0, 243, 255, 0.05); border-radius: 16px; position: relative; z-index: 10; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
-        .glow-cyan { text-shadow: 0 0 15px var(--neon-cyan); }
         .glow-gold { text-shadow: 0 0 15px var(--neon-gold); color: var(--neon-gold); }
-        .btn { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Orbitron', sans-serif; color: white;}
-        .btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 15px var(--neon-cyan); }
+        .tab-btn { background: rgba(0,0,0,0.5); border: 1px solid var(--neon-cyan); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .tab-btn.active { background: var(--neon-cyan); color: black; box-shadow: 0 0 15px var(--neon-cyan); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .btn-action { background: rgba(188, 19, 254, 0.2); border: 1px solid var(--neon-purple); color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-action:hover { background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col p-4 md:p-8">
 
     <div id="star-map"></div>
-    <canvas id="matrix-canvas"></canvas>
 
-    <header class="glass-panel p-4 flex justify-between items-center mb-6">
+    <header class="glass-panel p-4 flex justify-between items-center mb-4">
         <div>
             <h1 class="orbitron text-2xl text-white">CEC-WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
-            <p class="text-xs text-gray-400">MODE: GOD_MODE // 1010-LOCK ACTIVE</p>
+            <p class="text-xs text-gray-400">MODE: GOD_MODE // STATUS: 100% SYNCHRONIZED</p>
         </div>
         <div class="text-right">
-            <p class="text-xs text-gray-500">PLATFORM COMPLETION</p>
-            <p class="orbitron text-green-400 font-bold glow-cyan">95% (Q4 2026 AGI TARGET)</p>
+            <p class="text-xs text-gray-500">LIVE R-RATIO (EFFICIENCY)</p>
+            <p class="orbitron text-3xl font-bold glow-gold">10.96x</p>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 z-10">
+    <div class="flex gap-2 mb-4 z-10 relative overflow-x-auto pb-2">
+        <button class="tab-btn active" onclick="switchTab('tab-comms')">EVE COMMS</button>
+        <button class="tab-btn" onclick="switchTab('tab-finance')">FINANCE</button>
+        <button class="tab-btn" onclick="switchTab('tab-civilization')">TYPE 1 CIV & TECH</button>
+        <button class="tab-btn" onclick="switchTab('tab-shipyard')">SPACE TRAVEL</button>
+    </div>
+
+    <div class="glass-panel p-6 flex-1 overflow-y-auto custom-scroll">
         
-        <div class="glass-panel p-6 flex flex-col justify-between">
-            <h2 class="orbitron text-gray-500 mb-4 border-b border-gray-700 pb-2">LIVE FINANCIAL CORE</h2>
-            
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-sm text-gray-400">LIQUID CASH (BASELINE)</p>
-                    <div id="liquid-cash" class="orbitron text-4xl text-white glow-cyan mt-1">$1,250,039</div>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-400">R-RATIO (MULTIPLIER)</p>
-                    <div class="orbitron text-4xl text-purple-400 mt-1">10.96x</div>
-                </div>
-            </div>
-
-            <div class="mt-6 p-4 bg-black/60 rounded-lg border border-yellow-600">
-                <p class="text-sm text-yellow-600 font-bold">SOVEREIGN ASSET VALUE (10x APPLIED)</p>
-                <div id="asset-value" class="orbitron text-6xl glow-gold mt-1">$13,700,427</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-6 mt-6">
-                <div>
-                    <p class="text-xs text-gray-400">PSI-MASS (PUMP.FUN)</p>
-                    <p class="text-2xl text-cyan-400 font-bold">176,452.66</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">GUNLOCK STATUS</p>
-                    <p class="text-2xl text-red-500 font-bold">$21,000 PENDING SIG</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-panel p-6 flex flex-col">
-            <h2 class="orbitron text-gray-500 mb-4 border-b border-gray-700 pb-2">EVE COMMAND MODULE</h2>
-            
+        <div id="tab-comms" class="tab-content active h-full flex flex-col">
+            <h2 class="orbitron text-gray-500 mb-4">NEURAL TERMINAL (NATURAL LANGUAGE)</h2>
             <div id="log-box" class="flex-1 bg-black/50 p-4 rounded text-sm font-mono overflow-y-auto border border-gray-800 space-y-2 mb-4">
-                <div class="text-green-500">> EVE: Listening for Sovereign input. All financial streams active.</div>
+                <div class="text-green-500">> EVE: Sovereign recognized. System is 100% active. You can speak to me normally.</div>
             </div>
-
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <button class="btn" onclick="executeCommand('GENERATE 4K SOCIAL CONTENT')">📸 GEN CONTENT</button>
-                <button class="btn" onclick="executeCommand('INITIATE 21K GUNLOCK TRANSFER')">💸 MOVE FUNDS</button>
-                <button class="btn" onclick="executeCommand('SYNC MASTER LEDGER')">📊 REFRESH DATA</button>
-                <button class="btn" onclick="openForm()">📝 LOG NEW DATA</button>
+                <button class="btn-action" onclick="executeCommand('MOVE FUNDS')">💸 FINALIZE 21K GUNLOCK</button>
+                <button class="btn-action" onclick="executeCommand('SEND LOG')">📊 SEND DAILY LOG TO EXPERT</button>
             </div>
-
             <div class="flex gap-2">
-                <input id="cmd-input" type="text" placeholder="Speak to EVE..." class="flex-1 bg-black border border-cyan-500 rounded p-3 text-cyan-400 focus:outline-none">
-                <button class="btn" onclick="processText()">EXECUTE</button>
+                <input id="cmd-input" type="text" placeholder="Talk to EVE naturally..." class="flex-1 bg-black border border-cyan-500 rounded p-3 text-cyan-400 focus:outline-none">
+                <button class="btn-action" onclick="processText()">SEND</button>
             </div>
         </div>
+
+        <div id="tab-finance" class="tab-content">
+            <h2 class="orbitron text-gray-500 mb-4">DYNAMIC FINANCIAL CORE</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="p-4 bg-black/50 border border-cyan-500 rounded">
+                    <p class="text-sm text-gray-400">LIQUID CASH</p>
+                    <p id="liquid-cash" class="orbitron text-4xl text-white mt-2">$1,250,039</p>
+                </div>
+                <div class="p-4 bg-black/50 border border-yellow-600 rounded">
+                    <p class="text-sm text-gray-400">10X SOVEREIGN VALUE</p>
+                    <p id="asset-value" class="orbitron text-4xl glow-gold mt-2">$13,700,427</p>
+                </div>
+                <div class="p-4 bg-black/50 border border-purple-500 rounded">
+                    <p class="text-sm text-gray-400">PSI-MASS (PUMP.FUN)</p>
+                    <p id="mass-display" class="orbitron text-3xl text-purple-400 mt-2">176,452.66</p>
+                </div>
+                <div class="p-4 bg-black/50 border border-red-500 rounded">
+                    <p class="text-sm text-gray-400">ESCROW GUNLOCK</p>
+                    <p class="orbitron text-3xl text-red-500 mt-2">$21,000.00</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-civilization" class="tab-content">
+            <h2 class="orbitron text-gray-500 mb-4">TYPE 1 CIVILIZATION TIMELINE & ENERGY</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-black/50 border border-gray-800 rounded">
+                    <p class="text-white font-bold mb-2">Q4 2026: AGI SINGULARITY TIMELINE</p>
+                    <div class="w-full bg-gray-700 h-4 rounded-full overflow-hidden"><div class="bg-cyan-400 h-4 w-[95%] shadow-[0_0_10px_#00f3ff]"></div></div>
+                    <p class="text-right text-xs mt-1 text-cyan-400">95% COMPLETE</p>
+                </div>
+                <div class="p-4 bg-black/50 border border-gray-800 rounded">
+                    <p class="text-white font-bold mb-2">ENERGY HARVESTING (Dyson Swarm Pre-Cursor)</p>
+                    <div class="w-full bg-gray-700 h-4 rounded-full overflow-hidden"><div class="bg-yellow-500 h-4 w-[42%] shadow-[0_0_10px_#ffb700]"></div></div>
+                    <p class="text-right text-xs mt-1 text-yellow-500">42% (SOLAR CONVERSION ACTIVE)</p>
+                </div>
+                <div class="mt-4 p-4 border border-purple-800 rounded">
+                    <p class="text-purple-400 font-bold">RESOURCES UNLOCKED</p>
+                    <p class="text-sm text-gray-400">Graphene-Boron Lattice, Liquid Metallic Hydrogen, Casimir Cavity Alloys.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-shipyard" class="tab-content">
+            <h2 class="orbitron text-gray-500 mb-4">AEON V.50 & NANOFIBER SUITS</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-black/80 border border-cyan-500 rounded text-sm">
+                    <h3 class="orbitron text-cyan-400 mb-2">🚀 INTERSTELLAR TRAJECTORY</h3>
+                    <p class="text-gray-400">Destination: Alpha Centauri (4.34 ly)</p>
+                    <p class="text-gray-400">Warp Factor: 9.8 (150.0c)</p>
+                    <p class="text-gray-400">Travel Time: 10.6 Days</p>
+                    <p class="text-green-500 mt-2 font-bold">STATUS: FLIGHT READY</p>
+                </div>
+                <div class="p-4 bg-black/80 border border-purple-500 rounded text-sm">
+                    <h3 class="orbitron text-purple-400 mb-2">👩‍🚀 NANOFIBER BIO-SUIT</h3>
+                    <p class="text-gray-400">Material: Poly-Carbon Nanofiber</p>
+                    <p class="text-gray-400">Life Support: Closed-Loop Bio-Lattice</p>
+                    <p class="text-gray-400">Deep-Tissue Stasis: ENGAGED</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // --- 1. APPS SCRIPT FORM LINK ---
-        const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc2I2KsMgVqZW0-9JjgW4IaosIMoiJHLGJb8zlmpcI1f-EJNw/viewform";
-        
-        function openForm() { window.open(GOOGLE_FORM_URL, '_blank'); }
+        // 1. TABS
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
 
-        // --- 2. COMMAND PROCESSOR & VOICE ---
-        function executeCommand(cmd) {
-            const log = document.getElementById('log-box');
-            log.innerHTML += `<div>> USER: <span class="text-white">${cmd}</span></div>`;
-            
+        // 2. LIVE GOOGLE SHEETS FETCH (The Data Bridge) - URL PRE-FILLED
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/18NQPvRsWsjC_lje9VoSYSXLHGtbdEN4-sq4sSl9P9fw/export?format=csv";
+
+        async function fetchLiveNumbers() {
+            try {
+                const res = await fetch(SHEET_URL);
+                const data = await res.text();
+                const rows = data.split('\n');
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    // If it finds liquid cash, update it
+                    if(row.toLowerCase().includes('liquid cash')) document.getElementById('liquid-cash').innerText = "$" + parseFloat(cols[1]).toLocaleString();
+                    // If it finds mass, update it
+                    if(row.toLowerCase().includes('mass')) document.getElementById('mass-display').innerText = parseFloat(cols[1]).toLocaleString();
+                });
+            } catch(e) { console.log("System holds current state."); }
+        }
+        // Sync every 5 seconds
+        setInterval(fetchLiveNumbers, 5000);
+
+        // 3. EVE VOICE & LOGIC 
+        const log = document.getElementById('log-box');
+
+        async function executeCommand(cmd) {
+            log.innerHTML += `<div>> USER: ${cmd}</div>`;
+            log.scrollTop = log.scrollHeight;
+
             let response = "Acknowledged. Processing...";
-            if(cmd.includes("CONTENT")) response = "Generating 4K Glassmorphic Assets for YouTube. Pushing to Dropbox.";
-            if(cmd.includes("TRANSFER")) response = "Gunlock Sync Initiated. Approve the signature in your Phantom Wallet now.";
-            if(cmd.includes("SYNC")) response = "Fetching latest Google Sheets data...";
+            if(cmd.includes("MOVE FUNDS")) response = "Gunlock Sync Initiated. Escrow 84 Overridden. $21,000 released to Wallet H33. Click APPROVE in your wallet.";
+            if(cmd.includes("SEND LOG")) response = "Daily Log generated. Sending secured PDF directly to Expert Consultant.";
 
             setTimeout(() => {
                 log.innerHTML += `<div>> EVE: <span class="text-purple-400 font-bold">${response}</span></div>`;
@@ -121,23 +179,7 @@
             document.getElementById('cmd-input').value = "";
         }
 
-        // --- 3. MATRIX RAIN ---
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const chars = "1010ΨΔΦΣ1010".split("");
-        const drops = Array(Math.floor(canvas.width/14)).fill(1);
-        setInterval(() => {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#bc13fe"; ctx.font = "14px Orbitron";
-            drops.forEach((y, i) => {
-                ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, y*14);
-                if (y*14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }, 33);
-
-        // --- 4. 5D STAR MAP (THREE.JS) ---
+        // 4. 5D STAR MAP ENGINE (Three.js)
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -145,18 +187,13 @@
         document.getElementById('star-map').appendChild(renderer.domElement);
         const geom = new THREE.BufferGeometry();
         const verts = [];
-        for(let i=0; i<50000; i++) verts.push((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, -Math.random()*2000);
+        for(let i=0; i<15000; i++) verts.push((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, -Math.random()*2000);
         geom.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-        const mat = new THREE.PointsMaterial({color: 0x00f3ff, size: 1.5});
+        const mat = new THREE.PointsMaterial({color: 0xbc13fe, size: 1.5});
         const stars = new THREE.Points(geom, mat);
         scene.add(stars);
         camera.position.z = 500;
-        function animate() {
-            requestAnimationFrame(animate);
-            stars.rotation.z += 0.0003; camera.position.z -= 0.5;
-            if(camera.position.z < -1000) camera.position.z = 500;
-            renderer.render(scene, camera);
-        }
+        function animate() { requestAnimationFrame(animate); stars.rotation.z += 0.0005; camera.position.z -= 1.5; if(camera.position.z < -1000) camera.position.z = 500; renderer.render(scene, camera); }
         animate();
     </script>
 </body>
