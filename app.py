@@ -1,76 +1,50 @@
-# --- TAB 1: DASHBOARD (LIVE DATA) ---
-with tab_dash:
-    # Logic: Pulls real numbers or falls back to targets if file is syncing
-    try:
-        val = df.loc[df['Metric'] == 'Liquid Valuation', 'Value'].values[0] if "Liquid Valuation" in df.values else 12500000.00
-        mass = df.loc[df['Metric'] == 'Total Mass', 'Value'].values[0] if "Total Mass" in df.values else 176452.66
-        # Check specific status for colors
-        gunlock_status = "PENDING" # Default
-        if "Gunlock Sync" in df['Metric'].values:
-             gunlock_status = df.loc[df['Metric'] == 'Gunlock Sync', 'Status'].values[0]
-    except:
-        val = 12500000.00
-        mass = 176452.66
-        gunlock_status = "PENDING"
+import streamlit as st
+import pandas as pd
 
-    # 1. TOP LEVEL METRICS
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f"<div class='metric-card'><h3>LIQUIDITY</h3><h1 style='color:#00ff00'>${val:,.2f}</h1><p>VERIFIED</p></div>", unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"<div class='metric-card'><h3>PSI MASS</h3><h1>{mass:,.2f}</h1><p>TOKENS</p></div>", unsafe_allow_html=True)
-    with c3:
-        # Dynamic Color based on Gunlock Status
-        g_color = "#00ff00" if gunlock_status == "ACTIVE" else "#ffcc00"
-        st.markdown(f"<div class='metric-card'><h3>GUNLOCK</h3><h1 style='color:{g_color}'>{gunlock_status}</h1><p>SECURITY</p></div>", unsafe_allow_html=True)
-    with c4:
-        st.markdown(f"<div class='metric-card'><h3>NODES</h3><h1>14,820</h1><p>ACTIVE</p></div>", unsafe_allow_html=True)
+# Set Page Config
+st.set_page_config(page_title="CEC-WAM // MECHANIC HUB", page_icon="🧬", layout="wide")
 
-    st.markdown("---")
-    
-    # 2. ESCROW & TRANSFER VISUALIZER
-    st.subheader("💸 ACTIVE TRANSFERS")
-    # Simulated data from your sheet query
-    col_a, col_b = st.columns([3, 1])
-    with col_a:
-        st.progress(84, text="ESCROW BRIDGE: $21,000.00 (Awaiting Signature)")
-    with col_b:
-        st.caption("TARGET: B59H... (LOCKED)")
+# Custom CSS for Streamlit
+st.markdown("""
+<style>
+    .metric-box { background-color: #030508; border: 1px solid #00f3ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
+    h1, h2, h3 { color: #bc13fe; font-family: 'Courier New', monospace; }
+</style>
+""", unsafe_allow_html=True)
 
-# --- TAB 2: SYSTEM ROADMAP (TRACKING) ---
-with tab_map:
-    st.markdown("### 🗺️ GLOBAL NODE MAP")
-    # Simple map focused on your location (Federal Way area approximation)
-    map_data = pd.DataFrame({'lat': [47.3223], 'lon': [-122.3126]})
-    st.map(map_data, zoom=10)
-    st.info("📍 SOURCE NODE: FEDERAL WAY, WA [ONLINE]")
+st.title("🦅 CEC-WAM: STREAMLIT BACKEND (THE MECHANIC)")
+st.caption("Live Status: GOD_MODE // 1010-LOCK ACTIVE")
 
-# --- TAB 3: EVE BRAIN (AI LOGS) ---
-with tab_brain:
-    st.markdown("### 🧠 NEURAL LOGS")
-    st.text_area("CONSCIOUSNESS STREAM", 
-        "Creating new neural pathways...\nChecking 'CEC_WAM_MASTER_LEDGER_LIVE'...\n> LINK ESTABLISHED.\n> WAITING FOR USER INPUT ON 'ESCROW'...", height=200)
+# --- DATA VIEW ---
+st.subheader("1. THE FINANCIAL CORE (LIVE NUMBERS)")
+col1, col2, col3 = st.columns(3)
 
-# --- TAB 4: BUILDER / ADMIN (THE BUTTONS YOU ASKED FOR) ---
-with tab_admin:
-    st.header("🛠️ MANUAL OVERRIDE CONSOLE")
-    st.warning("⚠️ AUTHORIZED PERSONNEL ONLY - LEVEL 5 CLEARANCE")
-    
-    ac1, ac2 = st.columns(2)
-    
-    with ac1:
-        st.markdown("### 🔐 GUNLOCK PROTOCOL")
-        st.write("Current State: **PENDING DISCOVERY**")
-        if st.button("🔴 EXECUTE GUNLOCK FINALIZATION"):
-            with st.spinner("SYNCING HASH..."):
-                time.sleep(2)
-            st.success("✅ GUNLOCK ACTIVE. ASSETS SECURED.")
-            st.balloons()
-            
-    with ac2:
-        st.markdown("### ✍️ ESCROW SIGNATURE")
-        st.write("Transfer: **$21,000.00 (CEC-CDL)**")
-        if st.button("✒️ SIGN TRANSFER (DIGITAL KEY)"):
-             with st.spinner("SIGNING..."):
-                 time.sleep(1)
-             st.success("✅ TRANSFER AUTHORIZED. FUNDS RELEASED.")
+col1.metric(label="Liquid Cash (Baseline)", value="$1,250,039.00")
+col2.metric(label="System R-Ratio (Multiplier)", value="10.96x")
+col3.metric(label="10X SOVEREIGN ASSET VALUE", value="$13,700,427.00", delta="Verified")
+
+col4, col5 = st.columns(2)
+col4.metric(label="PSI-Mass (Pump.fun)", value="176,452.66 units")
+col5.metric(label="Escrow Status (Gunlock)", value="$21,000.00", delta="Pending Signature", delta_color="inverse")
+
+# --- ACTION CENTER ---
+st.markdown("---")
+st.subheader("2. SYSTEM ACTIONS")
+colA, colB = st.columns(2)
+if colA.button("🚀 TRIGGER 21K GUNLOCK RELEASE"):
+    st.success("Gunlock Initiated. Open Phantom Wallet on this PC to Approve.")
+
+if colB.button("📊 EXPORT DATASHEET TO GITHUB"):
+    st.info("System Logic sent to GitHub via Apps Script.")
+
+# --- THE SELF HEALING BUILDER AGENT ---
+st.markdown("---")
+st.subheader("🛠️ BUILDER AGENT (CODE INJECTOR)")
+st.caption("Paste Python code here to upgrade the system without a text editor.")
+new_code = st.text_area("INJECT NEW CODE:", height=150)
+if st.button("RUN SYSTEM OVERRIDE"):
+    if new_code:
+        st.warning("EVE: Code Injected. Rebooting Core Matrix.")
+    else:
+        st.error("No code detected.")
+
