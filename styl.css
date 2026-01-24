@@ -1,0 +1,28 @@
+body {
+    background: #0e0e1b;
+    color: #00ffe0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.panel {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.4);
+}
+
+.panel h3, .panel h4 {
+    color: #00ffe0;
+}
+
+button {
+    padding: 10px 20px;
+    background: #00ffc3;
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
