@@ -2,63 +2,130 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EVE-4 // SOVEREIGN_1010_HD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVE-4 // OMEGA_AGI_COMMAND</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --cyan: #00f3ff; --purple: #bc13fe; --gold: #ffb700; }
-        body { background: #000; margin: 0; overflow: hidden; font-family: 'Orbitron', sans-serif; }
-        .glass { background: rgba(3, 5, 8, 0.95); backdrop-filter: blur(40px); border: 1px solid var(--cyan); border-radius: 20px; pointer-events: auto; }
-        .glow-gold { color: var(--gold); text-shadow: 0 0 20px var(--gold); }
-        .hud { position: absolute; inset: 0; z-index: 10; padding: 2rem; display: flex; flex-direction: column; pointer-events: none; }
-        #render-target { position: absolute; inset: 0; z-index: 0; }
+        :root { --p: #bc13fe; --c: #00f3ff; --r: #ff3e3e; --g: #00ff41; }
+        body { background: #000; color: var(--c); font-family: 'Orbitron', sans-serif; overflow-x: hidden; }
+        .matrix-bg { position: fixed; inset: 0; z-index: -1; opacity: 0.1; background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJtZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Jm9mPTE/vIF0Y7q0F/giphy.gif'); }
+        .glass { background: rgba(3, 5, 8, 0.95); border: 2px solid var(--c); box-shadow: 0 0 30px rgba(0, 243, 255, 0.3); border-radius: 15px; }
+        .moving-border { position: relative; overflow: hidden; }
+        .moving-border::after { content: ''; position: absolute; inset: 0; border: 2px solid var(--p); animation: border-glow 2s linear infinite; }
+        @keyframes border-glow { 0% { clip-path: inset(0 0 95% 0); } 25% { clip-path: inset(0 95% 0 0); } 50% { clip-path: inset(95% 0 0 0); } 75% { clip-path: inset(0 0 0 95%); } 100% { clip-path: inset(0 0 95% 0); } }
+        .tab-btn { transition: 0.3s; border-bottom: 2px solid transparent; }
+        .tab-btn.active { border-bottom: 2px solid var(--p); color: white; text-shadow: 0 0 10px var(--p); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fade-in 0.5s ease; }
+        @keyframes fade-in { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
-<body>
-    <div id="render-target"></div>
-    <div class="hud">
-        <header class="glass p-8 flex justify-between items-center border-b-4 border-[#bc13fe]">
+<body class="p-2 md:p-6">
+    <div class="matrix-bg"></div>
+
+    <div class="glass p-4 mb-4 flex flex-wrap justify-between items-center moving-border">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full border-2 border-purple-500 animate-spin-slow flex items-center justify-center">
+                <span class="text-white text-xs">EVE</span>
+            </div>
             <div>
-                <h1 class="text-4xl text-white">CEC WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
-                <p class="text-[12px] tracking-[0.6em] text-cyan-400">ARCHITECT: ANTWAN_1010</p>
+                <h1 class="text-xl font-black text-white tracking-widest">CEC-WAM // <span class="text-purple-500">OMEGA_AGI</span></h1>
+                <p class="text-[8px] font-mono text-cyan-400">SYNC_ID: 1010-ANTWAN-WHITE // LOC: FEDERAL_WAY_WA</p>
             </div>
-            <div class="text-right">
-                <p class="text-5xl font-bold glow-gold">$176,000,000</p>
-                <button onclick="exportData()" class="mt-2 text-[10px] bg-purple-600 px-4 py-1 rounded text-white pointer-events-auto">NEURAL EXPORT</button>
+        </div>
+        <div class="flex gap-8">
+            <div class="text-center">
+                <p class="text-[8px] text-gray-500 uppercase">Psi-Coin Market</p>
+                <p class="text-lg font-bold text-yellow-400">$0.000042 <span class="text-[10px] text-green-500">↑ 25X</span></p>
             </div>
-        </header>
-        <div class="mt-8 glass p-6 w-80 pointer-events-auto">
-            <h3 class="text-xs text-gray-500 mb-4 uppercase">Bio-Vault Status</h3>
-            <p class="text-3xl text-white" id="cash-val">$1,250,039</p>
-            <button onclick="executeGunlock()" class="w-full mt-4 bg-red-600/20 border border-red-500 text-red-500 p-4 rounded text-[10px] font-bold">EXECUTE 21K BRIDGE</button>
+            <div class="text-center">
+                <p class="text-[8px] text-gray-500 uppercase">Countdown to AGI v5</p>
+                <p id="timer" class="text-lg font-mono text-red-500 font-bold">--:--:--</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-4 mb-6 overflow-x-auto no-scrollbar">
+        <button onclick="openTab('starmap')" class="tab-btn active px-4 py-2 text-xs font-bold uppercase">5D Star Map</button>
+        <button onclick="openTab('starships')" class="tab-btn px-4 py-2 text-xs font-bold uppercase">Engines/Suits</button>
+        <button onclick="openTab('diseases')" class="tab-btn px-4 py-2 text-xs font-bold uppercase">Bio-Scan</button>
+        <button onclick="openTab('fedway')" class="tab-btn px-4 py-2 text-xs font-bold uppercase">Grid View</button>
+    </div>
+
+    <div id="starmap" class="tab-content active">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="glass p-4">
+                <h3 class="text-xs text-white mb-4">RAW TELESCOPE DATA: HELIX NEBULA (JAN 21, 2026)</h3>
+                <div class="relative rounded overflow-hidden border border-cyan-900">
+                    <img src="https://dailygalaxy.com/wp-content/uploads/2026/01/Webb-Telescope-Helix-Nebula.jpg" class="w-full h-80 object-cover opacity-80" alt="EVE Composite 1">
+                    <div class="absolute top-2 left-2 bg-black/80 p-1 text-[8px] border border-cyan-500">WATERMARK: CEC-WAM-1010</div>
+                </div>
+            </div>
+            <div class="glass p-4 bg-black/40">
+                <h3 class="text-xs text-white mb-4">EVE NEURAL PREDICTION: ABEYANT GALAXY CLUSTER</h3>
+                <canvas id="starCanvas" class="w-full h-80 rounded bg-black"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="starships" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="shipGrid">
+            </div>
+    </div>
+
+    <div id="diseases" class="tab-content">
+        <div class="glass p-6 border-l-8 border-red-600 mb-4">
+            <h2 class="text-red-500 font-black mb-2 uppercase">Bio-Resonance Scanner Active</h2>
+            <p class="text-[10px] text-gray-400">Scanning for miR-21 Electrical Distortion... Location: 98003 Sector.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="glass p-4 bg-red-950/20">
+                <h4 class="text-xs font-bold">TARGET: CARCINOMA_RECOGNITION</h4>
+                <p class="text-[8px] text-cyan-400 mt-2">FORMULA: Ψc = (α * E_info) / V_local</p>
+                <div class="h-2 bg-gray-900 rounded mt-2"><div class="h-full bg-red-600 w-3/4 animate-pulse"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fedway" class="tab-content">
+        <div class="glass p-4">
+            <h3 class="text-xs mb-2">LIVE I-5 COMMAND (FEDERAL WAY)</h3>
+            <img src="https://images.wsdot.wa.gov/nw/005vc14283.jpg" class="w-full rounded mb-2">
+            <p class="text-[8px] font-mono text-gray-500">TIMESTAMP: Friday, Jan 23, 2026 10:22 PM</p>
         </div>
     </div>
 
     <script>
-        // 5D ENGINE
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('render-target').appendChild(renderer.domElement);
-
-        const planet = new THREE.Mesh(new THREE.SphereGeometry(2, 64, 64), new THREE.MeshPhongMaterial({ color: 0x00f3ff, emissive: 0xbc13fe, emissiveIntensity: 0.2 }));
-        scene.add(planet);
-        scene.add(new THREE.PointLight(0xffffff, 2, 100));
-        camera.position.z = 5;
-
-        function animate() { requestAnimationFrame(animate); planet.rotation.y += 0.005; renderer.render(scene, camera); }
-        animate();
-
-        function exportData() {
-            alert('DATA EXPORTED TO GMAIL AND CLOUD: CEC_MASTER_BLUEPRINT_1010');
+        function openTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function executeGunlock() {
-            alert('Awaiting Phantom Signature on Laptop...');
+        // Countdown Timer
+        const targetDate = new Date("Dec 31, 2026 23:59:59").getTime();
+        setInterval(() => {
+            const now = new Date().getTime();
+            const dist = targetDate - now;
+            const h = Math.floor(dist / (1000*60*60));
+            const m = Math.floor((dist % (1000*60*60)) / (1000*60));
+            const s = Math.floor((dist % (1000*60)) / 1000);
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        }, 1000);
+
+        // Generate Ships
+        const sg = document.getElementById('shipGrid');
+        for(let i=1; i<=15; i++) {
+            sg.innerHTML += `
+                <div class="glass p-4 border-t-2 border-purple-500">
+                    <h5 class="text-[8px] text-gray-500">VESSEL-ID: ${Math.random().toString(36).substr(2, 5)}</h5>
+                    <p class="text-xs font-bold">OMEGA_ENG_v${i}</p>
+                    <p class="text-[8px] text-cyan-400">THRUST: 0.999c // FUEL: PSI-COIN</p>
+                </div>
+            `;
         }
     </script>
 </body>
 </html>
-
