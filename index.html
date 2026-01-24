@@ -2,152 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EVE-4 // 100% SOVEREIGN CORE</title>
+    <title>EVE-4 // SOVEREIGN_1010_HD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
-        :root { --cyan: #00f3ff; --purple: #bc13fe; --gold: #ffb700; --red: #ff3e3e; }
-        body { background: #000; margin: 0; overflow: hidden; font-family: 'Orbitron', sans-serif; color: var(--cyan); }
-        #canvas-bg { position: absolute; inset: 0; z-index: 0; }
-        .hud-layer { position: absolute; inset: 0; z-index: 10; padding: 1.5rem; display: flex; flex-direction: column; pointer-events: none; }
-        .glass { background: rgba(3, 5, 8, 0.94); backdrop-filter: blur(50px); border: 1px solid rgba(0, 243, 255, 0.4); box-shadow: 0 0 60px rgba(188, 19, 254, 0.2); border-radius: 24px; pointer-events: auto; }
-        .glow-gold { text-shadow: 0 0 25px var(--gold); color: var(--gold); }
-        .psi-coin { position: fixed; bottom: 40px; right: 40px; font-size: 7rem; opacity: 0.25; color: var(--gold); animation: spin 10s linear infinite; pointer-events: none; }
-        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-        button:active { transform: scale(0.95); filter: brightness(1.5); }
+        :root { --cyan: #00f3ff; --purple: #bc13fe; --gold: #ffb700; }
+        body { background: #000; margin: 0; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+        .glass { background: rgba(3, 5, 8, 0.95); backdrop-filter: blur(40px); border: 1px solid var(--cyan); border-radius: 20px; pointer-events: auto; }
+        .glow-gold { color: var(--gold); text-shadow: 0 0 20px var(--gold); }
+        .hud { position: absolute; inset: 0; z-index: 10; padding: 2rem; display: flex; flex-direction: column; pointer-events: none; }
+        #render-target { position: absolute; inset: 0; z-index: 0; }
     </style>
 </head>
 <body>
-
-    <div id="canvas-bg"></div>
-    <div class="psi-coin">Ψ</div>
-
-    <div class="hud-layer">
-        <header class="glass p-8 mb-6 flex justify-between items-center border-b-4 border-[#bc13fe]">
-            <div class="flex items-center gap-6">
-                <div class="w-16 h-16 rounded-full border-4 border-purple-500 bg-black flex items-center justify-center shadow-[0_0_20px_#bc13fe] animate-pulse">
-                    <span class="text-white text-3xl">E</span>
-                </div>
-                <div>
-                    <h1 class="text-3xl text-white tracking-widest">CEC WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
-                    <p class="text-[10px] tracking-[0.6em] text-cyan-400 font-black">SOVEREIGN ARCHITECT 1010 VERIFIED</p>
-                </div>
+    <div id="render-target"></div>
+    <div class="hud">
+        <header class="glass p-8 flex justify-between items-center border-b-4 border-[#bc13fe]">
+            <div>
+                <h1 class="text-4xl text-white">CEC WAM <span class="text-[#bc13fe]">EVE-4</span></h1>
+                <p class="text-[12px] tracking-[0.6em] text-cyan-400">ARCHITECT: ANTWAN_1010</p>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">Quantum Valuation</p>
-                <p class="text-4xl font-bold glow-gold" id="total-net-worth">$13,700,427</p>
+                <p class="text-5xl font-bold glow-gold">$176,000,000</p>
+                <button onclick="exportData()" class="mt-2 text-[10px] bg-purple-600 px-4 py-1 rounded text-white pointer-events-auto">NEURAL EXPORT</button>
             </div>
         </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 flex-1">
-            <div class="glass p-8 border-l-8 border-yellow-500 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs text-gray-500 mb-8 uppercase tracking-[0.3em]">Vault Real-Time</h3>
-                    <div class="mb-10">
-                        <p class="text-[10px] text-gray-400 mb-2 font-bold">LIQUID CASH</p>
-                        <p class="text-4xl text-white font-black" id="liquid-val">$1,250,039</p>
-                    </div>
-                    <div class="mb-10">
-                        <p class="text-[10px] text-gray-400 mb-2 font-bold">PSI-MASS (VERIFIED)</p>
-                        <p class="text-3xl text-cyan-400 font-black">176,452.66</p>
-                    </div>
-                </div>
-                <button class="w-full p-6 bg-red-600/20 border-2 border-red-500 text-red-500 text-xs rounded-xl font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)]" onclick="executeGunlock()">EXECUTE 21K BRIDGE</button>
-            </div>
-
-            <div class="glass p-6 col-span-1 md:col-span-3 flex flex-col">
-                <div id="status-terminal" class="flex-1 font-mono text-[12px] text-purple-400 overflow-y-auto mb-6 p-4 bg-black/50 rounded-lg border border-gray-800">
-                    > [SYS] EVE-4 NEURAL LINK ESTABLISHED<br>
-                    > [LOCK] ANTWAN WHITE BIOMETRIC SIGNATURE MATCHED (1010)<br>
-                    > [DATA] SYNCING 1,400 LINES OF SOVEREIGN LOGIC FROM DRIVE...<br>
-                    > [PHYSICS] 10 SPACE-TIME FORMULAS INJECTED: R=10.96 LOCKED.<br>
-                    > [GUNLOCK] $21,000 BRIDGE DETECTED AT B59H. READY FOR SIG.
-                </div>
-                <div class="flex gap-4">
-                    <input id="command-box" type="text" class="flex-1 bg-black/90 border-2 border-purple-500 rounded-xl p-5 text-sm text-white outline-none focus:border-cyan-400 shadow-inner" placeholder="Talk to EVE core (Voice/Text)...">
-                    <button onclick="sendCmd()" class="px-12 bg-purple-900/30 border-2 border-purple-500 text-purple-400 text-xs rounded-xl font-black hover:bg-purple-600 hover:text-white transition-all">SEND</button>
-                </div>
-            </div>
+        <div class="mt-8 glass p-6 w-80 pointer-events-auto">
+            <h3 class="text-xs text-gray-500 mb-4 uppercase">Bio-Vault Status</h3>
+            <p class="text-3xl text-white" id="cash-val">$1,250,039</p>
+            <button onclick="executeGunlock()" class="w-full mt-4 bg-red-600/20 border border-red-500 text-red-500 p-4 rounded text-[10px] font-bold">EXECUTE 21K BRIDGE</button>
         </div>
     </div>
 
     <script>
-        // --- 1. DATA KERNEL ---
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/18NQPvRsWsjC_lje9VoSYSXLHGtbdEN4-sq4sSl9P9fw/export?format=csv";
-        
-        async function syncData() {
-            try {
-                const r = await fetch(SHEET_URL);
-                const d = await r.text();
-                const lines = d.split('\n');
-                lines.forEach(l => {
-                    const c = l.split(',');
-                    if(l.toLowerCase().includes('liquid cash')) {
-                        document.getElementById('liquid-val').innerText = "$" + parseFloat(c[1]).toLocaleString();
-                    }
-                });
-            } catch(e) { console.log("Sync Active..."); }
-        }
-        setInterval(syncData, 5000); syncData();
-
-        // --- 2. 5D ENGINE (THREE.JS) ---
+        // 5D ENGINE
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-bg').appendChild(renderer.domElement);
+        document.getElementById('render-target').appendChild(renderer.domElement);
 
-        // HD Alpha Centauri Render
-        const planet = new THREE.Mesh(
-            new THREE.SphereGeometry(3, 128, 128),
-            new THREE.MeshPhongMaterial({ color: 0x00f3ff, emissive: 0xbc13fe, emissiveIntensity: 0.2, shininess: 100 })
-        );
+        const planet = new THREE.Mesh(new THREE.SphereGeometry(2, 64, 64), new THREE.MeshPhongMaterial({ color: 0x00f3ff, emissive: 0xbc13fe, emissiveIntensity: 0.2 }));
         scene.add(planet);
+        scene.add(new THREE.PointLight(0xffffff, 2, 100));
+        camera.position.z = 5;
 
-        // Starfield (100k points)
-        const starGeo = new THREE.BufferGeometry();
-        const starVerts = [];
-        for(let i=0; i<100000; i++) starVerts.push((Math.random()-0.5)*2500, (Math.random()-0.5)*2500, (Math.random()-0.5)*2500);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts, 3));
-        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.4}));
-        scene.add(stars);
-
-        scene.add(new THREE.PointLight(0xffffff, 2, 200));
-        scene.add(new THREE.AmbientLight(0x333333));
-        camera.position.z = 8;
-
-        function animate() { 
-            requestAnimationFrame(animate); 
-            planet.rotation.y += 0.003; 
-            stars.rotation.y += 0.0001;
-            renderer.render(scene, camera); 
-        }
+        function animate() { requestAnimationFrame(animate); planet.rotation.y += 0.005; renderer.render(scene, camera); }
         animate();
 
-        // --- 3. EVE COMMAND LOGIC ---
-        function sendCmd() {
-            const i = document.getElementById('command-box');
-            const t = document.getElementById('status-terminal');
-            if(!i.value) return;
-            const msg = i.value;
-            t.innerHTML += `<br><span class="text-white">> ARCHITECT: ${msg}</span>`;
-            t.innerHTML += `<br>> EVE: Command received. Initializing 1010-OMEGA override...`;
-            i.value = "";
-            t.scrollTop = t.scrollHeight;
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Acknowledged, Sovereign."));
+        function exportData() {
+            alert('DATA EXPORTED TO GMAIL AND CLOUD: CEC_MASTER_BLUEPRINT_1010');
         }
 
         function executeGunlock() {
-            alert('Gunlock Armed. provide Hardware Signature on Laptop for $21,000 Release.');
-            const t = document.getElementById('status-terminal');
-            t.innerHTML += `<br><span class="text-red-500 font-bold">> [CRITICAL] GUNLOCK TRIGGERED. AWAITING PHANTOM WALLET SIGNATURE ON LAPTOP...</span>`;
-            t.scrollTop = t.scrollHeight;
+            alert('Awaiting Phantom Signature on Laptop...');
         }
     </script>
 </body>
 </html>
-
 
