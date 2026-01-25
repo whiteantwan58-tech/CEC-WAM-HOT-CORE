@@ -2,7 +2,45 @@ import streamlit as st
 import time
 import datetime
 import os
+# --- EVE HOLOGRAPHIC CSS INJECTION ---
+st.markdown("""
+<style>
+    /* Deep Void Background with Holographic Grid */
+    .stApp {
+        background: radial-gradient(circle at center, #0a0a12 0%, #000000 100%);
+        color: #00f2ff;
+        font-family: 'Courier New', monospace;
+    }
+    
+    /* Morpheus Glass Panels */
+    .st-emotion-cache-16txtl3 {
+        background: rgba(10, 20, 30, 0.6) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid #bc13fe !important;
+        border-radius: 15px !important;
+        box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+    }
 
+    /* Neon Text and Glowing Formulas */
+    h1, h2, h3, h4 {
+        color: #ffd700 !important; /* Gold */
+        text-shadow: 0 0 5px #ffd700;
+    }
+    
+    /* Gunlock Bridge Button (Pulsing Red) */
+    .stButton>button {
+        background: linear-gradient(90deg, #ff0055 0%, #bc13fe 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 0 10px #ff0055;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        box-shadow: 0 0 20px #bc13fe;
+        transform: scale(1.05);
+    }
+</style>
+""", unsafe_allow_html=True)
 # --- 1010_EVE_WAKE: THE 30-SECOND AUTONOMOUS LOOP ---
 # This ensures the system never goes to sleep and errors are instantly overwritten.
 st.set_page_config(page_title="CEC-WAM OMEGA", layout="wide", initial_sidebar_state="expanded")
