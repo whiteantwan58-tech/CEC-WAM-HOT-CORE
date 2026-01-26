@@ -1,5 +1,7 @@
-streamlit
-google-generativeai
-pandas
-plotly
-requests
+# requirements.txt
+streamlit==1.53.1
+pandas==2.3.3
+requests==2.32.5
+plotly==6.5.2
+openai>=1.0.0
+streamlit-plotly-events==0.0.6
