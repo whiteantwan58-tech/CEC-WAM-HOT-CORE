@@ -1,314 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CEC-WAM SOVEREIGN V.90</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap');
-        
-        :root {
-            --neon-cyan: #00f2ff;
-            --neon-purple: #bc13fe;
-            --void-black: #020202;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ψ CEC‑WAM SOVEREIGN CORE Ψ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
 
-        body {
-            background-color: var(--void-black);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* --------------------------------
+   GLOBAL RESET & MATRIX BACKDROP
+-------------------------------- */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',Monospace;}
+body{overflow:hidden;background:#000 url('matrix‑bg.gif') center/cover no-repeat;color:#00f2ff;}
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+/* --------------------------------
+   HEADER
+-------------------------------- */
+.header{padding:15px;text-align:center;background:rgba(0,0,0,0.8);border-bottom:2px solid #bc13fe;}
+.header h1{color:#bc13fe;text-shadow:0 0 15px #bc13fe;font-size:1.3rem;}
+#clock{color:#ffd700;font-size:1.1rem;margin-top:5px;}
 
-        .neon-border-cyan { border: 1px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-        .neon-text-cyan { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
-        
-        .tab-active {
-            background: rgba(0, 242, 255, 0.15);
-            color: var(--neon-cyan);
-            border-bottom: 2px solid var(--neon-cyan);
-        }
+/* --------------------------------
+   LAYOUT GRID
+-------------------------------- */
+#container{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:10px;height:calc(100vh−60px);}
+#mainView{position:relative;border:2px solid #00f2ff;border-radius:10px;overflow:hidden;}
+#sidePanel{display:flex;flex-direction:column;gap:10px;}
 
-        /* Scanline Effect */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 100;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
+/* --------------------------------
+   PSI COIN + BOND CURVE
+-------------------------------- */
+.card{background:rgba(0,0,30,0.8);border:2px solid #00f2ff;border-radius:10px;padding:10px;}
+.cardTitle{font-size:0.9rem;color:#888;}
+.cardVal{font-size:1.6rem;color:#ffd700;margin-top:5px;}
 
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-    </style>
+/* --------------------------------
+   LIVE CAM
+-------------------------------- */
+#liveCam{width:100%;border:2px solid red;border-radius:8px;}
+
+/* --------------------------------
+   STAR MAP
+-------------------------------- */
+#starMap{width:100%;height:100%;background:#000;}
+
+/* --------------------------------
+   CHAT (EVE)
+-------------------------------- */
+.chatBox{position:absolute;bottom:10px;left:10px;right:10px;height:180px;background:rgba(0,0,0,0.9);}
+.chatLog{flex:1;overflow-y:auto;padding:5px;color:#ccc;font-size:0.9rem;}
+.chatInputBar{display:flex;}
+.chatInput{flex:1;padding:10px;border:1px solid #00f2ff;background:#111;color:#00f2ff;}
+.sendBtn{padding:10px;background:#00f2ff;color:#000;border:none;font-weight:bold;}
+
+</style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <!-- TOP STATUS BAR -->
-    <header class="p-4 border-b border-white/10 flex justify-between items-center glass sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                <i data-lucide="zap" class="text-white w-6 h-6"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-black tracking-tighter leading-none">CEC-WAM <span class="text-cyan-400">V.90</span></h1>
-                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">Sovereign Architect Protocol</p>
-            </div>
-        </div>
-        <div class="text-right">
-            <p id="clock" class="mono text-lg font-bold leading-none text-white">00:00:00</p>
-            <p class="text-[8px] text-cyan-500 font-black uppercase tracking-widest">98003 // SECTOR_ACTIVE</p>
-        </div>
-    </header>
+<div class="header">
+    <h1>Ψ CEC‑WAM SOVEREIGN CORE Ψ</h1>
+    <div id="clock">SYSTEM TIME: —</div>
+</div>
 
-    <!-- NAVIGATION TABS -->
-    <nav class="flex border-b border-white/10 bg-black/50 overflow-x-auto scrollbar-hide sticky top-[73px] z-40">
-        <button onclick="switchTab('res')" id="tab-res" class="flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all tab-active">Reservations</button>
-        <button onclick="switchTab('hud')" id="tab-hud" class="flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">Master HUD</button>
-        <button onclick="switchTab('sec')" id="tab-sec" class="flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">Sector 98003</button>
-        <button onclick="switchTab('dev')" id="tab-dev" class="flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">Deploy</button>
-    </nav>
+<div id="container">
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full mb-20">
-        
-        <!-- SECTION: RESERVATIONS -->
-        <section id="section-res" class="space-y-6">
-            <div class="flex justify-between items-end">
-                <h2 class="text-2xl font-black text-white">SECTOR_BOOKINGS</h2>
-                <button onclick="toggleModal(true)" class="bg-cyan-500 text-black px-4 py-2 rounded-lg text-xs font-black uppercase flex items-center gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Add Entry
-                </button>
-            </div>
-
-            <div id="res-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Data populated by JS -->
-                <div class="p-10 text-center border-2 border-dashed border-white/5 rounded-3xl text-gray-600 font-mono">
-                    INITIALIZING DATA STREAM...
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION: MASTER HUD -->
-        <section id="section-hud" class="hidden space-y-6 animate-in fade-in">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass p-8 rounded-3xl relative overflow-hidden group border border-white/5">
-                    <i data-lucide="wallet" class="absolute top-4 right-4 text-purple-500/20 w-16 h-16"></i>
-                    <p class="text-purple-400 font-black text-[10px] uppercase tracking-widest mb-2">Total System Valuation</p>
-                    <h3 class="text-5xl font-black text-white leading-none">$34,103,161.42</h3>
-                    <p class="text-[9px] text-gray-500 mt-4 font-mono">SOURCE: ARCHITECT_SPREADSHEET_V1</p>
-                </div>
-                <div class="glass p-8 rounded-3xl relative overflow-hidden group border border-white/5">
-                    <i data-lucide="activity" class="absolute top-4 right-4 text-green-500/20 w-16 h-16"></i>
-                    <p class="text-green-400 font-black text-[10px] uppercase tracking-widest mb-2">Liquid Cash Reserves</p>
-                    <h3 class="text-5xl font-black text-white leading-none">$1,250,039.00</h3>
-                    <p class="text-[9px] text-gray-500 mt-4 font-mono">STATUS: FULLY VERIFIED</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-4">
-                <div class="glass p-4 rounded-2xl text-center">
-                    <p class="text-[8px] text-gray-500 font-black uppercase mb-1">R-Ratio</p>
-                    <p class="text-xl font-black text-cyan-400">10.96</p>
-                </div>
-                <div class="glass p-4 rounded-2xl text-center">
-                    <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Psi Coins</p>
-                    <p class="text-xl font-black text-yellow-500">8,500</p>
-                </div>
-                <div class="glass p-4 rounded-2xl text-center">
-                    <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Brain Shield</p>
-                    <p class="text-xl font-black text-green-500">100%</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION: SECTOR 98003 -->
-        <section id="section-sec" class="hidden space-y-6 animate-in fade-in">
-            <div class="bg-blue-500/10 border border-blue-500/30 p-6 rounded-3xl flex items-center gap-6">
-                <i data-lucide="car" class="text-blue-400 w-12 h-12"></i>
-                <div>
-                    <h4 class="text-xs font-black text-blue-400 uppercase tracking-widest mb-1">I-5 Corridor Traffic</h4>
-                    <p class="text-2xl font-black text-white">FLOWING (65 MPH)</p>
-                </div>
-            </div>
-            <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-3xl flex items-center gap-6">
-                <i data-lucide="siren" class="text-red-400 w-12 h-12"></i>
-                <div>
-                    <h4 class="text-xs font-black text-red-400 uppercase tracking-widest mb-1">Police Dispatch (98003)</h4>
-                    <p class="text-2xl font-black text-white">NO ACTIVE INCIDENTS</p>
-                </div>
-            </div>
-            <div class="glass p-8 rounded-3xl">
-                <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-6">Local Seismic Status</h4>
-                <div class="flex items-end gap-2 mb-4">
-                    <div class="w-2 bg-cyan-500/30 h-10"></div>
-                    <div class="w-2 bg-cyan-500/50 h-24 animate-pulse"></div>
-                    <div class="w-2 bg-cyan-500/30 h-16"></div>
-                    <div class="w-2 bg-cyan-400 h-8"></div>
-                </div>
-                <p class="text-3xl font-black text-white">MT. RAINIER: STABLE</p>
-                <p class="text-[10px] text-gray-500 font-mono mt-2">LAST SCAN: JUST NOW</p>
-            </div>
-        </section>
-
-        <!-- SECTION: DEPLOY -->
-        <section id="section-dev" class="hidden space-y-6 animate-in fade-in">
-            <div class="glass p-8 rounded-3xl border-green-500/20">
-                <h2 class="text-2xl font-black mb-4 flex items-center gap-3">
-                    <i data-lucide="github" class="text-green-500"></i> KID HUB DEPLOY
-                </h2>
-                <p class="text-sm text-gray-400 mb-8 leading-relaxed">
-                    This system is designed for **Universal Access**. To make this your permanent mobile app, upload this file to GitHub and enable "Pages".
-                </p>
-                <button onclick="downloadSelf()" class="w-full bg-green-600 hover:bg-green-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-3">
-                    <i data-lucide="download"></i> Download Master File
-                </button>
-            </div>
-            <div class="glass p-6 rounded-3xl">
-                <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Core Identity</h4>
-                <div id="user-id" class="mono text-[10px] text-cyan-400 break-all bg-black p-3 rounded-lg border border-white/5">
-                    INITIALIZING_SECURE_ID...
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- BOTTOM NAV (MOBILE) -->
-    <div class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 p-2 z-50 flex justify-between px-8 text-[10px] font-black uppercase tracking-tighter text-gray-500">
-        <div class="flex items-center gap-2 text-green-500">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> BRAIN_SAFE
-        </div>
-        <div class="text-cyan-500">STABLE // SYNC_ACTIVE</div>
+    <!-- MAIN STAR MAP / 3D VIEW -->
+    <div id="mainView">
+        <canvas id="starMap"></canvas>
     </div>
 
-    <!-- MODAL: ADD RESERVATION -->
-    <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] hidden flex items-center justify-center p-4">
-        <div class="glass w-full max-w-md rounded-3xl p-8 border border-cyan-500/30 shadow-2xl">
-            <h3 class="text-2xl font-black text-white mb-6 uppercase">New Mission Entry</h3>
-            <div class="space-y-4">
-                <input id="input-title" type="text" placeholder="Entry Title / Guest" class="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-500 text-white">
-                <input id="input-date" type="date" class="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-500 text-white">
-                <div class="flex gap-4">
-                    <button onclick="saveEntry()" class="flex-1 bg-cyan-600 text-black py-4 rounded-xl font-black uppercase tracking-widest">Deploy</button>
-                    <button onclick="toggleModal(false)" class="px-6 bg-white/5 text-white py-4 rounded-xl font-black uppercase tracking-widest border border-white/10">Cancel</button>
-                </div>
-            </div>
+    <!-- SIDE PANEL -->
+    <div id="sidePanel">
+        <div class="card">
+            <div class="cardTitle">PSI‑COIN BALANCE</div>
+            <div class="cardVal" id="psiVal">— Ψ</div>
+        </div>
+        <div class="card">
+            <div class="cardTitle">BONDING CURVE</div>
+            <canvas id="bondCurveChart" height="100"></canvas>
+        </div>
+        <div class="card">
+            <div class="cardTitle">LIVE TRAFFIC CAM</div>
+            <img id="liveCam" src="" alt="Live Traffic">
         </div>
     </div>
 
-    <script>
-        // --- Core Logic ---
-        let currentTab = 'res';
-        let reservations = JSON.parse(localStorage.getItem('cec_res') || '[]');
+</div>
 
-        function init() {
-            lucide.createIcons();
-            updateClock();
-            renderReservations();
-            document.getElementById('user-id').innerText = "ARCHITECT_" + Math.random().toString(36).substr(2, 9).toUpperCase();
-            
-            setInterval(updateClock, 1000);
-            
-            // Initial mock data if empty
-            if (reservations.length === 0) {
-                reservations = [
-                    { id: 1, title: 'Strategic Review: Starship Aeon', date: '2026-01-26', type: 'Mission' },
-                    { id: 2, title: 'Federal Way Sector Scan', date: '2026-01-27', type: 'Analysis' }
-                ];
-                renderReservations();
-            }
-        }
+<!-- EVE CHAT -->
+<div class="chatBox">
+    <div class="chatLog" id="chatLog"></div>
+    <div class="chatInputBar">
+        <input type="text" id="chatInput" class="chatInput" placeholder="Ask EVE anything...">
+        <button class="sendBtn" onclick="sendCMD()">SEND</button>
+    </div>
+</div>
 
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-        }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-        function switchTab(id) {
-            // Hide all
-            ['res', 'hud', 'sec', 'dev'].forEach(tab => {
-                document.getElementById('section-' + tab).classList.add('hidden');
-                document.getElementById('tab-' + tab).classList.remove('tab-active');
-                document.getElementById('tab-' + tab).classList.add('text-gray-500');
-            });
-            
-            // Show target
-            document.getElementById('section-' + id).classList.remove('hidden');
-            document.getElementById('tab-' + id).classList.add('tab-active');
-            document.getElementById('tab-' + id).classList.remove('text-gray-500');
-            currentTab = id;
-        }
+<script>
 
-        function toggleModal(show) {
-            document.getElementById('modal').style.display = show ? 'flex' : 'none';
-        }
+// LIVE CLOCK
+setInterval(()=>document.getElementById('clock').innerText = new Date().toLocaleString(),1000);
 
-        function renderReservations() {
-            const container = document.getElementById('res-list');
-            if (reservations.length === 0) {
-                container.innerHTML = '<div class="col-span-2 p-10 text-center border-2 border-dashed border-white/5 rounded-3xl text-gray-600 font-mono uppercase">Sector Clear // No Active Entries</div>';
-                return;
-            }
+// PSI–COIN (placeholder)
+document.getElementById('psiVal').innerText = "100,500.33 Ψ";
 
-            container.innerHTML = reservations.map(res => `
-                <div class="glass p-6 rounded-3xl border border-white/5 hover:border-cyan-500/50 transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-[8px] font-black bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded uppercase tracking-[0.2em]">MISSION_SYNCED</span>
-                        <button onclick="deleteEntry(${res.id})" class="text-gray-700 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                    <h4 class="text-xl font-black text-white mb-2 uppercase">${res.title}</h4>
-                    <div class="flex items-center gap-2 text-[10px] font-mono text-gray-500 uppercase">
-                        <i data-lucide="calendar" class="w-3 h-3"></i> ${res.date}
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-            localStorage.setItem('cec_res', JSON.stringify(reservations));
-        }
+// LIVE CAM
+const camURL = "https://images.wsdot.wa.gov/nw/005vc14370.jpg";
+setInterval(()=>document.getElementById('liveCam').src = camURL + "?t=" + Date.now(),5000);
 
-        function saveEntry() {
-            const title = document.getElementById('input-title').value;
-            const date = document.getElementById('input-date').value;
-            if (!title || !date) return;
+// BONDING CURVE (placeholder fake data)
+const ctx = document.getElementById('bondCurveChart').getContext('2d');
+new Chart(ctx, {type:'line',
+    data:{labels:["0","1","2","3","4","5"], datasets:[{label:'Bonding',data:[10,20,30,40,55,80],borderColor:'#00f2ff',fill:false}]}
+});
 
-            reservations.unshift({
-                id: Date.now(),
-                title: title,
-                date: date
-            });
+// THREE.JS STAR MAP
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById("starMap")});
+renderer.setSize(window.innerWidth,window.innerHeight);
 
-            renderReservations();
-            toggleModal(false);
-            document.getElementById('input-title').value = '';
-            document.getElementById('input-date').value = '';
-        }
+const starGeo = new THREE.BufferGeometry();
+const starCount = 5000;
+const positions = new Float32Array(starCount * 3);
+for(let i=0;i<starCount*3;i++){positions[i] = (Math.random()−0.5)*200;}
+starGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff}));
+scene.add(stars);
+camera.position.z = 100;
 
-        function deleteEntry(id) {
-            reservations = reservations.filter(r => r.id !== id);
-            renderReservations();
-        }
+function animate(){requestAnimationFrame(animate);stars.rotation.y += 0.0005;renderer.render(scene,camera);}
+animate();
 
-        function downloadSelf() {
-            const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'CEC_WAM_CORE.html';
-            a.click();
-        }
+// CHAT & EVE
+function sendCMD() {
+    const input = document.getElementById('chatInput');
+    const txt = input.value.trim();if(!txt) return;
+    const log = document.getElementById('chatLog');
+    log.innerHTML += "<p><b>You:</b> "+txt+"</p>";
+    input.value="";
 
-        window.onload = init;
-    </script
+    // instant EVE placeholder reply
+    log.innerHTML += "<p><b>EVE:</b> Command registered.</p>";
+    log.scrollTop = log.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
