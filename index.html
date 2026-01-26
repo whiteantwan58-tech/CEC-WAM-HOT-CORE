@@ -1,154 +1,936 @@
+<!-- /index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ψ CEC‑WAM SOVEREIGN CORE Ψ</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Ψ CEC-WAM / EVE Sovereign Core</title>
 
-/* --------------------------------
-   GLOBAL RESET & MATRIX BACKDROP
--------------------------------- */
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',Monospace;}
-body{overflow:hidden;background:#000 url('matrix‑bg.gif') center/cover no-repeat;color:#00f2ff;}
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root{
+      --bg:#04060a;
+      --ink:#a9f7ff;
+      --neon:#28f0ff;
+      --neon2:#2cff9a;
+      --vio:#bc13fe;
+      --warn:#ffd166;
+      --bad:#ff4d6d;
 
-/* --------------------------------
-   HEADER
--------------------------------- */
-.header{padding:15px;text-align:center;background:rgba(0,0,0,0.8);border-bottom:2px solid #bc13fe;}
-.header h1{color:#bc13fe;text-shadow:0 0 15px #bc13fe;font-size:1.3rem;}
-#clock{color:#ffd700;font-size:1.1rem;margin-top:5px;}
+      --panel: rgba(2, 8, 14, 0.78);
+      --panel2: rgba(4, 12, 22, 0.60);
+      --stroke: rgba(40, 240, 255, 0.72);
+      --stroke2: rgba(44, 255, 154, 0.55);
+      --shadow: 0 0 18px rgba(40,240,255,.25), 0 0 60px rgba(44,255,154,.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-/* --------------------------------
-   LAYOUT GRID
--------------------------------- */
-#container{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:10px;height:calc(100vh−60px);}
-#mainView{position:relative;border:2px solid #00f2ff;border-radius:10px;overflow:hidden;}
-#sidePanel{display:flex;flex-direction:column;gap:10px;}
+    *{ box-sizing:border-box; margin:0; padding:0; font-family: var(--mono); }
+    html, body { height:100%; background: var(--bg); color: var(--ink); overflow:hidden; }
 
-/* --------------------------------
-   PSI COIN + BOND CURVE
--------------------------------- */
-.card{background:rgba(0,0,30,0.8);border:2px solid #00f2ff;border-radius:10px;padding:10px;}
-.cardTitle{font-size:0.9rem;color:#888;}
-.cardVal{font-size:1.6rem;color:#ffd700;margin-top:5px;}
+    /* Matrix canvas backdrop */
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.28;
+      filter: contrast(110%) saturate(125%);
+    }
 
-/* --------------------------------
-   LIVE CAM
--------------------------------- */
-#liveCam{width:100%;border:2px solid red;border-radius:8px;}
+    /* Subtle star dust overlay */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(40,240,255,.08), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(188,19,254,.07), transparent 45%),
+        radial-gradient(circle at 60% 80%, rgba(44,255,154,.06), transparent 45%),
+        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
+      mix-blend-mode: screen;
+    }
 
-/* --------------------------------
-   STAR MAP
--------------------------------- */
-#starMap{width:100%;height:100%;background:#000;}
+    /* Header */
+    header {
+      position: relative;
+      z-index: 5;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(188,19,254,.45);
+      background: rgba(0,0,0,.72);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
 
-/* --------------------------------
-   CHAT (EVE)
--------------------------------- */
-.chatBox{position:absolute;bottom:10px;left:10px;right:10px;height:180px;background:rgba(0,0,0,0.9);}
-.chatLog{flex:1;overflow-y:auto;padding:5px;color:#ccc;font-size:0.9rem;}
-.chatInputBar{display:flex;}
-.chatInput{flex:1;padding:10px;border:1px solid #00f2ff;background:#111;color:#00f2ff;}
-.sendBtn{padding:10px;background:#00f2ff;color:#000;border:none;font-weight:bold;}
+    .brand {
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .brand h1{
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--vio);
+      text-shadow: 0 0 18px rgba(188,19,254,.55);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .brand small{
+      font-size: 11px;
+      opacity: .85;
+      color: rgba(169,247,255,.9);
+      letter-spacing: .12em;
+    }
 
-</style>
+    .statusbar{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(40,240,255,.45);
+      border-radius: 999px;
+      background: rgba(2, 10, 18, .65);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--neon2);
+      box-shadow: 0 0 12px rgba(44,255,154,.8);
+    }
+    .dot.bad{ background: var(--bad); box-shadow: 0 0 12px rgba(255,77,109,.85); }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 12px rgba(255,209,102,.8); }
+
+    /* Layout */
+    #app {
+      position: relative;
+      z-index: 4;
+      height: calc(100vh - 60px);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 12px;
+    }
+
+    /* Main View */
+    #mainView {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(40,240,255,.55);
+      background: radial-gradient(circle at 50% 45%, rgba(8,20,40,.8), rgba(0,0,0,.95) 70%);
+      box-shadow: var(--shadow);
+      min-height: 420px;
+    }
+
+    #threeCanvas {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    /* HUD overlay */
+    .hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .scanlines::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.035),
+        rgba(255,255,255,.035) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+      opacity:.22;
+      mix-blend-mode: overlay;
+    }
+
+    .vignette::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(0,0,0,.55) 78%, rgba(0,0,0,.78) 100%);
+      opacity: .75;
+    }
+
+    /* Center radar ring */
+    .ring {
+      position:absolute;
+      left: 50%;
+      top: 55%;
+      width: 720px;
+      height: 720px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid rgba(40,240,255,.18);
+      box-shadow: 0 0 0 1px rgba(44,255,154,.10), inset 0 0 40px rgba(40,240,255,.08);
+    }
+    .ring::before, .ring::after{
+      content:"";
+      position:absolute;
+      inset: 12%;
+      border-radius: 50%;
+      border: 1px dashed rgba(44,255,154,.18);
+    }
+    .ring::after{
+      inset: 26%;
+      border-style: solid;
+      border-color: rgba(40,240,255,.14);
+    }
+
+    .sweep {
+      position:absolute;
+      left: 50%;
+      top: 55%;
+      width: 720px;
+      height: 720px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(44,255,154,.35), rgba(44,255,154,0) 35%);
+      mask: radial-gradient(circle, rgba(0,0,0,0) 0 32%, rgba(0,0,0,1) 33% 100%);
+      opacity: .22;
+      animation: sweep 2.8s linear infinite;
+      filter: blur(.2px);
+    }
+    @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* Corner panels like the reference */
+    .cornerPanel{
+      position:absolute;
+      width: 280px;
+      border-radius: 14px;
+      border: 1px solid rgba(40,240,255,.45);
+      background: rgba(0, 10, 18, .55);
+      box-shadow: var(--shadow);
+      padding: 10px;
+      backdrop-filter: blur(6px);
+    }
+    .cornerPanel h3{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: rgba(44,255,154,.95);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      opacity: .95;
+    }
+    .kv{ display:grid; grid-template-columns: 1fr auto; gap: 6px 10px; font-size: 11px; opacity: .95; }
+    .kv .k{ color: rgba(169,247,255,.78); }
+    .kv .v{ color: rgba(255,255,255,.9); text-shadow: 0 0 12px rgba(40,240,255,.15); }
+
+    .cp-tl{ left: 14px; top: 14px; }
+    .cp-tr{ right: 14px; top: 14px; }
+    .cp-br{ right: 14px; bottom: 14px; width: 320px; }
+    .cp-bl{ left: 14px; bottom: 14px; width: 320px; }
+
+    /* Side panel */
+    #sidePanel {
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 320px;
+    }
+
+    .card{
+      border-radius: 16px;
+      border: 1px solid rgba(40,240,255,.55);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(40,240,255,.18);
+      background: rgba(0,0,0,.25);
+    }
+    .card .head .title{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: rgba(44,255,154,.92);
+      text-transform: uppercase;
+    }
+    .card .body{ padding: 12px; }
+
+    .bigVal{
+      font-size: 24px;
+      color: rgba(255,255,255,.94);
+      text-shadow: 0 0 22px rgba(40,240,255,.20);
+      letter-spacing: .04em;
+    }
+    .subVal{
+      margin-top: 6px;
+      font-size: 12px;
+      opacity: .9;
+      letter-spacing: .08em;
+      color: rgba(169,247,255,.8);
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tag{
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(44,255,154,.25);
+      background: rgba(44,255,154,.08);
+    }
+
+    /* Live Cam */
+    #liveCam {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(255,77,109,.55);
+      box-shadow: 0 0 22px rgba(255,77,109,.18);
+      background: rgba(0,0,0,.35);
+    }
+
+    /* EVE Terminal */
+    #terminal {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 6;
+      border-radius: 16px;
+      border: 1px solid rgba(40,240,255,.55);
+      background: rgba(0,0,0,.78);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    #terminal .termHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.35);
+      border-bottom: 1px solid rgba(40,240,255,.18);
+    }
+    .termHead .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: rgba(188,19,254,.95);
+      text-shadow: 0 0 14px rgba(188,19,254,.35);
+    }
+    .termHead .right{
+      font-size: 11px;
+      opacity: .85;
+      letter-spacing: .10em;
+      color: rgba(169,247,255,.75);
+    }
+
+    #termLog{
+      height: 150px;
+      overflow:auto;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(220,255,255,.85);
+    }
+    .line{ margin-bottom: 6px; }
+    .you{ color: rgba(255,255,255,.92); }
+    .eve{ color: rgba(44,255,154,.92); }
+    .sys{ color: rgba(169,247,255,.72); }
+
+    #termInputRow{
+      display:flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(40,240,255,.18);
+      background: rgba(0,0,0,.25);
+    }
+    #termInput{
+      flex:1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(40,240,255,.45);
+      background: rgba(4,10,18,.65);
+      color: rgba(255,255,255,.92);
+      outline: none;
+    }
+    #termBtn{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(44,255,154,.55);
+      background: rgba(44,255,154,.12);
+      color: rgba(255,255,255,.92);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(44,255,154,.14);
+    }
+    #termBtn:hover{ filter: brightness(1.12); }
+
+    /* Responsive */
+    @media (max-width: 1080px){
+      #app{ grid-template-columns: 1fr; height: calc(100vh - 60px - 220px); }
+      #sidePanel{ min-width: unset; }
+      .ring,.sweep{ width: 560px; height: 560px; }
+      .cornerPanel{ display:none; }
+    }
+    @media (max-width: 720px){
+      header{ flex-direction:column; align-items:flex-start; }
+      .statusbar{ justify-content:flex-start; }
+      #termLog{ height: 130px; }
+    }
+  </style>
 </head>
+
 <body>
+  <canvas id="matrix"></canvas>
+  <div class="grain"></div>
 
-<div class="header">
-    <h1>Ψ CEC‑WAM SOVEREIGN CORE Ψ</h1>
-    <div id="clock">SYSTEM TIME: —</div>
-</div>
-
-<div id="container">
-
-    <!-- MAIN STAR MAP / 3D VIEW -->
-    <div id="mainView">
-        <canvas id="starMap"></canvas>
+  <header>
+    <div class="brand">
+      <h1>Ψ CEC-WAM SOVEREIGN CORE Ψ</h1>
+      <small id="clock">SYSTEM TIME: —</small>
     </div>
 
-    <!-- SIDE PANEL -->
-    <div id="sidePanel">
-        <div class="card">
-            <div class="cardTitle">PSI‑COIN BALANCE</div>
-            <div class="cardVal" id="psiVal">— Ψ</div>
-        </div>
-        <div class="card">
-            <div class="cardTitle">BONDING CURVE</div>
-            <canvas id="bondCurveChart" height="100"></canvas>
-        </div>
-        <div class="card">
-            <div class="cardTitle">LIVE TRAFFIC CAM</div>
-            <img id="liveCam" src="" alt="Live Traffic">
-        </div>
+    <div class="statusbar">
+      <div class="pill"><span id="netDot" class="dot"></span><span id="netStatus">LINK: —</span></div>
+      <div class="pill"><span class="dot"></span><span id="eveStatus">EVE: ONLINE</span></div>
+      <div class="pill"><span class="dot warn"></span><span id="sourceStatus">FEEDS: —</span></div>
     </div>
+  </header>
 
-</div>
+  <main id="app">
+    <section id="mainView">
+      <canvas id="threeCanvas"></canvas>
 
-<!-- EVE CHAT -->
-<div class="chatBox">
-    <div class="chatLog" id="chatLog"></div>
-    <div class="chatInputBar">
-        <input type="text" id="chatInput" class="chatInput" placeholder="Ask EVE anything...">
-        <button class="sendBtn" onclick="sendCMD()">SEND</button>
+      <div class="hud scanlines vignette">
+        <div class="ring"></div>
+        <div class="sweep"></div>
+
+        <div class="cornerPanel cp-tl">
+          <h3>Orbital / Tactical</h3>
+          <div class="kv">
+            <div class="k">Sector</div><div class="v" id="kvSector">SOL-C/ORBIT-07</div>
+            <div class="k">Coords</div><div class="v" id="kvCoords">—</div>
+            <div class="k">Drift</div><div class="v" id="kvDrift">—</div>
+            <div class="k">Threat</div><div class="v">LOW</div>
+          </div>
+        </div>
+
+        <div class="cornerPanel cp-tr">
+          <h3>Quantum Core</h3>
+          <div class="kv">
+            <div class="k">Core</div><div class="v">ONLINE</div>
+            <div class="k">Entropy</div><div class="v" id="kvEntropy">—</div>
+            <div class="k">Latency</div><div class="v" id="kvLatency">—</div>
+            <div class="k">Sync</div><div class="v" id="kvSync">—</div>
+          </div>
+        </div>
+
+        <div class="cornerPanel cp-bl">
+          <h3>PSI-Coin Deployment</h3>
+          <div class="kv">
+            <div class="k">PSI Ticker</div><div class="v" id="kvPsiTicker">SOL</div>
+            <div class="k">PSI Price</div><div class="v" id="kvPsiPrice">—</div>
+            <div class="k">BTC Height</div><div class="v" id="kvBtcHeight">—</div>
+            <div class="k">Heartbeat</div><div class="v" id="kvHeartbeat">—</div>
+          </div>
+        </div>
+
+        <div class="cornerPanel cp-br">
+          <h3>Network / Telemetry</h3>
+          <div class="kv">
+            <div class="k">BTC</div><div class="v" id="kvBtc">—</div>
+            <div class="k">ETH</div><div class="v" id="kvEth">—</div>
+            <div class="k">SOL</div><div class="v" id="kvSol">—</div>
+            <div class="k">Feed</div><div class="v" id="kvFeed">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside id="sidePanel">
+      <div class="card">
+        <div class="head">
+          <div class="title">PSI Wallet</div>
+          <div class="pill" style="padding:6px 10px;">
+            <span class="dot"></span><span id="walletMode">SOVEREIGN</span>
+          </div>
+        </div>
+        <div class="body">
+          <div class="bigVal" id="psiBalance">— Ψ</div>
+          <div class="subVal">
+            <span class="tag" id="psiUsd">— USD</span>
+            <span class="tag" id="psiChange">— 24h</span>
+            <span class="tag" id="psiSource">SOURCE: —</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <div class="title">Bonding Curve Timeline</div>
+          <div style="font-size:11px;opacity:.8;letter-spacing:.1em" id="bondMeta">—</div>
+        </div>
+        <div class="body">
+          <canvas id="bondChart" height="130"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <div class="title">Live Traffic Cam (WA)</div>
+          <div style="font-size:11px;opacity:.8;letter-spacing:.1em" id="camMeta">REFRESH 5s</div>
+        </div>
+        <div class="body">
+          <img id="liveCam" alt="Live Traffic Cam" />
+          <div style="margin-top:10px;font-size:11px;opacity:.8;letter-spacing:.08em">
+            FEED: WSDOT / NW
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <section id="terminal">
+    <div class="termHead">
+      <div class="left"><span class="dot"></span> EVE // COMMAND BUS</div>
+      <div class="right" id="termRight">type: <span style="color:rgba(44,255,154,.9)">help</span></div>
     </div>
-</div>
+    <div id="termLog"></div>
+    <div id="termInputRow">
+      <input id="termInput" autocomplete="off" placeholder="EVE> enter command (help, status, prices, cam, set psi sol|eth|btc, clear)" />
+      <button id="termBtn">SEND</button>
+    </div>
+  </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 
-<script>
+  <script>
+    /**
+     * Minimal docs:
+     * - Run locally with a server (fetch needs http):
+     *   python -m http.server 5173
+     * - PSI maps to a real ticker (default SOL). Use terminal:
+     *   set psi btc|eth|sol
+     */
 
-// LIVE CLOCK
-setInterval(()=>document.getElementById('clock').innerText = new Date().toLocaleString(),1000);
+    const CFG = {
+      psiBalance: 100_500.33,
+      psiMapsTo: "sol", // sol | eth | btc
+      camUrl: "https://images.wsdot.wa.gov/nw/005vc14370.jpg",
+      pollMs: 12_000,
+      camRefreshMs: 5_000,
+    };
 
-// PSI–COIN (placeholder)
-document.getElementById('psiVal').innerText = "100,500.33 Ψ";
+    const $ = (id) => document.getElementById(id);
 
-// LIVE CAM
-const camURL = "https://images.wsdot.wa.gov/nw/005vc14370.jpg";
-setInterval(()=>document.getElementById('liveCam').src = camURL + "?t=" + Date.now(),5000);
+    // ---------- Clock ----------
+    function tickClock(){
+      const now = new Date();
+      $("clock").textContent = "SYSTEM TIME: " + now.toLocaleString();
+      $("kvHeartbeat").textContent = now.toLocaleTimeString();
+    }
+    setInterval(tickClock, 1000);
+    tickClock();
 
-// BONDING CURVE (placeholder fake data)
-const ctx = document.getElementById('bondCurveChart').getContext('2d');
-new Chart(ctx, {type:'line',
-    data:{labels:["0","1","2","3","4","5"], datasets:[{label:'Bonding',data:[10,20,30,40,55,80],borderColor:'#00f2ff',fill:false}]}
-});
+    // ---------- Safe fetch ----------
+    async function fetchJson(url, { timeoutMs = 8000 } = {}){
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      try{
+        const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        return await res.json();
+      } finally {
+        clearTimeout(t);
+      }
+    }
 
-// THREE.JS STAR MAP
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
-const renderer = new THREE.WebGLRenderer({canvas:document.getElementById("starMap")});
-renderer.setSize(window.innerWidth,window.innerHeight);
+    // ---------- Live cam ----------
+    function startCam(){
+      const refresh = () => { $("liveCam").src = CFG.camUrl + "?t=" + Date.now(); };
+      refresh();
+      setInterval(refresh, CFG.camRefreshMs);
+    }
+    startCam();
 
-const starGeo = new THREE.BufferGeometry();
-const starCount = 5000;
-const positions = new Float32Array(starCount * 3);
-for(let i=0;i<starCount*3;i++){positions[i] = (Math.random()−0.5)*200;}
-starGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
-const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff}));
-scene.add(stars);
-camera.position.z = 100;
+    // ---------- Data feeds (real) ----------
+    async function pollFeeds(){
+      const netDot = $("netDot");
+      const netStatus = $("netStatus");
+      const sourceStatus = $("sourceStatus");
 
-function animate(){requestAnimationFrame(animate);stars.rotation.y += 0.0005;renderer.render(scene,camera);}
-animate();
+      try{
+        netDot.className = "dot";
+        netStatus.textContent = "LINK: CONNECTING…";
 
-// CHAT & EVE
-function sendCMD() {
-    const input = document.getElementById('chatInput');
-    const txt = input.value.trim();if(!txt) return;
-    const log = document.getElementById('chatLog');
-    log.innerHTML += "<p><b>You:</b> "+txt+"</p>";
-    input.value="";
+        // CoinGecko simple price (no key)
+        const cgUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
+        const cg = await fetchJson(cgUrl);
 
-    // instant EVE placeholder reply
-    log.innerHTML += "<p><b>EVE:</b> Command registered.</p>";
-    log.scrollTop = log.scrollHeight;
-}
+        const btc = cg.bitcoin?.usd ?? null;
+        const eth = cg.ethereum?.usd ?? null;
+        const sol = cg.solana?.usd ?? null;
 
-</script>
+        $("kvBtc").textContent = btc ? "$" + btc.toLocaleString() : "—";
+        $("kvEth").textContent = eth ? "$" + eth.toLocaleString() : "—";
+        $("kvSol").textContent = sol ? "$" + sol.toLocaleString() : "—";
 
+        // BTC height (Blockchair, no key)
+        const bc = await fetchJson("https://api.blockchair.com/bitcoin/stats");
+        const btcHeight = bc?.data?.blocks ?? null;
+        $("kvBtcHeight").textContent = btcHeight ? btcHeight.toLocaleString() : "—";
+
+        // PSI mapping
+        const map = CFG.psiMapsTo;
+        const mapPrice = map === "btc" ? btc : map === "eth" ? eth : sol;
+        const mapChange = map === "btc" ? cg.bitcoin?.usd_24h_change : map === "eth" ? cg.ethereum?.usd_24h_change : cg.solana?.usd_24h_change;
+
+        $("kvPsiTicker").textContent = map.toUpperCase();
+        $("kvPsiPrice").textContent = mapPrice ? "$" + mapPrice.toLocaleString() : "—";
+
+        $("psiBalance").textContent = CFG.psiBalance.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " Ψ";
+        $("psiUsd").textContent = (mapPrice ? ("$" + (CFG.psiBalance * mapPrice).toLocaleString(undefined,{maximumFractionDigits:2})) : "— USD");
+        $("psiChange").textContent = (typeof mapChange === "number")
+          ? ((mapChange >= 0 ? "+" : "") + mapChange.toFixed(2) + "% 24h")
+          : "— 24h";
+        $("psiSource").textContent = "SOURCE: CoinGecko";
+
+        // Telemetry-ish (synthetic but derived)
+        const entropy = (Math.abs(Math.sin(Date.now()/14000))*0.42 + 0.58);
+        $("kvEntropy").textContent = entropy.toFixed(3);
+        $("kvLatency").textContent = Math.floor(18 + Math.random()*24) + " ms";
+        $("kvSync").textContent = "OK/" + (100 - Math.floor(Math.random()*3)) + "%";
+
+        $("kvFeed").textContent = "CG + Blockchair";
+        $("sourceStatus").textContent = "FEEDS: LIVE";
+        netStatus.textContent = "LINK: STABLE";
+        netDot.className = "dot";
+      } catch (e){
+        $("sourceStatus").textContent = "FEEDS: DEGRADED";
+        $("netStatus").textContent = "LINK: DEGRADED";
+        $("netDot").className = "dot bad";
+      }
+    }
+
+    pollFeeds();
+    setInterval(pollFeeds, CFG.pollMs);
+
+    // ---------- Bonding curve (visual, deterministic) ----------
+    const bondCtx = $("bondChart").getContext("2d");
+    const bondState = {
+      t: 0,
+      labels: Array.from({length: 24}, (_,i)=> String(i - 23)),
+      data: [],
+    };
+
+    function bondingPriceAt(step){
+      // pseudo bonding curve: p = a*sqrt(supply) + b*sin(wt)
+      const supply = 10_000 + step * 250;
+      const a = 0.0009;
+      const b = 0.06;
+      return a * Math.sqrt(supply) + b * Math.sin(step/3.2);
+    }
+
+    for(let i=0;i<24;i++) bondState.data.push(bondingPriceAt(i));
+
+    const bondChart = new Chart(bondCtx, {
+      type: "line",
+      data: {
+        labels: bondState.labels,
+        datasets: [{
+          label: "Bond Curve",
+          data: bondState.data,
+          tension: 0.25,
+          borderWidth: 2,
+          pointRadius: 0,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: { display: false },
+          y: {
+            ticks: { color: "rgba(169,247,255,.75)", font: { size: 10 } },
+            grid: { color: "rgba(40,240,255,.10)" }
+          }
+        }
+      }
+    });
+
+    function tickBond(){
+      bondState.t++;
+      bondState.data.shift();
+      bondState.data.push(bondingPriceAt(bondState.t + 23));
+      bondChart.update("none");
+      $("bondMeta").textContent = "T+" + bondState.t.toString().padStart(4,"0") + " / SUPPLY SIM";
+    }
+    setInterval(tickBond, 1200);
+    tickBond();
+
+    // ---------- Three.js starfield (sized to panel, not window) ----------
+    const threeCanvas = $("threeCanvas");
+    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: true });
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.0035);
+
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1200);
+    camera.position.set(0, 0, 140);
+
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 9000;
+    const pos = new Float32Array(starCount * 3);
+    const col = new Float32Array(starCount * 3);
+
+    for(let i=0;i<starCount;i++){
+      const i3 = i*3;
+      pos[i3+0] = (Math.random()-0.5) * 900;
+      pos[i3+1] = (Math.random()-0.5) * 650;
+      pos[i3+2] = (Math.random()-0.5) * 900;
+
+      const tint = 0.6 + Math.random()*0.4;
+      col[i3+0] = tint;
+      col[i3+1] = tint * (0.9 + Math.random()*0.2);
+      col[i3+2] = 1.0;
+    }
+    starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    starGeo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+
+    const stars = new THREE.Points(
+      starGeo,
+      new THREE.PointsMaterial({
+        size: 1.15,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false
+      })
+    );
+    scene.add(stars);
+
+    // Soft neon “lane” streaks
+    const streakGeo = new THREE.BufferGeometry();
+    const streakCount = 1200;
+    const spos = new Float32Array(streakCount * 3);
+    for(let i=0;i<streakCount;i++){
+      const i3=i*3;
+      spos[i3+0]=(Math.random()-0.5)*600;
+      spos[i3+1]=(Math.random()-0.5)*400;
+      spos[i3+2]=(Math.random()-0.5)*800;
+    }
+    streakGeo.setAttribute("position", new THREE.BufferAttribute(spos,3));
+    const streaks = new THREE.Points(
+      streakGeo,
+      new THREE.PointsMaterial({
+        size: 2.4,
+        color: 0x28f0ff,
+        transparent: true,
+        opacity: 0.10,
+        depthWrite: false
+      })
+    );
+    scene.add(streaks);
+
+    function resizeThreeToElement(){
+      const el = $("mainView");
+      const rect = el.getBoundingClientRect();
+      const w = Math.max(2, Math.floor(rect.width));
+      const h = Math.max(2, Math.floor(rect.height));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    new ResizeObserver(resizeThreeToElement).observe($("mainView"));
+    window.addEventListener("resize", resizeThreeToElement);
+    resizeThreeToElement();
+
+    let lastTs = performance.now();
+    function animate(ts){
+      const dt = Math.min(0.05, (ts - lastTs) / 1000);
+      lastTs = ts;
+
+      stars.rotation.y += dt * 0.07;
+      stars.rotation.x += dt * 0.02;
+
+      // drift camera a bit
+      camera.position.x = Math.sin(ts/6000) * 6;
+      camera.position.y = Math.cos(ts/7000) * 4;
+
+      renderer.render(scene, camera);
+
+      // HUD kv updates
+      $("kvCoords").textContent = (
+        (camera.position.x/10).toFixed(3) + "," +
+        (camera.position.y/10).toFixed(3) + "," +
+        (camera.position.z/10).toFixed(3)
+      );
+      $("kvDrift").textContent = (Math.sin(ts/5000)*0.18 + 0.22).toFixed(3) + " AU";
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // ---------- Matrix rain ----------
+    const m = $("matrix");
+    const mctx = m.getContext("2d");
+    const glyphs = "Ψ01ΔΣΩλμνξπστυφχψζアイウエオカキクケコサシスセソツテトナニヌネノ";
+    let mW=0, mH=0, cols=0, drops=[];
+
+    function resizeMatrix(){
+      mW = m.width = window.innerWidth;
+      mH = m.height = window.innerHeight;
+      cols = Math.floor(mW / 14);
+      drops = Array.from({length: cols}, () => Math.random()*mH/14);
+    }
+    window.addEventListener("resize", resizeMatrix);
+    resizeMatrix();
+
+    function drawMatrix(){
+      mctx.fillStyle = "rgba(0,0,0,0.09)";
+      mctx.fillRect(0,0,mW,mH);
+
+      mctx.font = "13px " + getComputedStyle(document.documentElement).getPropertyValue("--mono");
+      for(let i=0;i<cols;i++){
+        const x = i * 14;
+        const y = drops[i] * 14;
+        const ch = glyphs[Math.floor(Math.random()*glyphs.length)];
+        mctx.fillStyle = "rgba(40,240,255,0.75)";
+        mctx.fillText(ch, x, y);
+
+        if(y > mH && Math.random() > 0.985) drops[i] = 0;
+        drops[i] += 0.75 + Math.random()*0.45;
+      }
+      requestAnimationFrame(drawMatrix);
+    }
+    requestAnimationFrame(drawMatrix);
+
+    // ---------- EVE terminal ----------
+    function termLine(kind, text){
+      const div = document.createElement("div");
+      div.className = "line " + kind;
+      div.textContent = text;
+      $("termLog").appendChild(div);
+      $("termLog").scrollTop = $("termLog").scrollHeight;
+    }
+
+    function eveSay(text){ termLine("eve", "EVE: " + text); }
+    function sysSay(text){ termLine("sys", "SYS: " + text); }
+
+    function fmtMoney(n){
+      if(typeof n !== "number") return "—";
+      return "$" + n.toLocaleString(undefined,{maximumFractionDigits:2});
+    }
+
+    async function cmdStatus(){
+      sysSay("CEC-WAM CORE: NOMINAL");
+      sysSay("FEEDS: " + $("sourceStatus").textContent.replace("FEEDS: ",""));
+      sysSay("PSI MAP: " + CFG.psiMapsTo.toUpperCase() + " / BAL: " + CFG.psiBalance.toFixed(2) + " Ψ");
+      eveSay("Awaiting command.");
+    }
+
+    async function cmdPrices(){
+      eveSay("Fetching live prices…");
+      await pollFeeds();
+      eveSay("BTC " + $("kvBtc").textContent + " | ETH " + $("kvEth").textContent + " | SOL " + $("kvSol").textContent);
+      eveSay("BTC Height " + $("kvBtcHeight").textContent);
+    }
+
+    function cmdHelp(){
+      eveSay("Commands: help, status, prices, cam, set psi btc|eth|sol, clear, ping");
+    }
+
+    function cmdCam(){
+      eveSay("Refreshing live cam feed.");
+      $("liveCam").src = CFG.camUrl + "?t=" + Date.now();
+    }
+
+    function cmdPing(){
+      const ms = Math.floor(18 + Math.random()*38);
+      eveSay("PING OK: " + ms + "ms");
+    }
+
+    function cmdSetPsi(arg){
+      const v = (arg || "").toLowerCase().trim();
+      if(!["btc","eth","sol"].includes(v)){
+        eveSay("Invalid ticker. Use: set psi btc|eth|sol");
+        return;
+      }
+      CFG.psiMapsTo = v;
+      eveSay("PSI mapped to: " + v.toUpperCase());
+      pollFeeds();
+    }
+
+    function handleCmd(raw){
+      const s = raw.trim();
+      if(!s) return;
+
+      termLine("you", "YOU: " + s);
+
+      const parts = s.split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+
+      if(cmd === "help") return cmdHelp();
+      if(cmd === "clear"){ $("termLog").innerHTML = ""; return eveSay("Log cleared."); }
+      if(cmd === "status") return cmdStatus();
+      if(cmd === "prices") return cmdPrices();
+      if(cmd === "cam") return cmdCam();
+      if(cmd === "ping") return cmdPing();
+
+      if(cmd === "set" && parts[1]?.toLowerCase() === "psi") return cmdSetPsi(parts[2]);
+
+      eveSay("Unknown command. Type: help");
+    }
+
+    $("termBtn").addEventListener("click", () => {
+      const v = $("termInput").value;
+      $("termInput").value = "";
+      handleCmd(v);
+    });
+    $("termInput").addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        const v = $("termInput").value;
+        $("termInput").value = "";
+        handleCmd(v);
+      }
+    });
+
+    // Initial boot lines
+    sysSay("Booting CEC-WAM HUD…");
+    sysSay("Establishing feeds: CoinGecko + Blockchair…");
+    eveSay("Online. Type 'help' for command list.");
+  </script>
 </body>
 </html>
+
