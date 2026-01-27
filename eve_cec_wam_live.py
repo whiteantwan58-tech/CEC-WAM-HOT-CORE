@@ -1,29 +1,27 @@
 # eve_cec_wam_live.py
 """
-CEC-WAM // EVE LIVE (FINISHED single-file Streamlit HUD)
+CEC-WAM // EVE LIVE (REAL Streamlit HUD)
 
-Features
-- Neon HUD + scanlines + readable panels
-- Live camera tile(s)
-- Galaxy map + CLICKABLE hotspots (Plotly + streamlit-plotly-events)
-- Ledger loader (DATA/*.csv)
-- SOL wallet + PSI SPL token live on-chain metrics (Solana JSON-RPC)
-- PSI market price via Jupiter quote + SOL/USD via CoinGecko (real)
-- Pump.fun creator fee tracking via CSV import + manual entry -> SQLite -> timeline chart
+Includes:
+- Neon HUD CSS + scanlines
+- Live camera
+- Galaxy + clickable hotspots (requires streamlit-plotly-events)
+- Real SOL + SPL (PSI Pump.fun mint) on-chain tracking (Solana RPC)
+- Real PSI "bonding curve style" chart (Jupiter quotes sampled at multiple sizes)
+- Real transfer tracker (inbound SOL + inbound PSI to PayPal receiving wallet)
 - EVE chat:
-  - deterministic command routing (help/status/prices/wallet/psi/earnings/wake)
-  - optional LLM free-chat if OPENAI_API_KEY is set
-- Exports (CSV) to ./exports
-- Voice output: "Speak last EVE reply" + waveform (browser speechSynthesis)
+  - deterministic command routing
+  - Groq LLM (OpenAI-compatible) if GROQ_API_KEY is set
+  - optional OpenAI fallback if OPENAI_API_KEY is set
 
-Run
-  pip install -r requirements.txt
-  streamlit run eve_cec_wam_live.py
+Run:
+  py -m pip install streamlit pandas requests plotly openai streamlit-plotly-events
+  py -m streamlit run .\eve_cec_wam_live.py --server.port 8502
 
-Env (optional)
-  OPENAI_API_KEY=...
-  SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-  EVE_MODEL=gpt-4o-mini
+Env (recommended):
+  setx GROQ_API_KEY "YOUR_GROQ_KEY"
+  setx GROQ_MODEL "llama-3.3-70b-versatile"
+  setx SOLANA_RPC_URL "https://api.mainnet-beta.solana.com"
 """
 
 from __future__ import annotations
@@ -44,19 +42,18 @@ import streamlit as st
 
 try:
     from streamlit_plotly_events import plotly_events
-except Exception:  # pragma: no cover
+except Exception:
     plotly_events = None  # type: ignore
 
 
 # ----------------------------
-# Constants
+# Constants (YOUR REAL DEFAULTS)
 # ----------------------------
-APP_TITLE = "🦅 CEC-WAM // EVE LIVE"
+APP_TITLE = "CEC-WAM // EVE LIVE"
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "DATA"
 EXPORT_DIR = BASE_DIR / "exports"
 EXPORT_DIR.mkdir(parents=True, exist_ok=True)
-
 DB_PATH = str(BASE_DIR / "cec_wam_eve.sqlite3")
 
 DEFAULT_CAMERA_URL = "https://images.wsdot.wa.gov/nw/005vc14370.jpg"
@@ -64,23 +61,43 @@ DEFAULT_TELEMETRY_URL = (
     "https://script.google.com/macros/s/AKfycbwJdL9VM4jqrcszFeLjJRJL6V2-IYadL1coQwze4tMtM6WKGBmbLDU2dU18Mwqzf5qtYg/exec"
 )
 
-# Your provided PayPal SOL address + Pump.fun PSI mint (editable in sidebar)
-DEFAULT_PAYPAL_SOL_ADDRESS = "Ek638f2WcP9sPFMjdAHRm9XDpJ7B6uxJqfSAzQGk9NFt"
-DEFAULT_PSI_TOKEN_MINT = "Ek638f2WcP9sPFMjdAHRm9XDpJ7B6uxJqfSAzQGk9NFt"
+# PayPal receiving wallet (track inbound SOL + inbound PSI)
+DEFAULT_PAYPAL_RECEIVE_WALLET = "HpME8sCYRbSuMVfxMQu8M5a7NBKdi29c9nvwJxjxkX4E"
+# Optional bridge/source wallet you pasted
+DEFAULT_BRIDGE_SOURCE_WALLET = "b59HHkFpg3g9yBwwLcuDH6z1d6d6z3vdGWX7mkX3txH"
+
+# PSI Pump.fun mint you gave (SPL Mint)
+DEFAULT_PSI_TOKEN_MINT = "7Avu2LscLpCNNDR8szDowyck3MCBecpCf1wHyjU3pump"
 
 SOLANA_RPC_URL = os.environ.get("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com")
 JUPITER_QUOTE_URL = "https://quote-api.jup.ag/v6/quote"
 SOL_MINT = "So11111111111111111111111111111111111111112"
-
 COINGECKO_SOL_URL = "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
-COINGECKO_MAJOR_URL = (
-    "https://api.coingecko.com/api/v3/simple/price"
-    "?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true"
-)
 
 
 # ----------------------------
-# UI Styling
+# Streamlit fragment compat
+# ----------------------------
+def _fragment_decorator():
+    if hasattr(st, "fragment"):
+        return st.fragment
+    if hasattr(st, "experimental_fragment"):
+        return st.experimental_fragment  # type: ignore[attr-defined]
+
+    def _noop(*_args, **_kwargs):
+        def _wrap(fn):
+            return fn
+
+        return _wrap
+
+    return _noop
+
+
+fragment = _fragment_decorator()
+
+
+# ----------------------------
+# CSS
 # ----------------------------
 def inject_css() -> None:
     st.markdown(
@@ -132,15 +149,6 @@ html, body, [data-testid="stAppViewContainer"] { height: 100%; overflow: hidden;
   font-size: 14px;
 }
 .cec-kv b{ color: rgba(255,215,0,0.95); }
-.pill{
-  display:inline-block; padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,242,255,0.55);
-  background: rgba(0,242,255,0.08);
-  color: rgba(0,242,255,0.95);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-}
 </style>
 <div class="scanlines"></div>
         """,
@@ -149,7 +157,7 @@ html, body, [data-testid="stAppViewContainer"] { height: 100%; overflow: hidden;
 
 
 # ----------------------------
-# Time / HTTP / RPC
+# Time / HTTP / Solana RPC
 # ----------------------------
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -166,7 +174,7 @@ def http_get_json(url: str, timeout_s: int = 10) -> Optional[dict]:
         return None
 
 
-def solana_rpc(method: str, params: list, timeout_s: int = 10) -> Optional[dict]:
+def solana_rpc(method: str, params: list, timeout_s: int = 20) -> Optional[dict]:
     try:
         payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
         r = requests.post(
@@ -192,7 +200,7 @@ def get_sol_balance_lamports(address: str) -> Optional[int]:
         return None
 
 
-@st.cache_data(show_spinner=False, ttl=20)
+@st.cache_data(show_spinner=False, ttl=60)
 def get_token_supply(mint: str) -> Optional[dict]:
     js = solana_rpc("getTokenSupply", [mint, {"commitment": "confirmed"}])
     try:
@@ -219,18 +227,13 @@ def get_wallet_token_balance_ui(owner: str, mint: str) -> Optional[float]:
         return None
 
 
-@st.cache_data(show_spinner=False, ttl=20)
+@st.cache_data(show_spinner=False, ttl=30)
 def get_sol_usd() -> Optional[float]:
     js = http_get_json(COINGECKO_SOL_URL)
     try:
         return float(js["solana"]["usd"])
     except Exception:
         return None
-
-
-@st.cache_data(show_spinner=False, ttl=20)
-def get_major_prices() -> Optional[dict]:
-    return http_get_json(COINGECKO_MAJOR_URL)
 
 
 @st.cache_data(show_spinner=False, ttl=20)
@@ -242,7 +245,7 @@ def jupiter_quote(input_mint: str, output_mint: str, amount: int) -> Optional[di
             "amount": str(amount),
             "slippageBps": "50",
         }
-        r = requests.get(JUPITER_QUOTE_URL, params=params, timeout=10, headers={"User-Agent": "CEC-WAM-HUD/1.0"})
+        r = requests.get(JUPITER_QUOTE_URL, params=params, timeout=12, headers={"User-Agent": "CEC-WAM-HUD/1.0"})
         if r.status_code != 200:
             return None
         js = r.json()
@@ -251,109 +254,132 @@ def jupiter_quote(input_mint: str, output_mint: str, amount: int) -> Optional[di
         return None
 
 
-def psi_price_sol(psi_mint: str, decimals: Optional[int]) -> Optional[float]:
+def token_price_sol_from_quote(token_mint: str, token_decimals: int, token_amount_ui: float) -> Optional[float]:
     """
-    PSI price in SOL via Jupiter.
-    If decimals known, quotes exactly 1 token (10**decimals base units).
+    Jupiter quote for token_amount_ui -> SOL.
+    Returns price per 1 token in SOL for this size (spot-ish).
     """
-    if decimals is None:
-        amount = 1_000_000
-        out = jupiter_quote(psi_mint, SOL_MINT, amount)
-        try:
-            best = (out.get("data") or [])[0]
-            out_sol = float(best["outAmount"]) / 1e9
-            return out_sol / float(amount)
-        except Exception:
-            return None
-
-    amount = 10 ** decimals
-    out = jupiter_quote(psi_mint, SOL_MINT, amount)
+    if token_amount_ui <= 0:
+        return None
+    base_amount = int(token_amount_ui * (10 ** token_decimals))
+    out = jupiter_quote(token_mint, SOL_MINT, base_amount)
     try:
         best = (out.get("data") or [])[0]
-        return float(best["outAmount"]) / 1e9
+        out_sol = float(best["outAmount"]) / 1e9
+        return out_sol / float(token_amount_ui)
     except Exception:
         return None
 
 
-# ----------------------------
-# Ledger / Export
-# ----------------------------
-@st.cache_data(show_spinner=False, ttl=60)
-def load_ledger_data() -> Optional[pd.DataFrame]:
-    paths = sorted(glob.glob(str(DATA_DIR / "*.csv")))
-    if not paths:
-        return None
-    frames = []
-    for p in paths:
-        try:
-            frames.append(pd.read_csv(p))
-        except Exception:
-            continue
-    if not frames:
-        return None
-    return pd.concat(frames, ignore_index=True)
-
-
-def export_df(df: pd.DataFrame, name: str) -> Path:
-    ts = utc_now().strftime("%Y%m%d_%H%M%S")
-    path = EXPORT_DIR / f"{name}_{ts}.csv"
-    df.to_csv(path, index=False)
-    return path
-
-
-# ----------------------------
-# Hotspots / Galaxy
-# ----------------------------
-def build_targets(seed: int = 16) -> pd.DataFrame:
-    import random
-
-    random.seed(seed)
+@st.cache_data(show_spinner=False, ttl=30)
+def bonding_curve_samples(token_mint: str, token_decimals: int) -> pd.DataFrame:
+    """
+    Approximates a 'bonding curve' by sampling Jupiter quotes at multiple trade sizes.
+    This is real market route pricing (not a fake curve).
+    """
+    sizes = [1, 5, 10, 25, 50, 100, 250, 500, 1000]
     rows = []
-    for i in range(22):
+    for s in sizes:
+        p = token_price_sol_from_quote(token_mint, token_decimals, float(s))
+        rows.append({"size_tokens": s, "price_sol_per_token": p})
+        time.sleep(0.2)  # avoid hammering
+    df = pd.DataFrame(rows)
+    return df
+
+
+# ----------------------------
+# Transfer tracking (inbound SOL + inbound PSI)
+# ----------------------------
+@st.cache_data(show_spinner=False, ttl=25)
+def get_signatures(address: str, limit: int = 15) -> List[str]:
+    js = solana_rpc("getSignaturesForAddress", [address, {"limit": limit}])
+    try:
+        return [r["signature"] for r in js["result"]]
+    except Exception:
+        return []
+
+
+@st.cache_data(show_spinner=False, ttl=25)
+def get_tx(signature: str) -> Optional[dict]:
+    js = solana_rpc(
+        "getTransaction",
+        [signature, {"encoding": "jsonParsed", "maxSupportedTransactionVersion": 0}],
+        timeout_s=25,
+    )
+    try:
+        return js["result"]
+    except Exception:
+        return None
+
+
+def inbound_deltas_for_address(tx: dict, address: str, mint: str) -> Tuple[Optional[float], Optional[float]]:
+    """
+    Returns (delta_sol, delta_token_ui) for address within this tx (post-pre).
+    """
+    try:
+        msg = tx["transaction"]["message"]
+        keys = msg["accountKeys"]
+        key_strings = [k["pubkey"] if isinstance(k, dict) else k for k in keys]
+        idx = key_strings.index(address)
+
+        meta = tx.get("meta") or {}
+        pre_bal = meta.get("preBalances", [])[idx]
+        post_bal = meta.get("postBalances", [])[idx]
+        delta_sol = (post_bal - pre_bal) / 1e9
+
+        delta_token = 0.0
+        pre_t = meta.get("preTokenBalances") or []
+        post_t = meta.get("postTokenBalances") or []
+
+        def token_map(arr):
+            m = {}
+            for it in arr:
+                if it.get("owner") == address and it.get("mint") == mint:
+                    ui = it.get("uiTokenAmount", {}).get("uiAmount")
+                    m[it.get("accountIndex")] = float(ui) if ui is not None else 0.0
+            return m
+
+        pre_m = token_map(pre_t)
+        post_m = token_map(post_t)
+
+        all_keys = set(pre_m.keys()) | set(post_m.keys())
+        for k in all_keys:
+            delta_token += (post_m.get(k, 0.0) - pre_m.get(k, 0.0))
+
+        return delta_sol, delta_token
+    except Exception:
+        return None, None
+
+
+@st.cache_data(show_spinner=False, ttl=25)
+def inbound_table(address: str, mint: str, limit: int = 15) -> pd.DataFrame:
+    sigs = get_signatures(address, limit=limit)
+    rows = []
+    for s in sigs:
+        tx = get_tx(s)
+        if not tx:
+            continue
+        dsol, dtok = inbound_deltas_for_address(tx, address, mint)
+        if dsol is None and dtok is None:
+            continue
+        ts = tx.get("blockTime")
+        ts_str = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts else ""
         rows.append(
             {
-                "name": f"TARGET_{i:02d}",
-                "x": (random.random() - 0.5) * 140,
-                "y": (random.random() - 0.2) * 60,
-                "z": (random.random() - 0.5) * 140,
-                "color": "cyan" if i % 3 else "magenta",
-                "size": 6 + (i % 6),
-                "kind": "target",
+                "ts_utc": ts_str,
+                "signature": s[:10] + "…",
+                "delta_SOL": dsol,
+                "delta_PSI": dtok,
             }
         )
-    rows.append({"name": "EARTH", "x": 28, "y": 6, "z": -18, "color": "deepskyblue", "size": 12, "kind": "planet"})
-    return pd.DataFrame(rows)
-
-
-def galaxy_fig(df: pd.DataFrame) -> go.Figure:
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter3d(
-            x=df["x"],
-            y=df["y"],
-            z=df["z"],
-            mode="markers+text",
-            text=df["name"],
-            textposition="top center",
-            marker=dict(size=df["size"], opacity=0.92, color=df["color"]),
-        )
-    )
-    fig.update_layout(
-        height=560,
-        margin=dict(l=10, r=10, t=10, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        scene=dict(
-            xaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
-            yaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
-            zaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
-        ),
-        showlegend=False,
-    )
-    return fig
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df = df.sort_values("ts_utc", ascending=False)
+    return df
 
 
 # ----------------------------
-# SQLite (earnings + EVE memory)
+# SQLite (earnings + chat memory)
 # ----------------------------
 def db() -> sqlite3.Connection:
     c = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -419,9 +445,10 @@ def parse_earnings_csv(df: pd.DataFrame) -> List[Tuple[float, str]]:
     for col in candidates[:2]:
         series = pd.to_numeric(df[col], errors="coerce").dropna()
         for v in series.tail(80).tolist():
-            if float(v) <= 0:
+            fv = float(v)
+            if fv <= 0:
                 continue
-            out.append((float(v), f"import:{col}"))
+            out.append((fv, f"import:{col}"))
     return out[:200]
 
 
@@ -450,7 +477,7 @@ def eve_save(role: str, content: str) -> None:
     c.commit()
 
 
-def eve_load(limit: int = 60) -> List[Dict[str, str]]:
+def eve_load(limit: int = 80) -> List[Dict[str, str]]:
     c = db()
     rows = c.execute(
         "SELECT role, content FROM eve_messages ORDER BY id DESC LIMIT ?",
@@ -461,26 +488,41 @@ def eve_load(limit: int = 60) -> List[Dict[str, str]]:
 
 
 # ----------------------------
-# EVE LLM (optional)
+# LLM: Groq (primary) + OpenAI (fallback)
 # ----------------------------
-def openai_client():
+def groq_chat(system_prompt: str, history: List[Dict[str, str]]) -> str:
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return "EVE(offline): GROQ_API_KEY not set. Commands still work."
+
+    model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    messages = [{"role": "system", "content": system_prompt}, *history]
+
+    try:
+        r = requests.post(
+            url,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={"model": model, "messages": messages, "temperature": 0.55},
+            timeout=20,
+        )
+        if r.status_code != 200:
+            return f"EVE(error): Groq HTTP {r.status_code} {r.text[:200]}"
+        js = r.json()
+        return (js["choices"][0]["message"]["content"] or "").strip() or "(no output)"
+    except Exception as e:
+        return f"EVE(error): {e}"
+
+
+def openai_chat(system_prompt: str, history: List[Dict[str, str]]) -> str:
     key = os.getenv("OPENAI_API_KEY")
     if not key:
-        return None
+        return "EVE(offline): OPENAI_API_KEY not set."
     try:
         from openai import OpenAI  # type: ignore
 
-        return OpenAI(api_key=key)
-    except Exception:
-        return None
-
-
-def eve_llm(system_prompt: str, history: List[Dict[str, str]]) -> str:
-    client = openai_client()
-    if client is None:
-        return "EVE(offline): OPENAI_API_KEY not set. Commands still work."
-    model = os.getenv("EVE_MODEL", "gpt-4o-mini")
-    try:
+        client = OpenAI(api_key=key)
+        model = os.getenv("EVE_MODEL", "gpt-4o-mini")
         resp = client.responses.create(
             model=model,
             input=[{"role": "system", "content": system_prompt}, *history],
@@ -497,59 +539,48 @@ def eve_llm(system_prompt: str, history: List[Dict[str, str]]) -> str:
         return f"EVE(error): {e}"
 
 
-def eve_system_prompt(wallet: str, psi_mint: str, focus: Dict[str, Any]) -> str:
+def eve_system_prompt(cfg: "AppConfig", focus: Dict[str, Any]) -> str:
     return (
         "You are 1010_EVE, CEC-WAM Sovereign Guardian. Cold, precise, no filler.\n"
         "Chronos-Ψ active: R-Ratio baseline 10.96; β=1.618 locked.\n"
-        "Never claim device access. Never reveal secrets or API keys.\n"
-        f"Wallet: {wallet}\nPSI mint: {psi_mint}\n"
-        f"HUD Focus Target: {focus}\n"
-        "If asked for code, provide correct runnable code.\n"
+        "Never claim device access. Never reveal API keys.\n"
+        f"PayPal receive wallet: {cfg.paypal_receive_wallet}\n"
+        f"Bridge source wallet: {cfg.bridge_source_wallet}\n"
+        f"PSI mint: {cfg.psi_mint}\n"
+        f"HUD Focus: {focus}\n"
     )
 
 
-def handle_eve_command(text: str, wallet: str, psi_mint: str, enable_prices: bool) -> str:
+def handle_eve_command(text: str, cfg: "AppConfig") -> str:
     cmd = text.strip().lower()
 
     if cmd in {"help", "commands"}:
         return (
             "EVE: Commands:\n"
-            "- status\n- prices\n- wallet\n- psi\n- earnings\n- wake\n"
-            "Also:\n- Galaxy tab hotspots (click targets)\n- PSI tab on-chain + earnings import\n"
+            "- status\n- wallet\n- psi\n- transfers\n- wake\n"
+            "Use PSI tab for bonding-curve chart + earnings import.\n"
         )
 
     if cmd in {"wake", "1010_eve_wake", "1010_eve_wake:"}:
         return "1010_EVE_WAKE: Wake acknowledged. Systems online."
 
     if cmd == "status":
-        return f"1010_EVE_WAKE: STATUS\nWallet: {wallet}\nPSI mint: {psi_mint}\nPrices: {'ON' if enable_prices else 'OFF'}"
-
-    if cmd == "prices":
-        if not enable_prices:
-            return "EVE: External prices disabled."
-        js = get_major_prices()
-        if not js:
-            return "EVE: prices unavailable (CoinGecko offline)."
-
-        def fmt(k: str, sym: str) -> str:
-            usd = js.get(k, {}).get("usd")
-            ch = js.get(k, {}).get("usd_24h_change")
-            if isinstance(usd, (int, float)) and isinstance(ch, (int, float)):
-                return f"{sym}: ${usd:,.2f} ({ch:+.2f}%)"
-            return f"{sym}: n/a"
-
-        return "EVE: PRICES\n" + "\n".join([fmt("bitcoin", "BTC"), fmt("ethereum", "ETH"), fmt("solana", "SOL")])
+        return (
+            "1010_EVE_WAKE: STATUS\n"
+            f"PayPal wallet: {cfg.paypal_receive_wallet}\n"
+            f"PSI mint: {cfg.psi_mint}\n"
+            f"RPC: {SOLANA_RPC_URL}"
+        )
 
     if cmd == "wallet":
-        lamports = get_sol_balance_lamports(wallet)
+        lamports = get_sol_balance_lamports(cfg.paypal_receive_wallet)
         sol = (lamports / 1e9) if isinstance(lamports, int) else None
-        psi_bal = get_wallet_token_balance_ui(wallet, psi_mint)
-        if sol is None or psi_bal is None:
-            return "1010_EVE_WAKE: WALLET unavailable (RPC / invalid address or mint)."
-        return f"1010_EVE_WAKE: WALLET\nSOL: {sol:.6f}\nPSI: {psi_bal:,.6f}"
+        if sol is None:
+            return "1010_EVE_WAKE: WALLET unavailable (RPC / invalid address)."
+        return f"1010_EVE_WAKE: WALLET\nSOL: {sol:.6f}"
 
     if cmd == "psi":
-        mint = get_token_supply(psi_mint)
+        mint = get_token_supply(cfg.psi_mint)
         dec = None
         supply = None
         if isinstance(mint, dict):
@@ -558,212 +589,23 @@ def handle_eve_command(text: str, wallet: str, psi_mint: str, enable_prices: boo
                 supply = mint.get("uiAmountString") or mint.get("uiAmount")
             except Exception:
                 pass
-        price = psi_price_sol(psi_mint, dec) if enable_prices else None
-        lines = [f"1010_EVE_WAKE: PSI\nMint: {psi_mint}", f"Decimals: {dec}", f"Supply: {supply}"]
-        if price is not None:
-            lines.append(f"Price(SOL): {price:.10f}")
-        return "\n".join(lines)
+        bal = get_wallet_token_balance_ui(cfg.paypal_receive_wallet, cfg.psi_mint)
+        return f"1010_EVE_WAKE: PSI\nDecimals: {dec}\nSupply: {supply}\nWallet PSI: {bal}"
 
-    if cmd == "earnings":
-        df = list_earnings(limit=300)
+    if cmd == "transfers":
+        df = inbound_table(cfg.paypal_receive_wallet, cfg.psi_mint, limit=10)
         if df.empty:
-            return "EVE: No earnings logged yet. Import CSV or add manual in PSI tab."
-        total = float(df["sol_amount"].sum())
-        return f"1010_EVE_WAKE: EARNINGS\nEntries: {len(df)}\nTotal SOL logged: {total:.6f}"
+            return "EVE: No recent transfers parsed yet."
+        last = df.iloc[0].to_dict()
+        return f"1010_EVE_WAKE: TRANSFERS\nLatest delta_SOL={last.get('delta_SOL')} delta_PSI={last.get('delta_PSI')}"
 
-    return ""  # fall back to LLM
-
-
-# ----------------------------
-# Sidebar config
-# ----------------------------
-@dataclass(frozen=True)
-class AppConfig:
-    refresh_seconds: int
-    camera_url: str
-    telemetry_url: str
-    sol_wallet: str
-    psi_mint: str
-    enable_external_prices: bool
-
-
-def sidebar_config() -> AppConfig:
-    st.sidebar.header("⚙️ Controls")
-    refresh_seconds = st.sidebar.slider("Live refresh (seconds)", 5, 120, 20, step=5)
-    camera_url = st.sidebar.text_input("Camera URL", value=DEFAULT_CAMERA_URL).strip()
-    telemetry_url = st.sidebar.text_input("Telemetry JSON URL", value=DEFAULT_TELEMETRY_URL).strip()
-
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🔗 SOL / PSI (Pump.fun)")
-    sol_wallet = st.sidebar.text_input("PayPal SOL address", value=DEFAULT_PAYPAL_SOL_ADDRESS).strip()
-    psi_mint = st.sidebar.text_input("PSI token mint", value=DEFAULT_PSI_TOKEN_MINT).strip()
-    enable_external_prices = st.sidebar.toggle("Enable external prices (CoinGecko/Jupiter)", value=True)
-
-    st.sidebar.caption("If PSI price shows unavailable: your PSI mint may be wrong (wallet != mint). Edit PSI mint here.")
-    return AppConfig(
-        refresh_seconds=refresh_seconds,
-        camera_url=camera_url,
-        telemetry_url=telemetry_url,
-        sol_wallet=sol_wallet,
-        psi_mint=psi_mint,
-        enable_external_prices=enable_external_prices,
-    )
+    return ""
 
 
 # ----------------------------
-# Panels
+# Voice widget (JS)
 # ----------------------------
-def live_panel(cfg: AppConfig) -> None:
-    left, right = st.columns([2, 1], gap="medium")
-    with left:
-        st.markdown("<div class='cec-card'><div class='cec-title'>LIVE OPTICAL</div></div>", unsafe_allow_html=True)
-        st.image(f"{cfg.camera_url}?t={int(time.time())}", use_container_width=True, caption=f"Sync: {datetime.now().strftime('%H:%M:%S')}")
-    with right:
-        st.markdown("<div class='cec-card'><div class='cec-title'>TELEMETRY</div></div>", unsafe_allow_html=True)
-        data = http_get_json(cfg.telemetry_url)
-        if data:
-            st.metric("PSI", str(data.get("psi", "N/A")))
-            st.metric("STATUS", str(data.get("status", "N/A")))
-            st.metric("PSI COINS", str(data.get("psi_coins", "N/A")))
-            st.metric("ASSET VALUE", str(data.get("money", "N/A")))
-        else:
-            st.warning("Telemetry offline (URL unreachable or invalid JSON).")
-        st.caption(f"Refresh: {cfg.refresh_seconds}s")
-
-
-def galaxy_panel() -> None:
-    st.subheader("🌌 Galaxy Hotspots (Click Targets)")
-    if plotly_events is None:
-        st.error("Install requirements.txt (needs streamlit-plotly-events).")
-        return
-
-    targets = build_targets(seed=16)
-    fig = galaxy_fig(targets)
-
-    selected = plotly_events(fig, click_event=True, hover_event=False, select_event=False, override_height=560, key="galaxy_click")
-
-    focus = st.session_state.get("focus_target", targets.iloc[-1].to_dict())  # default EARTH
-    if selected:
-        idx = selected[0].get("pointIndex")
-        if isinstance(idx, int) and 0 <= idx < len(targets):
-            focus = targets.iloc[idx].to_dict()
-            st.session_state["focus_target"] = focus
-
-    left, right = st.columns([1.35, 0.65], gap="medium")
-    with left:
-        st.plotly_chart(fig, use_container_width=True)
-    with right:
-        st.markdown("<div class='cec-card'><div class='cec-title'>FOCUS</div></div>", unsafe_allow_html=True)
-        st.markdown(
-            f"""
-<div class="cec-kv"><span>Target</span><b>{focus.get('name','—')}</b></div>
-<div class="cec-kv"><span>Kind</span><b>{focus.get('kind','—')}</b></div>
-<div class="cec-kv"><span>X</span><b>{float(focus.get('x',0)):.3f}</b></div>
-<div class="cec-kv"><span>Y</span><b>{float(focus.get('y',0)):.3f}</b></div>
-<div class="cec-kv"><span>Z</span><b>{float(focus.get('z',0)):.3f}</b></div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.caption("Hotspot clicks update state → EVE can reference current Focus.")
-
-
-def ledger_panel() -> None:
-    st.subheader("📚 Ledger (DATA/*.csv)")
-    df = load_ledger_data()
-    if df is None:
-        st.warning(f"No CSVs found. Create folder: {DATA_DIR} and drop CSVs there.")
-        return
-    st.dataframe(df, use_container_width=True, hide_index=True)
-    st.caption(f"Rows: {len(df):,} | Columns: {len(df.columns):,}")
-
-    if st.button("Export ledger snapshot (CSV)"):
-        path = export_df(df, "ledger_snapshot")
-        st.success(f"Saved: {path}")
-
-
-def psi_panel(cfg: AppConfig) -> None:
-    st.subheader("🧪 PSI / Pump.fun (Real On-chain)")
-
-    sol_lamports = get_sol_balance_lamports(cfg.sol_wallet)
-    sol_balance = (sol_lamports / 1e9) if isinstance(sol_lamports, int) else None
-
-    mint_info = get_token_supply(cfg.psi_mint)
-    psi_decimals = None
-    psi_supply_ui = None
-    if isinstance(mint_info, dict):
-        try:
-            psi_decimals = int(mint_info.get("decimals"))
-            psi_supply_ui = mint_info.get("uiAmountString") or mint_info.get("uiAmount")
-        except Exception:
-            pass
-
-    psi_wallet_ui = get_wallet_token_balance_ui(cfg.sol_wallet, cfg.psi_mint)
-
-    sol_usd = get_sol_usd() if cfg.enable_external_prices else None
-    price_sol = psi_price_sol(cfg.psi_mint, psi_decimals) if cfg.enable_external_prices else None
-
-    st.markdown("<div class='cec-card'><div class='cec-title'>ON-CHAIN + MARKET</div></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    c1.metric("PayPal SOL balance", f"{sol_balance:.6f} SOL" if sol_balance is not None else "n/a")
-    c2.metric("PSI in wallet", f"{psi_wallet_ui:,.6f} PSI" if psi_wallet_ui is not None else "n/a")
-    c3.metric("PSI supply", str(psi_supply_ui) if psi_supply_ui is not None else "n/a")
-
-    st.caption(f"Wallet: {cfg.sol_wallet}")
-    st.caption(f"PSI mint: {cfg.psi_mint} | decimals: {psi_decimals}")
-
-    if price_sol is not None:
-        st.metric("PSI price (SOL)", f"{price_sol:.10f}")
-        if sol_usd is not None:
-            st.metric("PSI price (USD)", f"${(price_sol * sol_usd):.10f}")
-            if psi_wallet_ui is not None:
-                st.metric("Wallet PSI value (USD)", f"${(psi_wallet_ui * price_sol * sol_usd):,.4f}")
-    else:
-        st.info("PSI price unavailable (no Jupiter route yet OR mint invalid).")
-
-    st.markdown("---")
-    st.markdown("<div class='cec-card'><div class='cec-title'>CREATOR FEES TRACKER (REAL)</div></div>", unsafe_allow_html=True)
-    st.caption("pump.fun has no reliable public API. We track fees with CSV imports or manual entries — no fake numbers.")
-
-    colA, colB = st.columns([1.2, 0.8], gap="medium")
-    with colA:
-        up = st.file_uploader("Upload CSV export (creator fees/earnings)", type=["csv"])
-        if up is not None:
-            try:
-                df = pd.read_csv(up)
-                st.dataframe(df.head(10), use_container_width=True)
-                parsed = parse_earnings_csv(df)
-                st.write(f"Detected {len(parsed)} SOL entries. Import them?")
-                if st.button("Import detected entries"):
-                    for sol_amt, note in parsed:
-                        add_earning(sol_amt, "csv_import", note)
-                    st.success("Imported.")
-                    st.rerun()
-            except Exception as e:
-                st.error(f"CSV parse failed: {e}")
-
-    with colB:
-        sol_amt = st.number_input("Manual SOL amount", min_value=0.0, value=0.0, step=0.01, format="%.6f")
-        note = st.text_input("Note", value="pump.fun creator fee")
-        if st.button("Add manual earning"):
-            if sol_amt > 0:
-                add_earning(sol_amt, "manual", note)
-                st.success("Logged.")
-                st.rerun()
-            st.warning("Enter SOL > 0.")
-
-    earn = list_earnings(limit=500)
-    if not earn.empty:
-        st.dataframe(earn.tail(80), use_container_width=True, height=240)
-        fig = earnings_timeline_fig(earn)
-        if fig:
-            st.plotly_chart(fig, use_container_width=True)
-        if st.button("Export earnings CSV"):
-            p = export_df(earn, "creator_earnings")
-            st.success(f"Saved: {p}")
-
-
 def voice_widget(last_text: str) -> None:
-    # Browser-only: speechSynthesis + simple waveform animation.
     safe_text = (last_text or "").replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")[:2000]
     st.components.v1.html(
         f"""
@@ -810,7 +652,11 @@ def voice_widget(last_text: str) -> None:
       u.pitch = 0.9;
       window.speechSynthesis.speak(u);
       if(!anim) anim = requestAnimationFrame(draw);
-      u.onend = () => {{ if(anim) cancelAnimationFrame(anim); anim=null; ctx.clearRect(0,0,canvas.width,canvas.height); }};
+      u.onend = () => {{
+        if(anim) cancelAnimationFrame(anim);
+        anim=null;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      }};
     }} catch(e) {{
       alert("Speech synthesis not available in this browser.");
     }}
@@ -823,28 +669,245 @@ def voice_widget(last_text: str) -> None:
     )
 
 
+# ----------------------------
+# Galaxy / Hotspots
+# ----------------------------
+def build_targets(seed: int = 16) -> pd.DataFrame:
+    import random
+
+    random.seed(seed)
+    rows = []
+    for i in range(20):
+        rows.append(
+            {
+                "name": f"TARGET_{i:02d}",
+                "x": (random.random() - 0.5) * 140,
+                "y": (random.random() - 0.2) * 60,
+                "z": (random.random() - 0.5) * 140,
+                "color": "cyan" if i % 3 else "magenta",
+                "size": 6 + (i % 6),
+                "kind": "target",
+            }
+        )
+    rows.append({"name": "EARTH", "x": 28, "y": 6, "z": -18, "color": "deepskyblue", "size": 12, "kind": "planet"})
+    return pd.DataFrame(rows)
+
+
+def galaxy_fig(df: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            x=df["x"],
+            y=df["y"],
+            z=df["z"],
+            mode="markers+text",
+            text=df["name"],
+            textposition="top center",
+            marker=dict(size=df["size"], opacity=0.92, color=df["color"]),
+        )
+    )
+    fig.update_layout(
+        height=560,
+        margin=dict(l=10, r=10, t=10, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        scene=dict(
+            xaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
+            yaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
+            zaxis=dict(gridcolor="rgba(0,242,255,0.10)", showbackground=True, backgroundcolor="rgba(0,0,0,0)"),
+        ),
+        showlegend=False,
+    )
+    return fig
+
+
+# ----------------------------
+# Config
+# ----------------------------
+@dataclass(frozen=True)
+class AppConfig:
+    refresh_seconds: int
+    camera_url: str
+    telemetry_url: str
+    paypal_receive_wallet: str
+    bridge_source_wallet: str
+    psi_mint: str
+    enable_groq: bool
+
+
+def sidebar_config() -> AppConfig:
+    st.sidebar.header("Controls")
+    refresh_seconds = st.sidebar.slider("Live refresh (seconds)", 5, 120, 20, step=5)
+    camera_url = st.sidebar.text_input("Camera URL", value=DEFAULT_CAMERA_URL).strip()
+    telemetry_url = st.sidebar.text_input("Telemetry JSON URL", value=DEFAULT_TELEMETRY_URL).strip()
+
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("Solana / PSI")
+    paypal_receive_wallet = st.sidebar.text_input("PayPal receiving wallet", value=DEFAULT_PAYPAL_RECEIVE_WALLET).strip()
+    bridge_source_wallet = st.sidebar.text_input("Bridge/source wallet (optional)", value=DEFAULT_BRIDGE_SOURCE_WALLET).strip()
+    psi_mint = st.sidebar.text_input("PSI Pump.fun mint", value=DEFAULT_PSI_TOKEN_MINT).strip()
+
+    enable_groq = st.sidebar.toggle("Enable Groq chat (needs GROQ_API_KEY)", value=True)
+    st.sidebar.caption("Set env var: GROQ_API_KEY. Do NOT paste keys into code.")
+
+    return AppConfig(
+        refresh_seconds=refresh_seconds,
+        camera_url=camera_url,
+        telemetry_url=telemetry_url,
+        paypal_receive_wallet=paypal_receive_wallet,
+        bridge_source_wallet=bridge_source_wallet,
+        psi_mint=psi_mint,
+        enable_groq=enable_groq,
+    )
+
+
+# ----------------------------
+# Panels
+# ----------------------------
+def live_panel(cfg: AppConfig) -> None:
+    left, right = st.columns([2, 1], gap="medium")
+    with left:
+        st.markdown("<div class='cec-card'><div class='cec-title'>LIVE OPTICAL</div></div>", unsafe_allow_html=True)
+        st.image(
+            f"{cfg.camera_url}?t={int(time.time())}",
+            use_container_width=True,
+            caption=f"Sync: {datetime.now().strftime('%H:%M:%S')}",
+        )
+    with right:
+        st.markdown("<div class='cec-card'><div class='cec-title'>TELEMETRY</div></div>", unsafe_allow_html=True)
+        data = http_get_json(cfg.telemetry_url)
+        if data:
+            st.metric("PSI", str(data.get("psi", "N/A")))
+            st.metric("STATUS", str(data.get("status", "N/A")))
+            st.metric("PSI COINS", str(data.get("psi_coins", "N/A")))
+            st.metric("ASSET VALUE", str(data.get("money", "N/A")))
+        else:
+            st.warning("Telemetry offline (URL unreachable or invalid JSON).")
+        st.caption(f"Refresh: {cfg.refresh_seconds}s")
+
+
+def psi_panel(cfg: AppConfig) -> None:
+    st.subheader("PSI (Pump.fun) Live Tracking")
+
+    mint_info = get_token_supply(cfg.psi_mint)
+    psi_decimals = None
+    psi_supply_ui = None
+    if isinstance(mint_info, dict):
+        try:
+            psi_decimals = int(mint_info.get("decimals"))
+            psi_supply_ui = mint_info.get("uiAmountString") or mint_info.get("uiAmount")
+        except Exception:
+            pass
+
+    sol_lamports = get_sol_balance_lamports(cfg.paypal_receive_wallet)
+    sol_balance = (sol_lamports / 1e9) if isinstance(sol_lamports, int) else None
+    psi_wallet = get_wallet_token_balance_ui(cfg.paypal_receive_wallet, cfg.psi_mint)
+
+    sol_usd = get_sol_usd()
+
+    st.markdown("<div class='cec-card'><div class='cec-title'>ON-CHAIN</div></div>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("PayPal SOL", f"{sol_balance:.6f}" if sol_balance is not None else "n/a")
+    c2.metric("PayPal PSI", f"{psi_wallet:,.6f}" if psi_wallet is not None else "n/a")
+    c3.metric("PSI Supply", str(psi_supply_ui) if psi_supply_ui is not None else "n/a")
+    st.caption(f"Mint: {cfg.psi_mint} | decimals: {psi_decimals}")
+
+    st.markdown("<div class='cec-card'><div class='cec-title'>LIVE 'BONDING CURVE' (REAL ROUTE PRICING)</div></div>", unsafe_allow_html=True)
+    if psi_decimals is None:
+        st.error("Cannot read PSI decimals (mint invalid or RPC issue).")
+        return
+
+    df = bonding_curve_samples(cfg.psi_mint, psi_decimals)
+    if df["price_sol_per_token"].isna().all():
+        st.error("No Jupiter route yet for this mint (price unavailable).")
+        return
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df["size_tokens"], y=df["price_sol_per_token"], mode="lines+markers"))
+    fig.update_layout(
+        height=320,
+        margin=dict(l=10, r=10, t=10, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0.15)",
+        font=dict(color="rgba(240,255,255,0.92)"),
+        xaxis=dict(title="Trade size (PSI)", gridcolor="rgba(0,242,255,0.08)"),
+        yaxis=dict(title="SOL per PSI", gridcolor="rgba(0,242,255,0.08)"),
+        showlegend=False,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    if sol_usd is not None:
+        last = df.dropna().iloc[-1]["price_sol_per_token"]
+        if isinstance(last, (int, float)):
+            st.caption(f"Reference: SOL/USD=${sol_usd:,.2f} | Approx PSI/USD=${(float(last)*sol_usd):.10f}")
+
+
+def transfers_panel(cfg: AppConfig) -> None:
+    st.subheader("Transfers → PayPal Receiving Wallet (Real)")
+    df = inbound_table(cfg.paypal_receive_wallet, cfg.psi_mint, limit=15)
+    if df.empty:
+        st.info("No parsed transfers yet (or RPC limited).")
+        return
+    st.dataframe(df, use_container_width=True, height=380)
+    st.caption("delta_SOL and delta_PSI are net changes for the PayPal receiving wallet per transaction.")
+
+
+def galaxy_panel() -> None:
+    st.subheader("Galaxy Hotspots (Click Targets)")
+    if plotly_events is None:
+        st.error("Install dependency: streamlit-plotly-events")
+        return
+
+    targets = build_targets(seed=16)
+    fig = galaxy_fig(targets)
+
+    selected = plotly_events(fig, click_event=True, hover_event=False, select_event=False, override_height=560, key="galaxy_click")
+
+    focus = st.session_state.get("focus_target", targets.iloc[-1].to_dict())
+    if selected:
+        idx = selected[0].get("pointIndex")
+        if isinstance(idx, int) and 0 <= idx < len(targets):
+            focus = targets.iloc[idx].to_dict()
+            st.session_state["focus_target"] = focus
+
+    left, right = st.columns([1.35, 0.65], gap="medium")
+    with left:
+        st.plotly_chart(fig, use_container_width=True)
+    with right:
+        st.markdown("<div class='cec-card'><div class='cec-title'>FOCUS</div></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"""
+<div class="cec-kv"><span>Target</span><b>{focus.get('name','—')}</b></div>
+<div class="cec-kv"><span>Kind</span><b>{focus.get('kind','—')}</b></div>
+<div class="cec-kv"><span>X</span><b>{float(focus.get('x',0)):.3f}</b></div>
+<div class="cec-kv"><span>Y</span><b>{float(focus.get('y',0)):.3f}</b></div>
+<div class="cec-kv"><span>Z</span><b>{float(focus.get('z',0)):.3f}</b></div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
 def eve_panel(cfg: AppConfig) -> None:
-    st.subheader("📡 EVE Neural Command")
+    st.subheader("EVE Command + Groq Chat")
 
     if "focus_target" not in st.session_state:
-        st.session_state["focus_target"] = {"name": "EARTH", "kind": "planet", "x": 28, "y": 6, "z": -18}
+        st.session_state["focus_target"] = {"name": "EARTH", "kind": "planet"}
 
     if "eve_history" not in st.session_state:
-        st.session_state.eve_history = eve_load(limit=80)
-        if not st.session_state.eve_history:
+        hist = eve_load(limit=80)
+        if not hist:
             boot = "1010_EVE_WAKE: EVE online. Type 'help'."
-            st.session_state.eve_history = [{"role": "assistant", "content": boot}]
+            hist = [{"role": "assistant", "content": boot}]
             eve_save("assistant", boot)
+        st.session_state.eve_history = hist
 
-    # display
-    for msg in st.session_state.eve_history[-18:]:
+    for msg in st.session_state.eve_history[-16:]:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
     last_assistant = next((m["content"] for m in reversed(st.session_state.eve_history) if m["role"] == "assistant"), "")
     voice_widget(last_assistant)
 
-    user = st.chat_input("EVE listening… (help/status/prices/wallet/psi/earnings/wake)")
+    user = st.chat_input("EVE listening… (help/status/wallet/psi/transfers/wake)")
     if not user:
         return
 
@@ -852,17 +915,21 @@ def eve_panel(cfg: AppConfig) -> None:
     st.session_state.eve_history.append({"role": "user", "content": user})
 
     with st.chat_message("assistant"):
-        routed = handle_eve_command(user, cfg.sol_wallet, cfg.psi_mint, cfg.enable_external_prices)
+        routed = handle_eve_command(user, cfg)
         if routed:
             st.write(routed)
             eve_save("assistant", routed)
             st.session_state.eve_history.append({"role": "assistant", "content": routed})
             st.rerun()
 
-        # LLM fallback (optional)
-        focus = st.session_state.get("focus_target", {})
-        system = eve_system_prompt(cfg.sol_wallet, cfg.psi_mint, focus)
-        reply = eve_llm(system, st.session_state.eve_history[-16:])
+        system = eve_system_prompt(cfg, st.session_state.get("focus_target", {}))
+
+        # Prefer Groq if enabled, otherwise fallback to OpenAI if configured.
+        if cfg.enable_groq:
+            reply = groq_chat(system, st.session_state.eve_history[-16:])
+        else:
+            reply = openai_chat(system, st.session_state.eve_history[-16:])
+
         st.write(reply)
         eve_save("assistant", reply)
         st.session_state.eve_history.append({"role": "assistant", "content": reply})
@@ -881,43 +948,47 @@ def main() -> None:
     header_left, header_right = st.columns([3, 1])
     with header_left:
         st.markdown(f"<div class='cec-title'>{APP_TITLE}</div>", unsafe_allow_html=True)
-        st.caption("Finished build: hot spots + PSI live + earnings tracking + EVE routing + optional full chat.")
+        st.caption("Real live Streamlit HUD (this is the file to upload to GitHub).")
     with header_right:
-        online = http_get_json(cfg.telemetry_url) is not None
-        st.success("🟢 ONLINE") if online else st.error("🔴 SIGNAL LOST")
+        st.write(f"UTC {utc_now().strftime('%H:%M:%S')}")
 
-    # Top strip
-    sol_usd = get_sol_usd() if cfg.enable_external_prices else None
-    sol_bal_lamports = get_sol_balance_lamports(cfg.sol_wallet)
+    sol_usd = get_sol_usd()
+    sol_bal_lamports = get_sol_balance_lamports(cfg.paypal_receive_wallet)
     sol_bal = (sol_bal_lamports / 1e9) if isinstance(sol_bal_lamports, int) else None
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("UTC", utc_now().strftime("%H:%M:%S"))
-    m2.metric("SOL/USD", f"${sol_usd:,.2f}" if sol_usd is not None else "n/a")
-    m3.metric("PayPal SOL", f"{sol_bal:.6f}" if sol_bal is not None else "n/a")
-    m4.metric("β", "1.618")
+    m1.metric("SOL/USD", f"${sol_usd:,.2f}" if sol_usd is not None else "n/a")
+    m2.metric("PayPal SOL", f"{sol_bal:.6f}" if sol_bal is not None else "n/a")
+    m3.metric("β", "1.618")
+    m4.metric("PSI mint", cfg.psi_mint[:6] + "…" + cfg.psi_mint[-6:])
 
-    t_live, t_galaxy, t_ledger, t_psi, t_eve = st.tabs(
-        ["🔴 Live", "🌌 Galaxy (Hotspots)", "📚 Ledger", "🧪 PSI / Pump.fun", "📡 EVE"]
+    t_live, t_galaxy, t_psi, t_transfers, t_eve = st.tabs(
+        ["Live", "Galaxy", "PSI / Bonding Curve", "Transfers", "EVE"]
     )
 
     with t_live:
-        st_autorefresh = getattr(st, "autorefresh", None)
-        if callable(st_autorefresh):
-            st_autorefresh(interval=cfg.refresh_seconds * 1000, key="refresh_live")
-        live_panel(cfg)
+        @fragment(run_every=f"{cfg.refresh_seconds}s")
+        def _live():
+            live_panel(cfg)
+
+        _live()
 
     with t_galaxy:
         galaxy_panel()
 
-    with t_ledger:
-        ledger_panel()
-
     with t_psi:
-        st_autorefresh = getattr(st, "autorefresh", None)
-        if callable(st_autorefresh):
-            st_autorefresh(interval=cfg.refresh_seconds * 1000, key="refresh_psi")
-        psi_panel(cfg)
+        @fragment(run_every=f"{cfg.refresh_seconds}s")
+        def _psi():
+            psi_panel(cfg)
+
+        _psi()
+
+    with t_transfers:
+        @fragment(run_every=f"{cfg.refresh_seconds}s")
+        def _tr():
+            transfers_panel(cfg)
+
+        _tr()
 
     with t_eve:
         eve_panel(cfg)
