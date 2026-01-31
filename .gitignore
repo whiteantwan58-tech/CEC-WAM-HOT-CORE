@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+automation.log
+
+# Temporary files
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Export files
+exports/
+EVE_MASTER_EXPORT.csv
+
+# Backup files
+*.bak
+*_old.*
+requirements_old.txt
+
+# Node modules (if any)
+node_modules/
+
+# Environment variables
+.env
+.env.local

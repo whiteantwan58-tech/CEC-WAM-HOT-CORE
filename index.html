@@ -523,7 +523,7 @@
     </div>
     <div id="termLog"></div>
     <div id="termInputRow">
-      <input id="termInput" autocomplete="off" placeholder="EVE> enter command (help, status, prices, cam, set psi sol|eth|btc, clear)" />
+      <input id="termInput" autocomplete="off" placeholder="EVE> enter command (help, status, prices, cam, charts, automation, set psi sol|eth|btc, clear)" />
       <button id="termBtn">SEND</button>
     </div>
   </section>
@@ -930,6 +930,118 @@
     sysSay("Booting CEC-WAM HUD…");
     sysSay("Establishing feeds: CoinGecko + Blockchair…");
     eveSay("Online. Type 'help' for command list.");
+
+    // ---------- Chart Data Integration ----------
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:5000' 
+      : '';
+
+    async function fetchChartData(){
+      try {
+        const res = await fetch(`${API_BASE}/api/chart-data`, { cache: "no-store" });
+        if(!res.ok) throw new Error("Chart API unavailable");
+        const data = await res.json();
+        
+        // Update status
+        sysSay(`Chart data loaded: ${Object.keys(data.datasets || {}).length} datasets`);
+        
+        // Log available chart datasets
+        if(data.datasets){
+          for(const key in data.datasets){
+            const ds = data.datasets[key];
+            sysSay(`Dataset available: ${ds.title || key}`);
+          }
+        }
+        
+        return data;
+      } catch(e){
+        // Silent fail - charts are optional
+        console.log("Chart data unavailable:", e.message);
+        return null;
+      }
+    }
+
+    async function fetchAutomationStatus(){
+      try {
+        const res = await fetch(`${API_BASE}/api/automation-status`, { cache: "no-store" });
+        if(!res.ok) return null;
+        const status = await res.json();
+        
+        if(status.status === 'SUCCESS'){
+          sysSay(`Automation: ${status.csv_files_processed} CSV files processed`);
+        }
+        
+        return status;
+      } catch(e){
+        console.log("Automation status unavailable:", e.message);
+        return null;
+      }
+    }
+
+    // Load chart data on startup
+    fetchChartData();
+    fetchAutomationStatus();
+
+    // Add chart command to terminal
+    async function cmdCharts(){
+      eveSay("Loading chart data...");
+      const data = await fetchChartData();
+      
+      if(!data || !data.datasets){
+        eveSay("Chart data unavailable. Run: python chart_automation.py");
+        return;
+      }
+      
+      const datasets = data.datasets;
+      eveSay(`Available charts: ${Object.keys(datasets).length}`);
+      
+      for(const key in datasets){
+        const ds = datasets[key];
+        eveSay(`- ${ds.title || key}: ${ds.type} chart with ${ds.labels?.length || 0} points`);
+      }
+    }
+
+    async function cmdAutomation(){
+      eveSay("Checking automation status...");
+      const status = await fetchAutomationStatus();
+      
+      if(!status){
+        eveSay("Automation report unavailable. Run: python chart_automation.py");
+        return;
+      }
+      
+      eveSay(`Status: ${status.status}`);
+      eveSay(`CSV Files: ${status.csv_files_processed}`);
+      eveSay(`Last update: ${new Date(status.timestamp).toLocaleString()}`);
+    }
+
+    // Update help command
+    const originalCmdHelp = cmdHelp;
+    cmdHelp = function(){
+      originalCmdHelp();
+      eveSay("Additional: charts, automation");
+    };
+
+    // Update command handler
+    const originalHandleCmd = handleCmd;
+    handleCmd = function(raw){
+      const s = raw.trim();
+      if(!s) return;
+      
+      const parts = s.split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      
+      if(cmd === "charts") {
+        termLine("you", "YOU: " + s);
+        return cmdCharts();
+      }
+      if(cmd === "automation") {
+        termLine("you", "YOU: " + s);
+        return cmdAutomation();
+      }
+      
+      return originalHandleCmd(raw);
+    };
   </script>
 </body>
 </html>
