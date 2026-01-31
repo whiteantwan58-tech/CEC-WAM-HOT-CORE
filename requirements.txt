@@ -1,6 +1,18 @@
-git init
-git add .
-git commit -m "Deploy V.99 Sovereign Core"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/cec-wam-core.git
-git push -u origin main
+# Core dependencies
+streamlit>=1.28.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# API integrations
+requests>=2.31.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+google-api-python-client>=2.100.0
+slack-sdk>=3.23.0
+
+# Data processing
+numpy>=1.24.0
+
+# Logging and monitoring
+python-json-logger>=2.0.7

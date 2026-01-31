@@ -25,4 +25,99 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #00e6ad;
+    box-shadow: 0 0 15px rgba(0, 255, 195, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: rgba(14, 14, 27, 0.95);
+    border: 1px solid rgba(0, 255, 224, 0.5);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(0, 255, 224, 0.3);
+}
+
+/* Form styles */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(0, 255, 224, 0.05);
+    border: 1px solid rgba(0, 255, 224, 0.3);
+    border-radius: 8px;
+    color: #00ffe0;
+    font-family: 'Orbitron', sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #00ffe0;
+    box-shadow: 0 0 10px rgba(0, 255, 224, 0.3);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #00ffe0;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Feedback styles */
+.feedback {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.feedback.success {
+    background: rgba(0, 255, 195, 0.15);
+    border: 1px solid rgba(0, 255, 195, 0.45);
+    color: #00ffc3;
+}
+
+.feedback.info {
+    background: rgba(188, 19, 254, 0.15);
+    border: 1px solid rgba(188, 19, 254, 0.45);
+    color: #bc13fe;
+}
+
+.feedback.warning {
+    background: rgba(255, 209, 102, 0.15);
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    color: #ffd166;
+}
+
+.feedback.error {
+    background: rgba(255, 77, 109, 0.15);
+    border: 1px solid rgba(255, 77, 109, 0.45);
+    color: #ff4d6d;
 }

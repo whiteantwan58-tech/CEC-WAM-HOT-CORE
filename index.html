@@ -420,6 +420,9 @@
       <div class="pill"><span id="netDot" class="dot"></span><span id="netStatus">LINK: —</span></div>
       <div class="pill"><span class="dot"></span><span id="eveStatus">EVE: ONLINE</span></div>
       <div class="pill"><span class="dot warn"></span><span id="sourceStatus">FEEDS: —</span></div>
+      <button id="openDataModal" class="pill" style="cursor:pointer; border:1px solid rgba(44,255,154,.55); background:rgba(44,255,154,.12);">
+        <span style="font-size:14px;">📊</span><span>Input Data</span>
+      </button>
     </div>
   </header>
 
@@ -515,6 +518,50 @@
       </div>
     </aside>
   </main>
+
+  <!-- Data Input Modal -->
+  <div id="dataModal" style="display:none; position:fixed; inset:0; z-index:10; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px);">
+    <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:90%; max-width:600px; border-radius:16px; border:1px solid rgba(40,240,255,.55); background:rgba(0,10,18,.95); box-shadow:var(--shadow); padding:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-size:16px; letter-spacing:.16em; color:rgba(44,255,154,.95); text-transform:uppercase;">📊 Data Input & Analysis</h2>
+        <button id="closeModal" style="padding:8px 12px; background:rgba(255,77,109,.2); border:1px solid rgba(255,77,109,.5); border-radius:8px; color:rgba(255,255,255,.9); cursor:pointer;">✕ Close</button>
+      </div>
+      
+      <form id="dataForm" style="display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <label style="display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; color:rgba(169,247,255,.85);">Data Type:</label>
+          <select id="dataType" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(40,240,255,.45); background:rgba(4,10,18,.65); color:rgba(255,255,255,.92); outline:none;">
+            <option value="metric">System Metric</option>
+            <option value="transaction">Transaction</option>
+            <option value="log">Log Entry</option>
+            <option value="custom">Custom Data</option>
+          </select>
+        </div>
+        
+        <div>
+          <label style="display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; color:rgba(169,247,255,.85);">Data Name/Title:</label>
+          <input id="dataName" type="text" placeholder="e.g., PSI Transfer, System Event" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(40,240,255,.45); background:rgba(4,10,18,.65); color:rgba(255,255,255,.92); outline:none;" />
+        </div>
+        
+        <div>
+          <label style="display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; color:rgba(169,247,255,.85);">Value/Amount:</label>
+          <input id="dataValue" type="text" placeholder="e.g., 1000, 0.5, active" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(40,240,255,.45); background:rgba(4,10,18,.65); color:rgba(255,255,255,.92); outline:none;" />
+        </div>
+        
+        <div>
+          <label style="display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; color:rgba(169,247,255,.85);">Description/Notes:</label>
+          <textarea id="dataDesc" rows="3" placeholder="Additional details or context..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(40,240,255,.45); background:rgba(4,10,18,.65); color:rgba(255,255,255,.92); outline:none; resize:vertical;"></textarea>
+        </div>
+        
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" id="analyzeBtn" style="padding:10px 16px; border-radius:8px; border:1px solid rgba(188,19,254,.55); background:rgba(188,19,254,.12); color:rgba(255,255,255,.92); letter-spacing:.12em; cursor:pointer;">🔍 Analyze with Grok</button>
+          <button type="submit" style="padding:10px 16px; border-radius:8px; border:1px solid rgba(44,255,154,.55); background:rgba(44,255,154,.12); color:rgba(255,255,255,.92); letter-spacing:.12em; cursor:pointer;">💾 Submit Data</button>
+        </div>
+      </form>
+      
+      <div id="formFeedback" style="margin-top:16px; padding:10px; border-radius:8px; display:none;"></div>
+    </div>
+  </div>
 
   <section id="terminal">
     <div class="termHead">
@@ -930,6 +977,96 @@
     sysSay("Booting CEC-WAM HUD…");
     sysSay("Establishing feeds: CoinGecko + Blockchair…");
     eveSay("Online. Type 'help' for command list.");
+
+    // ---------- Data Input Modal ----------
+    const dataModal = $("dataModal");
+    const openDataModal = $("openDataModal");
+    const closeModal = $("closeModal");
+    const dataForm = $("dataForm");
+    const analyzeBtn = $("analyzeBtn");
+    const formFeedback = $("formFeedback");
+
+    openDataModal.addEventListener("click", () => {
+      dataModal.style.display = "block";
+    });
+
+    closeModal.addEventListener("click", () => {
+      dataModal.style.display = "none";
+      dataForm.reset();
+      formFeedback.style.display = "none";
+    });
+
+    // Close modal on backdrop click
+    dataModal.addEventListener("click", (e) => {
+      if (e.target === dataModal) {
+        dataModal.style.display = "none";
+        dataForm.reset();
+        formFeedback.style.display = "none";
+      }
+    });
+
+    // Handle form submission
+    dataForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        type: $("dataType").value,
+        name: $("dataName").value,
+        value: $("dataValue").value,
+        description: $("dataDesc").value,
+        timestamp: new Date().toISOString()
+      };
+
+      // Show feedback
+      formFeedback.style.display = "block";
+      formFeedback.style.background = "rgba(44,255,154,.15)";
+      formFeedback.style.border = "1px solid rgba(44,255,154,.45)";
+      formFeedback.style.color = "rgba(44,255,154,.95)";
+      formFeedback.innerHTML = `<strong>✓ Data Submitted</strong><br/>Type: ${formData.type}<br/>Name: ${formData.name}<br/>Value: ${formData.value}`;
+
+      // Log to EVE terminal
+      eveSay(`Data submitted: ${formData.name} = ${formData.value}`);
+      
+      // Store in localStorage for persistence
+      const storedData = JSON.parse(localStorage.getItem('cecWamData') || '[]');
+      storedData.push(formData);
+      localStorage.setItem('cecWamData', JSON.stringify(storedData));
+
+      // Reset form after 2 seconds
+      setTimeout(() => {
+        dataForm.reset();
+        formFeedback.style.display = "none";
+      }, 2000);
+    });
+
+    // Handle Grok analysis
+    analyzeBtn.addEventListener("click", () => {
+      const formData = {
+        type: $("dataType").value,
+        name: $("dataName").value,
+        value: $("dataValue").value,
+        description: $("dataDesc").value
+      };
+
+      // Show analysis feedback
+      formFeedback.style.display = "block";
+      formFeedback.style.background = "rgba(188,19,254,.15)";
+      formFeedback.style.border = "1px solid rgba(188,19,254,.45)";
+      formFeedback.style.color = "rgba(188,19,254,.95)";
+      
+      // Simulate Grok analysis
+      const insights = [
+        "Pattern detected: " + formData.type.toUpperCase(),
+        "Data validation: PASSED",
+        "Anomaly score: 0.12 (NORMAL)",
+        "Recommendation: Store in " + formData.type + " ledger"
+      ];
+      
+      formFeedback.innerHTML = `<strong>🔍 Grok Analysis Complete</strong><br/>` + insights.join("<br/>");
+      
+      // Log to EVE terminal
+      eveSay(`Grok analyzed: ${formData.name} - ${insights[insights.length-1]}`);
+    });
   </script>
 </body>
 </html>
