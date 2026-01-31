@@ -30,7 +30,7 @@ python chart_automation.py
 # Start API server in background
 echo ""
 echo "Starting API server on port 5000..."
-python api_server.py &
+FLASK_ENV=development python api_server.py &
 API_PID=$!
 echo "API server started (PID: $API_PID)"
 

@@ -232,7 +232,7 @@ python chart_automation.py
 ### Production Deployment
 
 1. **Environment Variables:**
-   - Set `FLASK_ENV=production` for API server
+   - Set `FLASK_ENV=production` for API server (debug mode disabled by default)
    - Configure proper CORS origins in `api_server.py`
 
 2. **Process Management:**
