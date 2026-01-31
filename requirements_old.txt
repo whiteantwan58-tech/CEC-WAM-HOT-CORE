@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "Deploy V.99 Sovereign Core"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/cec-wam-core.git
+git push -u origin main
