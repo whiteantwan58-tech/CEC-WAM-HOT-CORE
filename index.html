@@ -1028,9 +1028,11 @@
       eveSay(`Data submitted: ${formData.name} = ${formData.value}`);
       
       // Store in localStorage for persistence
-      const storedData = JSON.parse(localStorage.getItem('cecWamData') || '[]');
+      // Key 'cecWamData' stores array of {type, name, value, description, timestamp} objects
+      const STORAGE_KEY = 'cecWamData';
+      const storedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       storedData.push(formData);
-      localStorage.setItem('cecWamData', JSON.stringify(storedData));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
 
       // Reset form after 2 seconds
       setTimeout(() => {

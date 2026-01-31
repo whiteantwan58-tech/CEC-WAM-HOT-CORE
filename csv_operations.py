@@ -225,8 +225,18 @@ class CSVOperations:
             df = pd.read_csv(csv_path)
             
             # Write to Excel
-            with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a' if Path(excel_path).exists() else 'w') as writer:
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
+            # Use 'w' mode to avoid sheet name conflicts, or 'a' with if_sheet_exists for newer pandas
+            excel_exists = Path(excel_path).exists()
+            write_mode = 'a' if excel_exists else 'w'
+            
+            # For pandas >= 1.4.0, we can use if_sheet_exists parameter
+            try:
+                with pd.ExcelWriter(excel_path, engine='openpyxl', mode=write_mode, if_sheet_exists='replace') as writer:
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
+            except TypeError:
+                # Fallback for older pandas versions - use 'w' mode
+                with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
             
             logger.info(f"Synced {len(df)} rows to {excel_path}")
             

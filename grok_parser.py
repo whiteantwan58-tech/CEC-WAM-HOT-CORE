@@ -287,8 +287,11 @@ class GrokParser:
                 results['files_analyzed'] += 1
                 
                 if 'statistics' in insights:
-                    results['total_rows'] += insights['statistics'].get('rows', 0) or \
-                                            insights['statistics'].get('total_lines', 0)
+                    # Get row count, preferring 'rows' key, falling back to 'total_lines'
+                    rows = insights['statistics'].get('rows')
+                    if rows is None:
+                        rows = insights['statistics'].get('total_lines', 0)
+                    results['total_rows'] += rows
                 
                 if 'anomalies' in insights:
                     results['total_anomalies'] += len(insights['anomalies'])

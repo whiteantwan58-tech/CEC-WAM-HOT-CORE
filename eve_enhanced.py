@@ -11,7 +11,18 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 import pandas as pd
 
-from eve_agent import export_and_cleanup, get_disk_usage
+# Import from existing eve_agent module (dependency)
+try:
+    from eve_agent import export_and_cleanup, get_disk_usage
+except ImportError:
+    # Fallback implementations if eve_agent is not available
+    def export_and_cleanup():
+        return "EVE agent module not available"
+    def get_disk_usage():
+        import shutil
+        total, used, _ = shutil.disk_usage('/')
+        return used / total
+
 from config import Config
 from logging_config import get_logger
 from grok_parser import GrokParser
