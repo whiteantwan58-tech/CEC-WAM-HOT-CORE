@@ -1,6 +1,42 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
-This repository contains a PWA frontend to connect the CEC WAM Living Calculator (Google Sheet / CSV / local file), providing:
+## 🌌 CEC Matrix Dashboard (Streamlit)
+
+A complete operational dashboard system for the Conscious Energy Continuum (CEC) Matrix. This dashboard provides real-time monitoring, data visualization, and export capabilities for all CEC system metrics.
+
+### Features
+- **Financial HUD**: Live KPIs including PSI-Coin Balance, Liquidity Reserves, Total Spendable, CEC_WAM Status, Net Worth, and Current Valuation
+- **System Metrics**: Full operational metrics and asset tracking
+- **Task Management**: EVE unfinished tasks with priority-based color coding
+- **Physics Modules**: Interactive tabs for DarkEnergy, BlackHoles, QuantumField, Conscious, Synth, Interface, and Log modules
+- **Data Export**: Download buttons for HUD, Metrics, and Tasks data in CSV format
+- **Modern Design**: Clean, wide-layout interface optimized for operational monitoring
+
+### Quick Start
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the dashboard
+streamlit run cec_dashboard.py
+```
+
+The dashboard will automatically load data from:
+- `data/CEC_WAM_MASTER_LEDGER_LIVE.xlsx` - Main Excel file with all physics modules
+- `data/EVE_UNFINISHED_TASKS.csv` - Task management data
+- `data/CEC_Matrix_System_Operational_Metrics_and_Assets.csv` - System metrics
+
+### Deploy to Streamlit Cloud
+1. Push this repository to GitHub
+2. Go to [share.streamlit.io](https://share.streamlit.io)
+3. Connect your repository and select `cec_dashboard.py`
+4. Deploy!
+
+---
+
+## PWA Frontend
+
+This repository also contains a PWA frontend to connect the CEC WAM Living Calculator (Google Sheet / CSV / local file), providing:
 
 - Live fetch & merge from a published Google Sheet (CSV) URL.
 - Import local CSV/XLSX (CSV parsing included; for XLSX use a converter).
