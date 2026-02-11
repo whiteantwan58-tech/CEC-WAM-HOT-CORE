@@ -56,3 +56,5 @@ EVE_MASTER_EXPORT_*.csv
 
 # OS
 Thumbs.db
+app_old_backup.py
+app_enhanced.py

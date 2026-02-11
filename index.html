@@ -1004,7 +1004,10 @@
   <section id="terminal">
     <div class="termHead">
       <div class="left"><span class="dot"></span> EVE // COMMAND BUS</div>
-      <div class="right" id="termRight">type: <span style="color:rgba(44,255,154,.9)">help</span></div>
+      <div class="right" id="termRight">
+        <button id="voiceBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 10px; font-size: 11px;">🎤 VOICE</button>
+        <span>type: <span style="color:rgba(44,255,154,.9)">help</span></span>
+      </div>
     </div>
     <div id="termLog"></div>
     <div id="termInputRow">
@@ -1486,6 +1489,61 @@
         handleCmd(v);
       }
     });
+
+    // ---------- Voice Input ----------
+    $("voiceBtn").addEventListener("click", () => {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        eveSay("❌ Voice input not supported in this browser");
+        return;
+      }
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      
+      recognition.onstart = () => {
+        $("voiceBtn").textContent = '🎙️ LISTENING...';
+        $("voiceBtn").style.background = 'linear-gradient(135deg, #ff4d6d 0%, #ff8c42 100%)';
+        eveSay("🎤 Voice input active. Speak now...");
+      };
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        eveSay("📝 Heard: " + transcript);
+        $("termInput").value = transcript;
+        handleCmd(transcript);
+      };
+      
+      recognition.onerror = (event) => {
+        eveSay("❌ Voice error: " + event.error);
+        $("voiceBtn").textContent = '🎤 VOICE';
+        $("voiceBtn").style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      };
+      
+      recognition.onend = () => {
+        $("voiceBtn").textContent = '🎤 VOICE';
+        $("voiceBtn").style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      };
+      
+      recognition.start();
+    });
+
+    // ---------- Auto-Refresh Every 5 Seconds ----------
+    let autoRefreshInterval = 5000; // 5 seconds
+    setInterval(() => {
+      // Refresh data silently
+      pollFeeds().catch(err => console.log("Auto-refresh error:", err));
+      initEmbeddedData();
+      
+      // Update clock display to show last refresh
+      const now = new Date();
+      $("termRight").querySelector('span').style.opacity = '0.5';
+      setTimeout(() => {
+        $("termRight").querySelector('span').style.opacity = '1';
+      }, 100);
+    }, autoRefreshInterval);
 
     // Boot sequence
     sysSay("🚀 Booting EVE-4 ULTRA HUD…");
