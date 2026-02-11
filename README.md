@@ -2,7 +2,39 @@
 
 A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling and clear status indicators.
 
-## 🌟 Features
+## 🌟 NEW Enhanced Features (v2.0)
+
+### ⚡ Performance Optimizations
+- **st.cache_data (ttl=10)**: All data loading functions use intelligent caching with 10-second TTL
+- **Auto-refresh every 5 seconds**: Real-time updates without manual refresh
+- **Efficient data filtering**: Automatic filtering from Nov 6, 2025 to today
+- **Batch loading**: Multiple CSV files loaded in parallel
+
+### 🎤 Voice Input
+- **Web Speech API**: Fully integrated voice command system
+- **Hands-free control**: Control the dashboard using voice commands
+- **Multi-browser support**: Works in Chrome, Edge, Safari (requires HTTPS)
+- **Real-time feedback**: Visual indication of listening state
+
+### 🌟 Three.js Star Map HD Visuals
+- **10,000+ HD particles**: High-definition star field visualization
+- **Smooth animation**: 60 FPS smooth rotation and movement
+- **Responsive design**: Adapts to any screen size
+- **Interactive**: Real-time 3D rendering
+
+### 🤖 EVE Agent Full Access
+- **Full system access**: EVE agent has complete control
+- **Auto-fix mechanisms**: Automatic error detection and repair
+- **Status monitoring**: Real-time health checks
+- **Command interface**: Terminal and voice command support
+
+### 📊 Live Data Management
+- **Date filtering**: Automatic filtering from Nov 6, 2025
+- **Real-time updates**: Data refreshes every 5 seconds
+- **CSV export**: One-click export of filtered data
+- **Error handling**: Graceful fallback and recovery
+
+## 🌟 Original Features
 
 - **Real-time Blockchain Data**: Live integration with Solana blockchain via RPC
 - **Token Tracking**: PSI-Coin holdings and price monitoring
@@ -10,7 +42,6 @@ A production-ready, autonomous live data dashboard that displays real-time block
 - **Smart Fallback**: Automatic CSV backup when APIs are unavailable
 - **Health Monitoring**: Real-time system health checks and status indicators
 - **Error Handling**: Robust retry logic and user-friendly error messages
-- **Auto-refresh**: Automatic data updates every 30 seconds
 - **Security**: Environment-based configuration with no hardcoded secrets
 
 ## 🚀 Quick Start
@@ -41,6 +72,32 @@ A production-ready, autonomous live data dashboard that displays real-time block
 
 5. **Access the dashboard**
    - Open your browser to `http://localhost:8501`
+
+### Run Alternative Dashboards
+
+```bash
+# EVE 1010_WAKE Dashboard (with enhanced features)
+streamlit run EVE_1010_WAKE_dashboard.py
+
+# OMEGA EVE Dashboard (with voice control)
+streamlit run omega_eve.py
+```
+
+### Testing and Utilities
+
+```bash
+# Run comprehensive system tests
+python test_system.py
+
+# Generate data report
+python data_manager.py report
+
+# Filter all CSV files (Nov 6 onwards)
+python data_manager.py filter
+
+# Filter specific file
+python data_manager.py input.csv output.csv
+```
 
 ### Testing Locally
 
@@ -239,8 +296,39 @@ To add new blockchain or API data:
 This repository also includes a PWA (Progressive Web App) frontend:
 
 - **Files**: `index.html`, `manifest.json`, `service-worker.js`
-- **Features**: Offline support, voice input, local storage
-- **Usage**: See original README section for PWA setup
+- **Features**: Offline support, voice input, local storage, Three.js star map
+- **Usage**: Open `index.html` in browser or deploy to web server
+
+## 📚 Additional Documentation
+
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)**: Comprehensive deployment guide with Docker, PM2, and cloud options
+- **[test_system.py](test_system.py)**: Automated test suite for all features
+- **[data_manager.py](data_manager.py)**: Utility for managing and filtering CSV data
+- **[formulas.md](formulas.md)**: Core system formulas and calculations
+
+## 🛠️ Utilities
+
+### test_system.py
+Comprehensive test suite that validates:
+- Dependencies installation
+- File structure integrity
+- CSV data validity
+- Streamlit app syntax
+- Cache functionality
+- Auto-refresh implementation
+- Voice input integration
+- Three.js visualization
+
+Run with: `python test_system.py`
+
+### data_manager.py
+Data management utility for:
+- Filtering CSV files by date (Nov 6 onwards)
+- Generating data reports
+- Batch processing multiple files
+- Data validation and cleanup
+
+Run with: `python data_manager.py report`
 
 ## 🧪 Testing
 
