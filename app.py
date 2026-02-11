@@ -20,6 +20,7 @@ load_dotenv()
 st.set_page_config(page_title="EVE 1010_WAKE", layout="wide")
 
 # Load environment variables
+# Note: GROQ_API_KEY is reserved for future AI features and not currently used
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 WALLET_ADDRESS = "b59HHkFpg3g9yBwwLcuDH6z1d6d6z3vdGWX7mkX3txH"
 PSI_COIN_TOKEN = "7Avu2LscLpCNNDR8szDowyck3MCBecpCf1wHyjU3pump"
