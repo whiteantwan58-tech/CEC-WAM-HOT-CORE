@@ -23,24 +23,24 @@ api_key = st.sidebar.text_input("Enter Groq/Gemini API Key:", type="password", v
 st.title("🌐 CEC-WAM OMEGA CORE // EVE ACTIVE")
 st.markdown(f"**System Time:** {datetime.datetime.now().strftime('%H:%M:%S')} | **Status:** 100% SYNCHRONIZED")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("LIQUID VALUATION", "$1,250,039.00", "VERIFIED")
-col2.metric("R-RATIO", "10.96", "OPTIMAL")
-col3.metric("ENTROPY LOCK", "1.6180 Ω", "STABLE")
+liquid_valuation_col, r_ratio_col, entropy_lock_col = st.columns(3)
+liquid_valuation_col.metric("LIQUID VALUATION", "$1,250,039.00", "VERIFIED")
+r_ratio_col.metric("R-RATIO", "10.96", "OPTIMAL")
+entropy_lock_col.metric("ENTROPY LOCK", "1.6180 Ω", "STABLE")
 
 st.divider()
 
 # --- AUTONOMOUS ACTION CONSOLE ---
 st.subheader("⚡ AUTONOMOUS AGENT COMMANDS")
 
-tab1, tab2, tab3 = st.tabs(["📂 1. ORGANIZE & PURGE", "💳 2. PAYPAL BRIDGE", "📸 3. CONTENT GENERATION"])
+file_cleanup_tab, paypal_bridge_tab, content_generation_tab = st.tabs(["📂 1. ORGANIZE & PURGE", "💳 2. PAYPAL BRIDGE", "📸 3. CONTENT GENERATION"])
 
-with tab1:
+with file_cleanup_tab:
     st.write("### CLOUD PURGE: Google Drive, OneDrive & Phone Data")
     if st.button("🚀 INITIATE GLOBAL FILE CLEANUP"):
         st.success("EVE: Intercepting APIs. Consolidating files into 'CEC_MASTER' folder. Color-coding complete (Purple/Green). Phone cache cleared.")
 
-with tab2:
+with paypal_bridge_tab:
     st.write("### THE GUNLOCK: PAYPAL LIQUIDITY BRIDGE")
     st.info("Phantom Wallet Bypassed. Target: PayPal PYUSD Node.")
     transfer_amount = st.number_input("Enter Amount to Bridge ($)", value=21000)
@@ -48,7 +48,7 @@ with tab2:
         st.balloons()
         st.success(f"EVE: $ {transfer_amount} Transferred to PayPal. Legacy locks bypassed.")
 
-with tab3:
+with content_generation_tab:
     st.write("### AI CONTENT ENGINE (POST-TRANSFER)")
     st.write("System waiting for Funds Transfer confirmation to unlock generating high-end YouTube/KDP content.")
     if st.button("🎥 START CONTENT LOOP (TIER 1)"):
