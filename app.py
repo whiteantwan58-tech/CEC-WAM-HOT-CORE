@@ -4,7 +4,12 @@ import os
 from datetime import datetime
 import requests
 from solana.rpc.api import Client
-from solana.publickey import PublicKey
+try:
+    # Try newer solana-py API (v0.30.0+)
+    from solders.pubkey import Pubkey as PublicKey
+except ImportError:
+    # Fallback to older API
+    from solana.publickey import PublicKey
 import json
 import time
 from dotenv import load_dotenv
