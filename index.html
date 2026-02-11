@@ -915,6 +915,7 @@
             src="https://eyes.nasa.gov/apps/solar-system/#/home" 
             style="width:100%;height:100%;border:none;border-radius:0 0 16px 16px;"
             title="NASA Eyes Solar System Visualization"
+            sandbox="allow-scripts allow-same-origin"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             loading="lazy">
           </iframe>
@@ -1105,6 +1106,8 @@
       psiBalance: DATA.psi_mass,
       psiMapsTo: "sol",
       pollMs: 15_000,
+      autoSaveMs: 30_000, // Auto-save interval
+      psiToSolMultiplier: 0.000001, // PSI price mapping multiplier
     };
 
     const $ = (id) => document.getElementById(id);
@@ -1212,7 +1215,7 @@
     // Schedule periodic auto-save
     setInterval(() => {
       CommandBus.enqueue("auto_save");
-    }, 30000); // Every 30 seconds
+    }, CFG.autoSaveMs);
 
     // ---------- Clock & Uptime ----------
     function tickClock(){
@@ -1323,7 +1326,7 @@
           const value = values[3] || "—";
           const status = values[4] || "UNKNOWN";
           
-          // Calculate distance metric (simulated based on ID)
+          // Calculate distance metric (simulated: ID number * 4.2 LY - representing Alpha Centauri as reference)
           const idNum = parseInt(id.replace(/[^0-9]/g, "")) || 0;
           const distance = (idNum * 4.2).toFixed(1) + " LY";
           
@@ -1384,8 +1387,8 @@
         const mapPrice = map === "btc" ? btc : map === "eth" ? eth : sol;
         const mapChange = map === "btc" ? cg.bitcoin?.usd_24h_change : map === "eth" ? cg.ethereum?.usd_24h_change : cg.solana?.usd_24h_change;
         
-        // Calculate PSI price (mapped to SOL for demo)
-        const psiPrice = sol ? (sol * 0.000001).toFixed(6) : null;
+        // Calculate PSI price (mapped to SOL with configured multiplier)
+        const psiPrice = sol ? (sol * CFG.psiToSolMultiplier).toFixed(6) : null;
         $("hudPsi").textContent = psiPrice ? "$" + psiPrice : "—";
 
         $("psiBalance").textContent = CFG.psiBalance.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " Ψ";
@@ -1413,6 +1416,7 @@
         console.error("Feed error:", e);
         
         // Auto-fix: Retry with exponential backoff
+        // Base delay: 5000ms, Growth factor: 2x, Max delay: 30000ms
         window.feedErrorCount = (window.feedErrorCount || 0) + 1;
         if (window.feedErrorCount < 3) {
           const retryDelay = Math.min(5000 * Math.pow(2, window.feedErrorCount), 30000);
@@ -1684,22 +1688,25 @@
     function exportLogsToCSV(){
       eveSay("📥 Generating CSV export...");
       
+      const timestamp = new Date().toISOString();
+      const filename = `CEC_WAM_Logs_${Date.now()}.csv`;
+      
       const logs = [
         ["Timestamp", "Category", "Metric", "Value", "Status"],
-        [new Date().toISOString(), "Finance", "Valuation", "$1.25M", "Verified"],
-        [new Date().toISOString(), "Finance", "PSI-Coins", "200 PSI", "Minted"],
-        [new Date().toISOString(), "System", "Mode", "GOD_MODE", "Optimal"],
-        [new Date().toISOString(), "Network", "Load", $("networkLoad").textContent, "Stable"],
-        [new Date().toISOString(), "Network", "Latency", $("latencyMs").textContent, "Fast"],
-        [new Date().toISOString(), "Security", "Identity", "Sovereign Architect", "Encrypted"],
-        [new Date().toISOString(), "Finance", "Net Liquidity", $("netLiquidity").textContent, "Active"],
-        [new Date().toISOString(), "Wallet", "PSI Balance", $("psiBalance").textContent, "Live"],
-        [new Date().toISOString(), "Network", "BTC Price", $("hudBtc").textContent, "Live"],
-        [new Date().toISOString(), "Network", "ETH Price", $("hudEth").textContent, "Live"],
-        [new Date().toISOString(), "Network", "SOL Price", $("hudSol").textContent, "Live"],
-        [new Date().toISOString(), "Network", "PSI Price", $("hudPsi").textContent, "Live"],
-        [new Date().toISOString(), "System", "Uptime", $("hudUptime").textContent, "Running"],
-        [new Date().toISOString(), "System", "Resource Usage", $("gaugeNum").textContent, "Monitored"]
+        [timestamp, "Finance", "Valuation", "$1.25M", "Verified"],
+        [timestamp, "Finance", "PSI-Coins", "200 PSI", "Minted"],
+        [timestamp, "System", "Mode", "GOD_MODE", "Optimal"],
+        [timestamp, "Network", "Load", $("networkLoad").textContent, "Stable"],
+        [timestamp, "Network", "Latency", $("latencyMs").textContent, "Fast"],
+        [timestamp, "Security", "Identity", "Sovereign Architect", "Encrypted"],
+        [timestamp, "Finance", "Net Liquidity", $("netLiquidity").textContent, "Active"],
+        [timestamp, "Wallet", "PSI Balance", $("psiBalance").textContent, "Live"],
+        [timestamp, "Network", "BTC Price", $("hudBtc").textContent, "Live"],
+        [timestamp, "Network", "ETH Price", $("hudEth").textContent, "Live"],
+        [timestamp, "Network", "SOL Price", $("hudSol").textContent, "Live"],
+        [timestamp, "Network", "PSI Price", $("hudPsi").textContent, "Live"],
+        [timestamp, "System", "Uptime", $("hudUptime").textContent, "Running"],
+        [timestamp, "System", "Resource Usage", $("gaugeNum").textContent, "Monitored"]
       ];
       
       const csvContent = logs.map(row => row.join(",")).join("\n");
@@ -1708,14 +1715,14 @@
       const url = URL.createObjectURL(blob);
       
       link.setAttribute("href", url);
-      link.setAttribute("download", `CEC_WAM_Logs_${Date.now()}.csv`);
+      link.setAttribute("download", filename);
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
       eveSay("✅ Logs exported successfully!");
-      sysSay("📄 File: CEC_WAM_Logs_" + Date.now() + ".csv");
+      sysSay("📄 File: " + filename);
     }
 
     // ---------- Domain Delegation Check ----------
@@ -1731,7 +1738,8 @@
       resultDiv.innerHTML = '<span style="color:var(--neon)">🔍 Checking...</span>';
       eveSay("🌐 Checking domain: " + domain);
       
-      // Simulate DNS check (in production, this would call a backend API)
+      // NOTE: This is a simulated DNS check for demonstration purposes
+      // In production, this should call a backend API that performs actual DNS lookups
       setTimeout(() => {
         const isValid = Math.random() > 0.3;
         const isDelegated = Math.random() > 0.4;
@@ -1750,6 +1758,8 @@
     }
 
     // ---------- Uptime Monitor Update ----------
+    // NOTE: This generates simulated uptime data for demonstration
+    // In production, this should query actual service health endpoints
     function updateUptimeStats(){
       const variation = () => (99 + Math.random() * 1).toFixed(1);
       $("uptimeAPI").textContent = "● " + variation() + "%";
