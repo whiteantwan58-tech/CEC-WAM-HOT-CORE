@@ -1,12 +1,23 @@
 [theme]
-primaryColor = "#FF4B4B"
+primaryColor = "#28f0ff"
 backgroundColor = "#0E1117"
 secondaryBackgroundColor = "#262730"
 textColor = "#FAFAFA"
-font = "sans serif"
+font = "monospace"
 
 [server]
 headless = true
 port = 8501
-enableCORS = false
-enableXsrfProtection = true
+enableCORS = true
+enableXsrfProtection = false
+maxUploadSize = 200
+enableWebsocketCompression = true
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
+serverAddress = "0.0.0.0"
+
+[client]
+showErrorDetails = true
+toolbarMode = "minimal"
