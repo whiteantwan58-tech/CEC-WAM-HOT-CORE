@@ -13,9 +13,11 @@ class GoogleDriveExporter {
     this.maxExports = 100;
     
     // Google Drive API configuration (would need actual credentials)
+    // To configure: Set environment variables GOOGLE_CLIENT_ID and GOOGLE_API_KEY
+    // Obtain credentials from: https://console.cloud.google.com/apis/credentials
     this.config = {
-      clientId: '', // Would be set from environment
-      apiKey: '', // Would be set from environment
+      clientId: process.env.GOOGLE_CLIENT_ID || '', // Set via environment variable
+      apiKey: process.env.GOOGLE_API_KEY || '', // Set via environment variable
       scopes: 'https://www.googleapis.com/auth/drive.file',
       discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
     };

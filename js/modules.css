@@ -72,6 +72,11 @@
   color: #ff4d6d;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;

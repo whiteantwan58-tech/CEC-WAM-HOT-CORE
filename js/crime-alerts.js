@@ -338,10 +338,11 @@ class CrimeAlertSystem {
 
   showNotification(alert) {
     if ('Notification' in window && Notification.permission === 'granted') {
+      // Use data URI for icons to avoid missing file issues
+      const iconDataUri = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🚨</text></svg>';
       new Notification('🚨 New Crime Alert', {
         body: `${alert.title} - ${alert.location}`,
-        icon: '/icon.png',
-        badge: '/badge.png',
+        icon: iconDataUri,
         tag: alert.id
       });
     }

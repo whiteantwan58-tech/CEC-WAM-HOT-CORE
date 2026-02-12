@@ -19,6 +19,7 @@ class StarMapVisualization {
     this.constellations = [];
     this.animationId = null;
     this.currentConstellation = 0;
+    this.onWindowResizeBound = this.onWindowResize.bind(this);
     
     this.init();
   }
@@ -58,7 +59,7 @@ class StarMapVisualization {
     this.scene.add(directionalLight);
     
     // Handle window resize
-    window.addEventListener('resize', () => this.onWindowResize());
+    window.addEventListener('resize', this.onWindowResizeBound);
     
     // Start animation
     this.animate();
@@ -270,7 +271,11 @@ class StarMapVisualization {
       
       constellation.traverse(child => {
         if (child.material && child.material.opacity !== undefined) {
-          child.material.opacity = opacity * (child.material.userData.baseOpacity || 0.9);
+          // Store base opacity for proper fading
+          if (child.material.userData.baseOpacity === undefined) {
+            child.material.userData.baseOpacity = child.material.opacity;
+          }
+          child.material.opacity = opacity * child.material.userData.baseOpacity;
         }
       });
       
@@ -322,7 +327,7 @@ class StarMapVisualization {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
     }
-    window.removeEventListener('resize', () => this.onWindowResize());
+    window.removeEventListener('resize', this.onWindowResizeBound);
     if (this.renderer) {
       this.renderer.dispose();
     }

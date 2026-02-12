@@ -233,7 +233,7 @@ class FederalWayLiveFeed {
     const ctx = canvas.getContext('2d');
     
     // Capture the video or placeholder
-    if (this.videoElement.readyState >= 2) {
+    if (this.videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
     } else {
       // Capture the placeholder canvas
