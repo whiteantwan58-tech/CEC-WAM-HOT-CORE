@@ -1,9 +1,10 @@
 # CEC-WAM EVE 1010_WAKE - Live Blockchain Dashboard
 
-A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling and clear status indicators.
+A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling, clear status indicators, and integrated traffic monitoring with live camera feeds, weather, and traffic data.
 
 ## 🌟 Features
 
+### Core Features
 - **Real-time Blockchain Data**: Live integration with Solana blockchain via RPC
 - **Token Tracking**: PSI-Coin holdings and price monitoring
 - **Wallet Monitoring**: SOL balance tracking
@@ -12,6 +13,24 @@ A production-ready, autonomous live data dashboard that displays real-time block
 - **Error Handling**: Robust retry logic and user-friendly error messages
 - **Auto-refresh**: Automatic data updates every 30 seconds
 - **Security**: Environment-based configuration with no hardcoded secrets
+
+### 🗺️ New: Map & Camera Integration
+- **Interactive Map**: Visualize Washington State DOT traffic camera locations
+- **Live Camera Feeds**: Click map markers to view individual camera feeds with metadata
+- **Camera Details**: Display location, direction, coordinates, and timestamps
+- **Real-time Updates**: Auto-refresh camera feeds every 60 seconds
+
+### 🌤️ New: Weather Integration
+- **Live Weather Data**: Real-time weather information from OpenWeatherMap API
+- **Location-based**: Weather data for camera locations and selected areas
+- **Detailed Information**: Temperature, conditions, humidity, wind speed
+- **Auto-refresh**: Weather updates every 5 minutes
+
+### 🚗 New: Traffic Assistance
+- **Traffic Monitoring**: Live traffic and incident data from WSDOT
+- **Traffic Statistics**: Active incidents, average speeds, flow status
+- **Real-time Updates**: Traffic data refreshes every 45 seconds
+- **Traffic Insights**: Monitor incidents and vehicle speeds near camera points
 
 ## 🚀 Quick Start
 
@@ -23,28 +42,34 @@ A production-ready, autonomous live data dashboard that displays real-time block
    cd CEC-WAM-HOT-CORE
    ```
 
-2. **Install dependencies**
+2. **Install dependencies** (for Streamlit version)
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Configure environment variables (optional)**
+3. **Configure environment variables**
    ```bash
    cp .env.example .env
-   # Edit .env and add your API keys if needed
+   # Edit .env and add your API keys:
+   # - OPENWEATHER_API_KEY for weather data (get free key at openweathermap.org)
+   # - GROQ_API_KEY (optional, for AI features)
    ```
 
-4. **Run the application**
+4. **Run the Streamlit application** (backend)
    ```bash
    streamlit run app.py
    ```
 
-5. **Access the dashboard**
-   - Open your browser to `http://localhost:8501`
+5. **Access the dashboard** (frontend)
+   Open `index.html` in your browser or serve it:
+   ```bash
+   python -m http.server 8000
+   # Then browse to http://localhost:8000
+   ```
 
 ### Testing Locally
 
-To test locally with a simple server:
+To test the full HTML dashboard with a simple server:
 ```bash
 python -m http.server 8000
 # Then browse to http://localhost:8000
@@ -117,6 +142,9 @@ The application uses the following environment variables:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GROQ_API_KEY` | No | API key for Groq AI features (optional) |
+| `OPENWEATHER_API_KEY` | Recommended | API key for OpenWeatherMap weather data (get free key at [openweathermap.org/api](https://openweathermap.org/api)) |
+
+**Note:** WSDOT traffic camera and traffic data APIs are public and don't require API keys.
 
 ### Setting Up Environment Variables
 
@@ -273,6 +301,74 @@ This repository also includes a PWA (Progressive Web App) frontend:
 ## 📄 License
 
 This project is part of the CEC-WAM system.
+
+## 🗺️ Map, Camera, Weather & Traffic Features
+
+### Interactive Map Controls
+
+The dashboard includes an interactive map with the following controls:
+- **🗺️ TOGGLE MAP**: Show/hide the map view
+- **📹 REFRESH CAMS**: Reload all traffic camera locations and feeds
+- **🌤️ WEATHER**: Toggle weather overlay layer
+- **🚗 TRAFFIC**: Toggle traffic overlay layer
+
+### Using the Camera System
+
+1. **View Camera Locations**: When the map loads, you'll see markers for each WSDOT traffic camera
+2. **Select a Camera**: Click any marker to view detailed information
+3. **View Live Feed**: Selected camera will display its live image feed
+4. **Check Details**: View location, direction, coordinates, and last update time
+5. **Close Panel**: Click the close button to deselect the camera
+
+### Weather Integration
+
+Weather data automatically updates for:
+- The selected camera location (when a camera is selected)
+- Default location (Seattle, WA when no camera is selected)
+- Updates every 5 minutes automatically
+
+The weather panel shows:
+- Current temperature
+- Weather condition description
+- Humidity percentage
+- Wind speed
+
+### Traffic Monitoring
+
+The traffic system provides:
+- **Active Incidents**: Real-time count of traffic incidents
+- **Average Speed**: Current average traffic speed
+- **Traffic Flow**: Overall flow status (GOOD/MODERATE/SLOW)
+- **Auto-refresh**: Updates every 45 seconds
+
+### Auto-Refresh Intervals
+
+The system automatically refreshes:
+- Traffic cameras: Every 60 seconds
+- Traffic data: Every 45 seconds
+- Weather data: Every 5 minutes
+- Crypto prices: Every 15 seconds
+
+## 🚀 GitHub Pages Deployment
+
+This repository is configured to automatically deploy to GitHub Pages.
+
+### Enable GitHub Pages
+
+1. Go to your repository Settings
+2. Navigate to "Pages" in the left sidebar
+3. Under "Build and deployment":
+   - Source: Deploy from a branch
+   - Branch: `main` / `(root)`
+4. Click "Save"
+5. Your site will be published at: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
+
+### Automated Deployment
+
+The repository includes a GitHub Actions workflow (`.github/workflows/deploy-dashboard.yml`) that:
+- Automatically deploys on every push to the `main` branch
+- Can be manually triggered from the Actions tab
+- Deploys the complete dashboard with all features
 
 ## 🤝 Contributing
 
