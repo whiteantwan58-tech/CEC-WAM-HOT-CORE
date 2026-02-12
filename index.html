@@ -6,6 +6,7 @@
   <title>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="js/modules.css" />
   <style>
     :root{
       --bg:#04060a;
@@ -19,6 +20,7 @@
       --gold:#ffd700;
 
       --panel: rgba(2, 8, 14, 0.82);
+      --panel-bg: rgba(2, 8, 14, 0.82);
       --panel2: rgba(4, 12, 22, 0.65);
       --stroke: rgba(40, 240, 255, 0.72);
       --stroke2: rgba(44, 255, 154, 0.55);
@@ -999,6 +1001,31 @@
       </div>
 
     </div>
+
+    <!-- New Real-time Modules Section -->
+    <div style="margin-top: 20px;">
+      <!-- Live Federal Way Feed Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">📹 FEDERAL WAY LIVE FEED</div>
+          <span style="font-size:10px;opacity:.75">HD CAMERA STREAM</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="federalWayFeed"></div>
+        </div>
+      </div>
+
+      <!-- Crime Alert System Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">🚨 CRIME ALERT FEED</div>
+          <span style="font-size:10px;opacity:.75">FEDERAL WAY POLICE SCANNER</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="crimeAlertSystem"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <section id="terminal">
@@ -1487,6 +1514,32 @@
       }
     });
 
+    // Initialize new real-time modules
+    let starMapViz = null;
+    let federalWayFeed = null;
+    let crimeAlertSystem = null;
+
+    // Wait for DOM to be fully loaded before initializing modules
+    setTimeout(() => {
+      // Initialize Star Map (already exists in the page)
+      if (typeof StarMapVisualization !== 'undefined') {
+        starMapViz = new StarMapVisualization('threeCanvas');
+        console.log('Star Map initialized');
+      }
+
+      // Initialize Federal Way Feed
+      if (typeof FederalWayLiveFeed !== 'undefined') {
+        federalWayFeed = new FederalWayLiveFeed('federalWayFeed');
+        console.log('Federal Way Feed initialized');
+      }
+
+      // Initialize Crime Alert System
+      if (typeof CrimeAlertSystem !== 'undefined') {
+        crimeAlertSystem = new CrimeAlertSystem('crimeAlertSystem');
+        console.log('Crime Alert System initialized');
+      }
+    }, 500);
+
     // Boot sequence
     sysSay("🚀 Booting EVE-4 ULTRA HUD…");
     sysSay("🔗 Loading embedded data: live.json, BlackHoles.csv, pump.fun.csv…");
@@ -1498,6 +1551,13 @@
       eveSay("🎯 Mode: GOD_MODE | Focus: 99.9%");
     }, 1200);
   </script>
+
+  <!-- Real-time functionality modules -->
+  <script src="js/starmap.js"></script>
+  <script src="js/federal-way-feed.js"></script>
+  <script src="js/crime-alerts.js"></script>
+  <script src="js/google-drive-export.js"></script>
+
 </body><button id="eve-mic" style="background:#0f0;color:#000;padding:10px;border:none;cursor:pointer;">Talk to Eve</button>
 <script>
 const micBtn = document.getElementById('eve-mic');
