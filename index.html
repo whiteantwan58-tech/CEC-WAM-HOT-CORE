@@ -1591,13 +1591,18 @@
       markers: [],
       selectedCamera: null,
       currentWeather: null,
-      trafficData: null
+      trafficData: null,
+      intervals: {
+        cameras: null,
+        traffic: null,
+        weather: null
+      }
     };
 
-    // API Configuration - Note: Replace with your actual API keys
+    // API Configuration - Note: API keys should be configured via environment variables
     const API_CONFIG = {
       WSDOT_CAMERAS: 'https://www.wsdot.wa.gov/Traffic/api/HighwayCameras/HighwayCamerasREST.svc/GetCamerasAsJson',
-      OPENWEATHER_KEY: 'demo', // Replace with your OpenWeatherMap API key
+      OPENWEATHER_KEY: window.OPENWEATHER_API_KEY || 'demo', // Set via environment variable or use demo mode
       WSDOT_TRAFFIC: 'https://www.wsdot.wa.gov/Traffic/api/TravelTimes/TravelTimesREST.svc/GetTravelTimesAsJson'
     };
 
@@ -1688,7 +1693,7 @@
           <div style="font-size: 11px; opacity: 0.85;">
             <strong>Location:</strong> ${camera.Description || 'N/A'}<br>
             <strong>Direction:</strong> ${camera.Direction || 'N/A'}<br>
-            <strong>Coordinates:</strong> ${camera.Latitude?.toFixed(4)}, ${camera.Longitude?.toFixed(4)}
+            <strong>Coordinates:</strong> ${camera.Latitude ? camera.Latitude.toFixed(4) : 'N/A'}, ${camera.Longitude ? camera.Longitude.toFixed(4) : 'N/A'}
           </div>
       `;
       
@@ -1736,7 +1741,7 @@
           MAP_STATE.currentWeather = weather;
           
           $("weatherTemp").textContent = Math.round(weather.main.temp) + "°F";
-          $("weatherCondition").textContent = "Condition: " + (weather.weather[0]?.description || 'N/A');
+          $("weatherCondition").textContent = "Condition: " + (weather.weather && weather.weather.length > 0 ? weather.weather[0].description : 'N/A');
           $("weatherLocation").textContent = "Location: " + (locationName || weather.name);
           $("weatherHumidity").textContent = "Humidity: " + weather.main.humidity + "%";
           $("weatherWind").textContent = "Wind: " + Math.round(weather.wind.speed) + " mph";
@@ -1780,7 +1785,7 @@
               totalSpeed += route.AverageSpeed;
               speedCount++;
             }
-            if (route.Description && route.Description.includes('incident')) {
+            if (route.Description && route.Description.toLowerCase().includes('incident')) {
               totalIncidents++;
             }
           });
@@ -1902,17 +1907,17 @@
     }, 2000);
 
     // Auto-refresh intervals
-    setInterval(() => {
+    MAP_STATE.intervals.cameras = setInterval(() => {
       if (MAP_STATE.map) {
         loadWSDOTCameras();
       }
     }, 60000); // Refresh cameras every 60 seconds
 
-    setInterval(() => {
+    MAP_STATE.intervals.traffic = setInterval(() => {
       loadTrafficData();
     }, 45000); // Refresh traffic every 45 seconds
 
-    setInterval(() => {
+    MAP_STATE.intervals.weather = setInterval(() => {
       if (MAP_STATE.selectedCamera && MAP_STATE.selectedCamera.Latitude) {
         loadWeatherData(
           MAP_STATE.selectedCamera.Latitude, 
@@ -1921,6 +1926,13 @@
         );
       }
     }, 300000); // Refresh weather every 5 minutes
+
+    // Cleanup intervals on page unload
+    window.addEventListener('beforeunload', () => {
+      if (MAP_STATE.intervals.cameras) clearInterval(MAP_STATE.intervals.cameras);
+      if (MAP_STATE.intervals.traffic) clearInterval(MAP_STATE.intervals.traffic);
+      if (MAP_STATE.intervals.weather) clearInterval(MAP_STATE.intervals.weather);
+    });
 
     // ========== END MAP, CAMERA, WEATHER, TRAFFIC INTEGRATION ==========
 
