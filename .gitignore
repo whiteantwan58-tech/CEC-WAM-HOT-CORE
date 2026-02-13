@@ -54,5 +54,11 @@ temp/
 # Export files
 EVE_MASTER_EXPORT_*.csv
 
+# Node modules
+node_modules/
+
+# Vercel
+.vercel/
+
 # OS
 Thumbs.db

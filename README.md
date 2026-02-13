@@ -1,296 +1,343 @@
-# CEC-WAM EVE 1010_WAKE - Live Blockchain Dashboard
+# 🌌 CEC-WAM-HOT-CORE Live Dashboard
 
-A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling and clear status indicators.
+A cutting-edge, real-time dashboard featuring live Google Sheets data synchronization, interactive 3D star maps, cryptocurrency pricing, and a theatrical biometric lock screen interface.
 
-## 🌟 Features
+## ✨ Features
 
-- **Real-time Blockchain Data**: Live integration with Solana blockchain via RPC
-- **Token Tracking**: PSI-Coin holdings and price monitoring
-- **Wallet Monitoring**: SOL balance tracking
-- **Smart Fallback**: Automatic CSV backup when APIs are unavailable
-- **Health Monitoring**: Real-time system health checks and status indicators
-- **Error Handling**: Robust retry logic and user-friendly error messages
-- **Auto-refresh**: Automatic data updates every 30 seconds
-- **Security**: Environment-based configuration with no hardcoded secrets
+### Core Functionality
+- **Live Google Sheets Integration** - Auto-fetches CSV data from Google Sheets with 5-minute auto-refresh
+- **Color-Coded Status System** - Visual status indicators (PERFECT=Green, TODO=Yellow, ACTIVE=Blue, STABLE=Gray)
+- **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API
+- **Interactive 3D Star Map** - Three.js-powered visualization of celestial bodies
+- **Biometric Lock Screen** - Theatrical security interface (aesthetic only, press Enter to bypass)
+- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **Dark Cosmic Theme** - Professional space aesthetic with neon accents
 
-## 🚀 Quick Start
+### Technical Features
+- Data caching and error handling
+- Optional Google Sheets logging (requires service account)
+- Downloadable data exports (CSV)
+- Status distribution analytics
+- Numeric value analysis and charting
+
+## 🚀 Live Demo
+
+### Deployments
+- **Streamlit Cloud**: [Deploy to Streamlit](https://streamlit.io/)
+- **GitHub Pages**: View the standalone HTML version at your GitHub Pages URL
+- **Vercel**: Alternative deployment option for Streamlit apps
+
+## 📦 Installation & Setup
+
+### Prerequisites
+- Python 3.8+
+- pip (Python package manager)
+- Git
 
 ### Local Development
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
-   cd CEC-WAM-HOT-CORE
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure environment variables (optional)**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your API keys if needed
-   ```
-
-4. **Run the application**
-   ```bash
-   streamlit run app.py
-   ```
-
-5. **Access the dashboard**
-   - Open your browser to `http://localhost:8501`
-
-### Testing Locally
-
-To test locally with a simple server:
 ```bash
-python -m http.server 8000
-# Then browse to http://localhost:8000
+git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
+cd CEC-WAM-HOT-CORE
 ```
 
-## ☁️ Streamlit Cloud Deployment
+2. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
 
-### Step 1: Prepare Your Repository
+3. **Set up environment variables (optional)**
+```bash
+cp .env.example .env
+# Edit .env with your Google Sheets credentials if using logging feature
+```
 
-1. Ensure all files are committed:
-   ```bash
-   git add .
-   git commit -m "Prepare for Streamlit Cloud deployment"
-   git push origin main
-   ```
+4. **Run the application**
+```bash
+streamlit run app.py
+```
 
-2. Verify these files exist in your repo:
-   - ✅ `app.py` (main application)
-   - ✅ `requirements.txt` (Python dependencies)
-   - ✅ `.streamlit/config.toml` (Streamlit configuration)
-   - ✅ `pump.fun.csv` (backup data)
-   - ✅ `.gitignore` (excludes sensitive files)
+5. **Open in browser**
+```
+http://localhost:8501
+```
 
-### Step 2: Deploy to Streamlit Cloud
+## 🌐 Deployment Guide
 
-1. **Go to [share.streamlit.io](https://share.streamlit.io)**
+### Deploy to Streamlit Cloud
 
-2. **Sign in** with your GitHub account
+1. **Push your code to GitHub**
+```bash
+git add .
+git commit -m "Deploy to Streamlit"
+git push origin main
+```
 
-3. **Click "New app"**
+2. **Go to [Streamlit Cloud](https://streamlit.io/cloud)**
 
-4. **Configure your app:**
-   - Repository: `whiteantwan58-tech/CEC-WAM-HOT-CORE`
-   - Branch: `main`
-   - Main file path: `app.py`
+3. **Connect your GitHub repository**
+   - Click "New app"
+   - Select your repository: `whiteantwan58-tech/CEC-WAM-HOT-CORE`
+   - Set main file: `app.py`
+   - Click "Deploy"
 
-5. **Advanced settings** (optional):
-   - Python version: 3.9+ (recommended: 3.12)
-
-6. **Click "Deploy"**
-
-### Step 3: Configure Environment Variables (Optional)
-
-If you need to add API keys:
-
-1. In Streamlit Cloud, go to your app settings
-2. Click on "Secrets" in the left sidebar
-3. Add your secrets in TOML format:
+4. **Configure Secrets (optional, for Google Sheets logging)**
+   - In Streamlit Cloud dashboard, go to app settings
+   - Add secrets in TOML format:
    ```toml
-   GROQ_API_KEY = "your-api-key-here"
+   GOOGLE_SHEETS_CREDS = '{"type": "service_account", "project_id": "...", ...}'
+   LOG_SHEET_ID = "your-sheet-id"
    ```
 
-### Step 4: Verify Deployment
+### Deploy to Vercel
 
-1. **Check the sidebar status panel:**
-   - 🟢 Solana RPC: Should show "Connected"
-   - 🟢 Solscan API: Should show "Active"
-   - 🟢 Data Source: Should show "LIVE"
+1. **Install Vercel CLI**
+```bash
+npm install -g vercel
+```
 
-2. **Test functionality:**
-   - Verify PSI-Coin price updates
-   - Check wallet balance displays correctly
-   - Test the "Refresh Live Data" button
-   - Verify auto-refresh works
+2. **Deploy**
+```bash
+vercel
+```
 
-## 🔐 Environment Variables
+3. **Follow prompts** to link your GitHub repository
 
-The application uses the following environment variables:
+### Deploy to GitHub Pages
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | No | API key for Groq AI features (optional) |
+1. **Enable GitHub Pages**
+   - Go to repository Settings > Pages
+   - Source: Deploy from a branch
+   - Branch: `main` or `copilot/...`
+   - Folder: `/` (root)
 
-### Setting Up Environment Variables
+2. **Access your site**
+   - URL: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
+   - The `index.html` file will be served automatically
 
-**For Local Development:**
-1. Copy `.env.example` to `.env`
-2. Fill in your API keys
-3. Never commit `.env` to version control
+## 🔐 Google Sheets API Setup (Optional Logging)
 
-**For Streamlit Cloud:**
-1. Go to app settings → Secrets
-2. Add variables in TOML format
-3. Restart the app to apply changes
+### Create Service Account
 
-## 📊 Data Flow
+1. **Go to [Google Cloud Console](https://console.cloud.google.com/)**
 
-1. **Primary Data Source**: Live Solana blockchain via RPC
-2. **Secondary Data Source**: Solscan public API for token metadata
-3. **Fallback**: `pump.fun.csv` local CSV data when APIs are unavailable
+2. **Create a new project** (or use existing)
 
-## 🏥 System Health Checks
+3. **Enable Google Sheets API**
+   - Navigate to "APIs & Services" > "Library"
+   - Search for "Google Sheets API"
+   - Click "Enable"
 
-The dashboard includes comprehensive health monitoring:
+4. **Create Service Account**
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "Service Account"
+   - Fill in details and create
 
-- **Solana RPC Connectivity**: Verifies blockchain connection
-- **Solscan API Availability**: Checks token data API status
-- **CSV Data Integrity**: Validates backup data structure
-- **Token Address Validation**: Ensures token addresses are valid
+5. **Download JSON Key**
+   - Click on the service account
+   - Go to "Keys" tab
+   - Click "Add Key" > "Create new key"
+   - Choose JSON format
+   - Save the file
 
-View the health check in the sidebar under "System Health Check".
+6. **Share Google Sheet with Service Account**
+   - Open your Google Sheet
+   - Click "Share"
+   - Add service account email (from JSON file)
+   - Give "Editor" permissions
 
-## 🛠️ Troubleshooting
+### Configure Credentials
 
-### Common Issues and Solutions
+#### For Local Development
+Edit `.env` file:
+```bash
+GOOGLE_SHEETS_CREDS='{"type": "service_account", "project_id": "...", ...}'
+LOG_SHEET_ID=your-sheet-id-here
+```
 
-#### 1. "Solana RPC: Disconnected"
-- **Cause**: Cannot connect to Solana blockchain
-- **Solution**: Check internet connection, verify RPC endpoint is accessible
-- **Fallback**: App will use CSV backup data
+#### For Streamlit Cloud
+Add to app secrets in TOML format:
+```toml
+GOOGLE_SHEETS_CREDS = '{"type": "service_account", ...}'
+LOG_SHEET_ID = "your-sheet-id"
+```
 
-#### 2. "Solscan API: Failed"
-- **Cause**: API rate limit or service unavailable
-- **Solution**: Wait a few minutes and refresh, or check Solscan status
-- **Fallback**: App will use cached data and CSV backup
+## 📊 Data Source Configuration
 
-#### 3. "Data Source: CSV Backup"
-- **Cause**: Live APIs are unavailable
-- **Solution**: This is normal fallback behavior, data is still functional
-- **Note**: Price data may be outdated
+### Google Sheets CSV URL
+The dashboard fetches data from this public Google Sheets URL:
+```
+https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv
+```
 
-#### 4. CSV Parsing Errors
-- **Symptom**: Warnings about missing columns
-- **Solution**: Verify `pump.fun.csv` has required columns:
-  - Token Address, Flow, Amount, Decimals, Value
-- **Fix**: Re-export CSV with correct structure
+### Expected CSV Structure
+The dashboard expects these columns (will adapt to actual structure):
+- `Field` - Item/metric name
+- `Value` - Numeric or text value
+- `Status` - Status indicator (PERFECT/TODO/ACTIVE/STABLE)
+- `Notes` - Additional information (optional)
 
-#### 5. Missing Dependencies
-- **Error**: `ModuleNotFoundError`
-- **Solution**: Run `pip install -r requirements.txt`
-- **Note**: Ensure Python 3.9+ is installed
+### To Use Your Own Sheet
 
-### Live Data Verification Checklist
+1. **Publish your Google Sheet as CSV**
+   - File > Share > Publish to web
+   - Choose "Comma-separated values (.csv)"
+   - Copy the URL
 
-- [ ] Sidebar shows "Solana RPC: Connected"
-- [ ] Sidebar shows "Solscan API: Active"
-- [ ] Data Source indicates "LIVE"
-- [ ] Last Update timestamp is recent
-- [ ] PSI-Coin price shows as "Live Price"
-- [ ] Wallet balance displays correctly
-- [ ] Auto-refresh working (check timestamp updates)
-- [ ] Manual refresh button works
-- [ ] Error messages are clear and helpful
+2. **Update the URL in `app.py`**
+   ```python
+   GOOGLE_SHEETS_CSV_URL = "your-csv-url-here"
+   ```
 
-## 🔒 Security Best Practices
-
-### What We've Implemented
-
-✅ **No Hardcoded Secrets**: All sensitive data uses environment variables  
-✅ **`.env` in `.gitignore`**: Environment files never committed  
-✅ **`.env.example`**: Template provided for configuration  
-✅ **HTTPS APIs**: All external calls use secure connections  
-✅ **Input Validation**: CSV data validated before processing  
-✅ **Error Handling**: Graceful degradation without exposing internals  
-
-### Security Guidelines
-
-1. **Never commit secrets** to version control
-2. **Use environment variables** for all API keys and sensitive data
-3. **Rotate API keys** regularly if exposed
-4. **Monitor access logs** on Streamlit Cloud
-5. **Review dependencies** regularly for vulnerabilities
-6. **Use HTTPS** for all deployments
+3. **Update the URL in `index.html`**
+   ```javascript
+   const GOOGLE_SHEETS_CSV_URL = 'your-csv-url-here';
+   ```
 
 ## 🎨 Customization
 
-### Theme Configuration
-
-Edit `.streamlit/config.toml` to customize appearance:
-
+### Theme Colors
+Edit `.streamlit/config.toml`:
 ```toml
 [theme]
-primaryColor = "#FF4B4B"      # Main accent color
-backgroundColor = "#0E1117"    # App background
-secondaryBackgroundColor = "#262730"  # Sidebar/widgets
-textColor = "#FAFAFA"          # Text color
-font = "sans serif"            # Font family
+primaryColor = "#00D9FF"          # Accent color
+backgroundColor = "#0E0E1A"       # Main background
+secondaryBackgroundColor = "#1A1A2E"  # Card background
+textColor = "#EAEAEA"             # Text color
 ```
 
-### Adding New Data Sources
+### Status Colors
+Edit color mappings in `app.py` and `index.html`:
+- PERFECT: Green (`#00FF88`)
+- TODO: Yellow (`#FFC107`)
+- ACTIVE: Blue (`#2196F3`)
+- STABLE: Gray (`#9E9E9E`)
 
-To add new blockchain or API data:
+### Auto-Refresh Interval
+Change cache TTL in `app.py`:
+```python
+@st.cache_data(ttl=300)  # 300 seconds = 5 minutes
+```
 
-1. Create a new function in the "LIVE DATA FETCHING FUNCTIONS" section
-2. Add retry logic and error handling (see existing functions as templates)
-3. Update `SystemStatus` class if needed
-4. Add health check for the new source
-5. Display the data in the metrics section
+## 🛠️ Troubleshooting
 
-## 📱 PWA Version
+### Common Issues
 
-This repository also includes a PWA (Progressive Web App) frontend:
+**CSV Data Not Loading**
+- Check internet connection
+- Verify Google Sheets URL is public and published as CSV
+- Check browser console for CORS errors
 
-- **Files**: `index.html`, `manifest.json`, `service-worker.js`
-- **Features**: Offline support, voice input, local storage
-- **Usage**: See original README section for PWA setup
+**PSI Price Not Displaying**
+- CoinGecko API may be rate-limited (free tier)
+- Check if `tridentdao` token ID is correct
+- Try again after a few minutes
 
-## 🧪 Testing
+**Lock Screen Won't Dismiss**
+- Press Enter key
+- Click "OVERRIDE ACCESS" button
+- Refresh page if stuck
 
-### Manual Testing Procedures
+**Google Sheets Logging Fails**
+- Verify service account credentials are correct
+- Check if sheet is shared with service account email
+- Ensure `gspread` and `oauth2client` are installed
+- Logging is optional - dashboard will continue without it
 
-**Test Live Data Connectivity:**
-1. Open the app and check sidebar status indicators
-2. Verify all systems show green (connected)
-3. Check "Last Update" timestamp is current
-4. Click "Refresh Live Data" and verify update
+**Three.js Star Map Not Rendering**
+- Check if Three.js CDN is accessible
+- Verify browser supports WebGL
+- Try a different browser (Chrome/Firefox recommended)
 
-**Test CSV Fallback:**
-1. Disconnect from internet
-2. Restart the app
-3. Verify "Data Source" shows "CSV Backup"
-4. Confirm data still displays (from CSV)
+### Debug Mode
 
-**Test Error Handling:**
-1. Modify CSV to remove required columns
-2. Restart app and check for validation warnings
-3. Verify app doesn't crash
-4. Restore CSV and verify recovery
+Run Streamlit in debug mode:
+```bash
+streamlit run app.py --logger.level=debug
+```
 
-**Test Token Calculations:**
-1. Compare PSI-Coin holdings with CSV data
-2. Verify live price updates when API active
-3. Check Total Spendable calculation
-4. Export data and verify accuracy
+Check browser console (F12) for JavaScript errors.
 
-## 📄 License
+## 📁 Project Structure
 
-This project is part of the CEC-WAM system.
+```
+CEC-WAM-HOT-CORE/
+├── app.py                    # Main Streamlit application
+├── index.html                # Standalone HTML dashboard
+├── requirements.txt          # Python dependencies
+├── vercel.json              # Vercel deployment config
+├── .env.example             # Environment variables template
+├── .gitignore               # Git ignore rules
+├── .streamlit/
+│   └── config.toml          # Streamlit theme configuration
+└── README.md                # This file
+```
+
+## 📚 API Documentation
+
+### Google Sheets CSV
+- **URL Format**: `https://docs.google.com/spreadsheets/d/e/{SHEET_ID}/pub?output=csv`
+- **Method**: GET
+- **Response**: CSV text
+- **Rate Limit**: None (public sheets)
+
+### CoinGecko API
+- **Endpoint**: `https://api.coingecko.com/api/v3/simple/price`
+- **Parameters**: `ids=tridentdao&vs_currencies=usd&include_24hr_change=true`
+- **Method**: GET
+- **Response**: JSON
+- **Rate Limit**: 10-50 calls/minute (free tier)
+
+## 🔒 Security Notes
+
+- **Lock Screen**: Theatrical UI only, not real security
+- **Environment Variables**: Never commit `.env` file
+- **Service Account**: Keep JSON credentials secret
+- **HTTPS**: Always use HTTPS in production
+- **CORS**: Ensure proper CORS headers for API calls
 
 ## 🤝 Contributing
 
+Contributions are welcome! Please follow these guidelines:
+
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+## 🙏 Acknowledgments
+
+- **Streamlit** - Web app framework
+- **Three.js** - 3D graphics library
+- **CoinGecko** - Cryptocurrency data API
+- **Google Sheets** - Data storage and sync
+- **Vercel** - Deployment platform
 
 ## 📞 Support
 
-For issues or questions:
-- Open an issue on GitHub
-- Check the troubleshooting section above
-- Review Streamlit Cloud logs for deployment issues
+For issues, questions, or suggestions:
+- Open an [Issue](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/issues)
+- Contact: [GitHub Profile](https://github.com/whiteantwan58-tech)
+
+## 🗺️ Roadmap
+
+- [ ] Add more celestial bodies to star map
+- [ ] Implement real-time WebSocket updates
+- [ ] Add user authentication system
+- [ ] Create mobile app version
+- [ ] Integrate more cryptocurrency exchanges
+- [ ] Add data visualization charts
+- [ ] Implement export to PDF feature
+- [ ] Add multi-language support
 
 ---
 
-**Status**: Production Ready ✅  
-**Last Updated**: 2026-02-11  
-**Version**: 2.0.0
+**Built with ❤️ by the CEC-WAM Team**
+
+🌌 *Exploring the cosmos, one datapoint at a time* 🌌
