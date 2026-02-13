@@ -16,7 +16,9 @@ st.set_page_config(
 
 # Constants
 GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
-COINGECKO_API_URL = "https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true"
+# PSI-Coin is tracked as 'tridentdao' on CoinGecko
+PSI_COIN_ID = "tridentdao"
+COINGECKO_API_URL = f"https://api.coingecko.com/api/v3/simple/price?ids={PSI_COIN_ID}&vs_currencies=usd&include_24hr_change=true"
 
 # Biometric Lock Screen HTML/CSS/JS
 LOCK_SCREEN_HTML = """
@@ -140,16 +142,17 @@ CUSTOM_CSS = """
 """
 
 # Initialize session state
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
+# Note: lock_screen_dismissed is purely decorative - no real authentication
+if 'lock_screen_dismissed' not in st.session_state:
+    st.session_state.lock_screen_dismissed = False
     st.session_state.cached_data = None
     st.session_state.last_fetch = None
 
-# Show lock screen on first load
-if not st.session_state.authenticated:
+# Show theatrical lock screen on first load (aesthetic only, not real security)
+if not st.session_state.lock_screen_dismissed:
     st.components.v1.html(LOCK_SCREEN_HTML, height=800, scrolling=False)
-    # Automatically authenticate after showing lock screen
-    st.session_state.authenticated = True
+    # Automatically dismiss after showing lock screen (theatrical effect)
+    st.session_state.lock_screen_dismissed = True
     st.rerun()
 
 # Apply custom CSS
@@ -178,8 +181,8 @@ def fetch_psi_price():
         response.raise_for_status()
         data = response.json()
         
-        price = data.get('tridentdao', {}).get('usd', 0)
-        change_24h = data.get('tridentdao', {}).get('usd_24h_change', 0)
+        price = data.get(PSI_COIN_ID, {}).get('usd', 0)
+        change_24h = data.get(PSI_COIN_ID, {}).get('usd_24h_change', 0)
         
         return price, change_24h, True
     except Exception as e:
