@@ -54,13 +54,14 @@ class EVEAgent:
         self.openai_api_key = os.getenv('OPENAI_API_KEY')
         self.openai_model = os.getenv('OPENAI_MODEL', 'gpt-4')
         
+        # Initialize data structures first
+        self.conversation_history: List[Dict[str, str]] = []
+        self.max_history = 50  # Keep last 50 exchanges
+        self.logs: List[Dict[str, Any]] = []
+        
         # Initialize APIs
         self._init_elevenlabs()
         self._init_openai()
-        
-        # Conversation history for learning
-        self.conversation_history: List[Dict[str, str]] = []
-        self.max_history = 50  # Keep last 50 exchanges
         
         # EVE's knowledge about the owner
         self.owner_profile = {
@@ -82,9 +83,6 @@ class EVEAgent:
             "24_7_availability",
             "voice_recognition"
         ]
-        
-        # Logging
-        self.logs: List[Dict[str, Any]] = []
         
     def _init_elevenlabs(self):
         """Initialize ElevenLabs API"""
