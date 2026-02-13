@@ -283,7 +283,7 @@ with st.sidebar:
     st.caption("[Google Sheets CSV](https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv)")
 
 # Main content
-tab1, tab2, tab3 = st.tabs(["📊 Data Table", "📈 Analytics", "🌟 Star Map"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Data Table", "📈 Analytics", "🌟 Star Map", "🎙️ EVE Voice AI"])
 
 with tab1:
     st.header("Live Data Feed")
@@ -494,6 +494,176 @@ with tab3:
     """)
     
     st.components.v1.html(STAR_MAP_HTML, height=650)
+
+with tab4:
+    st.header("🎙️ EVE Voice AI Assistant")
+    
+    st.markdown("""
+    ### Meet EVE - Your AI Assistant
+    **System Code:** `CEC_WAM_HEI_EVE_7A2F-9C4B`
+    
+    EVE is your always-on AI assistant with:
+    - 🎙️ Voice synthesis via ElevenLabs
+    - 🤖 Advanced AI powered by OpenAI
+    - 🧠 Learning from interactions
+    - 📊 Full CEC WAM system access
+    - 🔢 Math and financial calculations
+    - 🔒 Biometric voice recognition (Twan only)
+    - ⚡ 24/7 availability
+    """)
+    
+    # Try to import EVE
+    try:
+        from eve_voice_agent import get_eve
+        eve = get_eve()
+        eve_available = True
+    except Exception as e:
+        eve_available = False
+        st.error(f"EVE is not available: {str(e)}")
+        st.info("Please configure ELEVENLABS_API_KEY and OPENAI_API_KEY in your environment variables.")
+    
+    if eve_available:
+        # EVE Status
+        with st.expander("🤖 EVE Status", expanded=False):
+            status = eve.get_status()
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Status", status.get('status', 'unknown').upper())
+            with col2:
+                st.metric("Uptime", status.get('uptime', 'N/A'))
+            with col3:
+                st.metric("Conversations", status.get('conversation_count', 0))
+            
+            st.json(status)
+        
+        # Chat Interface
+        st.subheader("💬 Chat with EVE")
+        
+        # Initialize chat history in session state
+        if 'eve_messages' not in st.session_state:
+            st.session_state.eve_messages = []
+        
+        # Display chat history
+        chat_container = st.container()
+        with chat_container:
+            for message in st.session_state.eve_messages:
+                role = message['role']
+                content = message['content']
+                
+                if role == 'user':
+                    st.chat_message('user').write(f"**You:** {content}")
+                else:
+                    st.chat_message('assistant').write(f"**EVE:** {content}")
+        
+        # Chat input
+        user_input = st.chat_input("Type your message to EVE...")
+        
+        if user_input:
+            # Add user message to history
+            st.session_state.eve_messages.append({
+                'role': 'user',
+                'content': user_input
+            })
+            
+            # Get EVE's response
+            with st.spinner("EVE is thinking..."):
+                response = eve.chat(user_input, include_history=True)
+            
+            # Add EVE's response to history
+            st.session_state.eve_messages.append({
+                'role': 'assistant',
+                'content': response
+            })
+            
+            # Rerun to display new messages
+            st.rerun()
+        
+        # Voice synthesis (if ElevenLabs is configured)
+        st.divider()
+        st.subheader("🔊 Voice Synthesis")
+        
+        text_to_speak = st.text_input("Enter text for EVE to speak:", key="tts_input")
+        
+        if st.button("🎙️ Generate Voice", key="tts_button"):
+            if text_to_speak:
+                with st.spinner("Generating voice..."):
+                    audio_data = eve.speak(text_to_speak)
+                    
+                if audio_data:
+                    st.audio(audio_data, format='audio/mp3')
+                    st.success("Voice generated successfully!")
+                else:
+                    st.warning("Voice synthesis not available. Please configure ELEVENLABS_API_KEY.")
+            else:
+                st.warning("Please enter text to speak")
+        
+        # Quick Actions
+        st.divider()
+        st.subheader("⚡ Quick Actions")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("📊 Get CEC WAM Data"):
+                cec_data = eve.get_cec_wam_data()
+                st.json(cec_data)
+        
+        with col2:
+            if st.button("🧮 Calculate"):
+                calc_expression = st.text_input("Enter expression (e.g., 25 * 4 + 100):", key="calc_input")
+                if calc_expression:
+                    result = eve.calculate(calc_expression)
+                    st.success(f"Result: {result}")
+        
+        with col3:
+            if st.button("🗑️ Clear Chat History"):
+                st.session_state.eve_messages = []
+                eve.clear_history()
+                st.success("Chat history cleared!")
+                st.rerun()
+        
+        # API Integration Info
+        with st.expander("🔧 API Integration", expanded=False):
+            st.markdown("""
+            ### Serverless API Endpoints
+            
+            EVE is also available via API endpoints for serverless deployment:
+            
+            **Chat Endpoint:**
+            ```
+            POST /api/chat
+            {
+                "message": "Hello EVE",
+                "include_history": true
+            }
+            ```
+            
+            **Voice Synthesis Endpoint:**
+            ```
+            POST /api/voice
+            {
+                "text": "Hello, this is EVE"
+            }
+            ```
+            
+            These endpoints are configured for Vercel deployment with hidden API keys.
+            """)
+    
+    else:
+        st.info("""
+        **To enable EVE, you need to:**
+        
+        1. Get an ElevenLabs API key from https://elevenlabs.io/
+        2. Get an OpenAI API key from https://platform.openai.com/
+        3. Add them to your `.env` file or Streamlit secrets:
+           ```
+           ELEVENLABS_API_KEY=your-key-here
+           OPENAI_API_KEY=your-key-here
+           ```
+        4. Restart the application
+        
+        See `.env.example` for full configuration options.
+        """)
 
 # Footer
 st.divider()

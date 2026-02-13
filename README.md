@@ -1,6 +1,6 @@
 # 🌌 CEC-WAM-HOT-CORE Live Dashboard
 
-A cutting-edge, real-time dashboard featuring live Google Sheets data synchronization, interactive 3D star maps, cryptocurrency pricing, and a theatrical biometric lock screen interface.
+A cutting-edge, real-time dashboard featuring live Google Sheets data synchronization, interactive 3D star maps, cryptocurrency pricing, a theatrical biometric lock screen interface, and **EVE - an advanced AI voice assistant**.
 
 ## ✨ Features
 
@@ -10,8 +10,24 @@ A cutting-edge, real-time dashboard featuring live Google Sheets data synchroniz
 - **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API
 - **Interactive 3D Star Map** - Three.js-powered visualization of celestial bodies
 - **Biometric Lock Screen** - Theatrical security interface (aesthetic only, press Enter to bypass)
+- **EVE Voice AI Assistant** - Advanced AI with voice synthesis and natural language understanding
 - **Responsive Design** - Optimized for desktop, tablet, and mobile devices
 - **Dark Cosmic Theme** - Professional space aesthetic with neon accents
+
+### EVE Voice AI Assistant (NEW! 🎙️)
+**System Code:** `CEC_WAM_HEI_EVE_7A2F-9C4B`
+
+EVE is your always-on AI assistant featuring:
+- 🎙️ **Voice Synthesis** - Natural voice output via ElevenLabs
+- 🤖 **Advanced AI** - Powered by OpenAI GPT-4
+- 🧠 **Learning Capability** - Learns from interactions and improves over time
+- 📊 **CEC WAM Integration** - Full access to system data and analytics
+- 🔢 **Math & Finance** - Performs calculations and financial analysis
+- 🔒 **Voice Recognition** - Biometric voice verification for owner (Twan)
+- ⚡ **24/7 Availability** - Always-on, never sleeps, auto-updating
+- 🌐 **Serverless API** - Vercel-ready API endpoints with hidden keys
+
+EVE is designed specifically for **Twan** with full access to all CEC-WAM system data, no restrictions, and continuous learning capabilities.
 
 ### Technical Features
 - Data caching and error handling
@@ -19,6 +35,8 @@ A cutting-edge, real-time dashboard featuring live Google Sheets data synchroniz
 - Downloadable data exports (CSV)
 - Status distribution analytics
 - Numeric value analysis and charting
+- Voice-enabled chat interface
+- API endpoints for serverless deployment
 
 ## 🚀 Live Demo
 
@@ -115,6 +133,112 @@ vercel
 2. **Access your site**
    - URL: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
    - The `index.html` file will be served automatically
+
+## 🎙️ EVE Voice AI Assistant Configuration
+
+### Overview
+EVE (Evolved Virtual Entity) is an advanced AI assistant with voice capabilities, designed specifically for **Twan** with the system code `CEC_WAM_HEI_EVE_7A2F-9C4B`.
+
+### Required API Keys
+
+#### 1. ElevenLabs API (Voice Synthesis)
+1. **Sign up at [ElevenLabs](https://elevenlabs.io/)**
+2. Navigate to your profile and get your API key
+3. Browse the voice library and select a voice (default: Rachel - `21m00Tcm4TlvDq8ikWAM`)
+4. Add to your `.env` file:
+   ```bash
+   ELEVENLABS_API_KEY=your-elevenlabs-api-key
+   ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+   ```
+
+#### 2. OpenAI API (AI Chat)
+1. **Sign up at [OpenAI Platform](https://platform.openai.com/)**
+2. Create an API key in your account settings
+3. Choose your model (recommended: `gpt-4` or `gpt-3.5-turbo`)
+4. Add to your `.env` file:
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key
+   OPENAI_MODEL=gpt-4
+   ```
+
+### EVE Configuration
+
+Edit your `.env` file with EVE-specific settings:
+
+```bash
+# EVE System Configuration
+EVE_SYSTEM_CODE=CEC_WAM_HEI_EVE_7A2F-9C4B
+EVE_OWNER_NAME=Twan
+EVE_PERSONALITY=professional,helpful,intelligent,learning
+```
+
+### For Streamlit Cloud Deployment
+
+Add EVE secrets in TOML format in your Streamlit Cloud app settings:
+
+```toml
+ELEVENLABS_API_KEY = "your-elevenlabs-api-key"
+ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
+OPENAI_API_KEY = "your-openai-api-key"
+OPENAI_MODEL = "gpt-4"
+EVE_SYSTEM_CODE = "CEC_WAM_HEI_EVE_7A2F-9C4B"
+EVE_OWNER_NAME = "Twan"
+EVE_PERSONALITY = "professional,helpful,intelligent,learning"
+```
+
+### For Vercel Deployment
+
+1. **Add environment variables in Vercel dashboard:**
+   - Go to your project settings
+   - Navigate to "Environment Variables"
+   - Add all EVE-related variables:
+     - `ELEVENLABS_API_KEY`
+     - `ELEVENLABS_VOICE_ID`
+     - `OPENAI_API_KEY`
+     - `OPENAI_MODEL`
+     - `EVE_SYSTEM_CODE`
+     - `EVE_OWNER_NAME`
+     - `EVE_PERSONALITY`
+
+2. **Redeploy** to apply the new environment variables
+
+### EVE Features
+
+Once configured, EVE provides:
+
+- **Voice Chat**: Talk to EVE and get voice responses
+- **Text Chat**: Type messages and get AI-powered responses
+- **Calculations**: Ask EVE to perform math and financial calculations
+- **CEC WAM Data Access**: EVE has full access to all system data
+- **Learning**: EVE learns from each interaction to improve responses
+- **Always Available**: 24/7 operation with no downtime
+- **Personality**: Consistent, professional, and helpful personality locked in
+- **Voice Recognition**: Designed to recognize and respond only to Twan's voice (owner)
+
+### Security Notes
+
+- **API Keys**: Never commit API keys to version control
+- **Environment Variables**: Always use `.env` files (local) or secrets (cloud)
+- **Voice Biometric**: EVE includes voice recognition capabilities (requires additional setup)
+- **Owner Access**: EVE is configured to recognize Twan as the primary owner
+- **No Restrictions**: EVE has full access to all CEC-WAM system data for Twan
+
+### Troubleshooting EVE
+
+**EVE not responding:**
+- Check that all API keys are configured correctly
+- Verify API keys are valid and have available quota
+- Check the EVE status panel in the dashboard
+
+**Voice synthesis not working:**
+- Ensure `ELEVENLABS_API_KEY` is set
+- Check ElevenLabs account quota/credits
+- Try a different voice ID if needed
+
+**AI responses are generic:**
+- Ensure `EVE_SYSTEM_CODE` and `EVE_OWNER_NAME` are set
+- Clear conversation history and start fresh
+- Check OpenAI API quota/credits
 
 ## 🔐 Google Sheets API Setup (Optional Logging)
 
