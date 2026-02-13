@@ -12,6 +12,20 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 import requests
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Try to load from the current directory or parent
+    import pathlib
+    current_dir = pathlib.Path(__file__).parent
+    env_path = current_dir / '.env'
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+    else:
+        load_dotenv()  # Try default locations
+except ImportError:
+    pass  # dotenv not available, will use system environment variables
+
 # Try to import optional dependencies
 try:
     from elevenlabs import generate, set_api_key, voices
