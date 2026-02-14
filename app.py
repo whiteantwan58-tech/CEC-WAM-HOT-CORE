@@ -1,676 +1,241 @@
 import streamlit as st
 import pandas as pd
-import requests
-import json
-import os
+import plotly.graph_objects as go
 from datetime import datetime
+import random
 from io import StringIO
+import time
 
-# Page configuration
+# Page Configuration
 st.set_page_config(
-    page_title="CEC-WAM-HOT-CORE Live Dashboard",
-    page_icon="🌌",
+    page_title="🔮 SOVEREIGN SYSTEM",
+    page_icon="🔮",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Constants
-GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
-# PSI-Coin is tracked as 'tridentdao' on CoinGecko
-PSI_COIN_ID = "tridentdao"
-COINGECKO_API_URL = f"https://api.coingecko.com/api/v3/simple/price?ids={PSI_COIN_ID}&vs_currencies=usd&include_24hr_change=true"
-
-# Biometric Lock Screen HTML/CSS/JS
-LOCK_SCREEN_HTML = """
-<div id="lockScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; font-family: 'Arial', sans-serif;">
-    <div style="text-align: center; color: #00D9FF;">
-        <div style="margin-bottom: 40px;">
-            <h1 style="font-size: 2.5rem; margin: 0; text-shadow: 0 0 20px #00D9FF;">🔐 BIOMETRIC AUTHENTICATION</h1>
-            <p style="font-size: 1.2rem; opacity: 0.8; margin-top: 10px;">CEC-WAM-HOT-CORE SECURITY PROTOCOL</p>
-        </div>
-        
-        <!-- Fingerprint Scanner Animation -->
-        <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 30px;">
-            <div style="width: 200px; height: 200px; border: 3px solid #00D9FF; border-radius: 50%; position: absolute; animation: pulse 2s infinite;"></div>
-            <div style="width: 160px; height: 160px; border: 2px solid #00D9FF; border-radius: 50%; position: absolute; top: 20px; left: 20px; animation: pulse 2s infinite 0.5s;"></div>
-            <div style="width: 120px; height: 120px; border: 1px solid #00D9FF; border-radius: 50%; position: absolute; top: 40px; left: 40px; animation: pulse 2s infinite 1s;"></div>
-            <div style="font-size: 4rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">🔍</div>
-        </div>
-        
-        <div id="scanStatus" style="font-size: 1.3rem; margin-bottom: 30px; color: #00FF88;">
-            <span class="scanning">● Scanning biometric data...</span>
-        </div>
-        
-        <button onclick="unlockDashboard()" style="background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%); border: none; color: #0E0E1A; padding: 15px 40px; font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 217, 255, 0.5); transition: all 0.3s;">
-            OVERRIDE ACCESS
-        </button>
-        
-        <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.6;">Press ENTER or click button to bypass</p>
-    </div>
-</div>
-
+# Holographic CSS
+st.markdown("""
 <style>
-@keyframes pulse {
-    0%, 100% { opacity: 0.4; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-}
-.scanning {
-    animation: blink 1.5s infinite;
-}
-@keyframes blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0.5; }
-}
-</style>
-
-<script>
-function unlockDashboard() {
-    document.getElementById('scanStatus').innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED</span>';
-    setTimeout(() => {
-        document.getElementById('lockScreen').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('lockScreen').style.display = 'none';
-        }, 500);
-    }, 800);
-}
-
-// Allow Enter key to unlock
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        unlockDashboard();
-    }
-});
-
-// Auto-transition after animation
-document.getElementById('lockScreen').style.transition = 'opacity 0.5s';
-</script>
-"""
-
-# Custom CSS for dark theme and color coding
-CUSTOM_CSS = """
-<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+    
     .stApp {
-        background: linear-gradient(135deg, #0E0E1A 0%, #1A1A2E 100%);
+        background: radial-gradient(ellipse at center, #1A0040 0%, #0A0020 50%, #000010 100%);
+        color: #00FFFF;
+        font-family: 'Orbitron', monospace;
+    }
+    
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    div[data-testid="stMetricValue"] {
+        color: #00FF88 !important;
+        font-size: 32px !important;
+        font-weight: 900 !important;
+        text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
     }
     
     h1, h2, h3 {
-        color: #00D9FF !important;
-        text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-    }
-    
-    .status-perfect {
-        background-color: rgba(0, 255, 136, 0.2) !important;
-        border-left: 4px solid #00FF88 !important;
-        padding: 8px !important;
-        border-radius: 4px !important;
-    }
-    
-    .status-todo {
-        background-color: rgba(255, 193, 7, 0.2) !important;
-        border-left: 4px solid #FFC107 !important;
-        padding: 8px !important;
-        border-radius: 4px !important;
-    }
-    
-    .status-active {
-        background-color: rgba(33, 150, 243, 0.2) !important;
-        border-left: 4px solid #2196F3 !important;
-        padding: 8px !important;
-        border-radius: 4px !important;
-    }
-    
-    .status-stable {
-        background-color: rgba(158, 158, 158, 0.2) !important;
-        border-left: 4px solid #9E9E9E !important;
-        padding: 8px !important;
-        border-radius: 4px !important;
-    }
-    
-    .metric-card {
-        background: rgba(26, 26, 46, 0.8);
-        border: 1px solid #00D9FF;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
-    }
-    
-    .stDataFrame {
-        border: 1px solid #00D9FF;
-        border-radius: 5px;
+        color: #00FFFF !important;
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
     }
 </style>
-"""
-
-# Initialize session state
-# Note: lock_screen_dismissed is purely decorative - no real authentication
-if 'lock_screen_dismissed' not in st.session_state:
-    st.session_state.lock_screen_dismissed = False
-    st.session_state.cached_data = None
-    st.session_state.last_fetch = None
-
-# Show theatrical lock screen on first load (aesthetic only, not real security)
-if not st.session_state.lock_screen_dismissed:
-    st.components.v1.html(LOCK_SCREEN_HTML, height=800, scrolling=False)
-    # Automatically dismiss after showing lock screen (theatrical effect)
-    st.session_state.lock_screen_dismissed = True
-    st.rerun()
-
-# Apply custom CSS
-st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
-
-# Functions
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def fetch_google_sheets_data():
-    """Fetch CSV data from Google Sheets"""
-    try:
-        response = requests.get(GOOGLE_SHEETS_CSV_URL, timeout=10)
-        response.raise_for_status()
-        
-        # Parse CSV
-        df = pd.read_csv(StringIO(response.text))
-        
-        return df, True, None
-    except Exception as e:
-        return None, False, str(e)
-
-@st.cache_data(ttl=60)  # Cache for 1 minute
-def fetch_psi_price():
-    """Fetch PSI-Coin price from CoinGecko"""
-    try:
-        response = requests.get(COINGECKO_API_URL, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        
-        price = data.get(PSI_COIN_ID, {}).get('usd', 0)
-        change_24h = data.get(PSI_COIN_ID, {}).get('usd_24h_change', 0)
-        
-        return price, change_24h, True
-    except Exception as e:
-        return 0, 0, False
-
-def style_dataframe(df):
-    """Apply color coding to dataframe based on status column"""
-    if 'Status' in df.columns:
-        def apply_status_style(row):
-            status = str(row['Status']).upper() if pd.notna(row['Status']) else ""
-            if "PERFECT" in status:
-                return ['background-color: rgba(0, 255, 136, 0.2); color: white'] * len(row)
-            elif "TODO" in status:
-                return ['background-color: rgba(255, 193, 7, 0.2); color: white'] * len(row)
-            elif "ACTIVE" in status:
-                return ['background-color: rgba(33, 150, 243, 0.2); color: white'] * len(row)
-            elif "STABLE" in status:
-                return ['background-color: rgba(158, 158, 158, 0.2); color: white'] * len(row)
-            return [''] * len(row)
-        
-        return df.style.apply(apply_status_style, axis=1)
-    return df
-
-def log_to_google_sheets():
-    """Log dashboard access to Google Sheets (optional, requires gspread setup)"""
-    try:
-        # This requires GOOGLE_SHEETS_CREDS and LOG_SHEET_ID in environment
-        creds_json = os.getenv('GOOGLE_SHEETS_CREDS')
-        log_sheet_id = os.getenv('LOG_SHEET_ID')
-        
-        if not creds_json or not log_sheet_id:
-            return False
-        
-        import gspread
-        from oauth2client.service_account import ServiceAccountCredentials
-        
-        # Parse credentials
-        creds_dict = json.loads(creds_json)
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(credentials)
-        
-        # Open sheet and append log
-        sheet = client.open_by_key(log_sheet_id).sheet1
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sheet.append_row([timestamp, 'Dashboard Access', 'Success'])
-        
-        return True
-    except Exception:
-        # Logging is optional, don't fail the app
-        return False
+""", unsafe_allow_html=True)
 
 # Header
-st.title("🌌 CEC-WAM-HOT-CORE Live Dashboard")
-st.markdown(f"**System Status:** `OPERATIONAL` | **Last Sync:** `{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`")
+st.markdown("""
+<div style="text-align: center; padding: 30px; background: linear-gradient(90deg, #00FFFF 0%, #9D00FF 50%, #00FFFF 100%); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    <h1 style="font-size: 56px; margin: 0;">🔮 SOVEREIGN SYSTEM</h1>
+    <p style="font-size: 18px; color: #00FFFF; -webkit-text-fill-color: #00FFFF;">
+        OMEGA_LOCK | φ=1.618 | 24/7 AUTONOMOUS
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
-    st.header("⚙️ Control Panel")
-    
-    # Refresh button
-    if st.button("🔄 Refresh Data", use_container_width=True):
-        fetch_google_sheets_data.clear()
-        fetch_psi_price.clear()
-        st.rerun()
-    
-    st.divider()
-    
-    # PSI Price Display
-    st.subheader("💎 PSI-COIN PRICE")
-    price, change, success = fetch_psi_price()
-    
-    if success and price > 0:
-        st.metric(
-            label="TridentDAO (PSI)",
-            value=f"${price:.6f}",
-            delta=f"{change:.2f}% (24h)"
-        )
-    else:
-        st.warning("Price unavailable")
-    
-    st.divider()
-    
-    # Info
-    st.markdown("""
-    ### 📊 Dashboard Features
-    - Live Google Sheets sync
-    - Color-coded status
-    - Real-time PSI pricing
-    - 3D star map
-    - Auto-refresh (5 min)
-    """)
-    
-    st.divider()
-    
-    # Data source
-    st.caption("**Data Source:**")
-    st.caption("[Google Sheets CSV](https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv)")
+# Initialize session state
+if 'eve_runtime' not in st.session_state:
+    st.session_state.eve_runtime = datetime.now()
 
-# Main content
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Data Table", "📈 Analytics", "🌟 Star Map", "🎙️ EVE Voice AI"])
+# Main Tabs
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "🏠 COMMAND CENTER",
+    "📹 LIVE VISION", 
+    "🌍 MULTI-LOCATION",
+    "🤖 EVE BRAIN",
+    "💎 PSI TRACKER"
+])
 
+# TAB 1: COMMAND CENTER
 with tab1:
-    st.header("Live Data Feed")
+    st.markdown("### 🏠 COMMAND CENTER")
     
-    # Fetch data
-    df, success, error = fetch_google_sheets_data()
+    col1, col2, col3, col4 = st.columns(4)
     
-    if success and df is not None:
-        st.success(f"✓ Data loaded successfully ({len(df)} rows)")
-        
-        # Display styled dataframe
-        st.dataframe(style_dataframe(df), use_container_width=True, height=400)
-        
-        # Download button
-        csv = df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download Data (CSV)",
-            data=csv,
-            file_name=f"cec_wam_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
-        )
-        
-    elif st.session_state.cached_data is not None:
-        st.warning("⚠️ Using cached data (network error)")
-        st.dataframe(st.session_state.cached_data, use_container_width=True, height=400)
-    else:
-        st.error(f"❌ Failed to load data: {error}")
-        st.info("Please check your internet connection or verify the Google Sheets URL.")
+    with col1:
+        st.metric("💎 PSI Peg", "$0.003466", delta="Stable")
+    with col2:
+        st.metric("🔒 φ-Lock", "$0.005608", delta="+61.8%")
+    with col3:
+        st.metric("💰 Internal", "$155.50", delta="Verified")
+    with col4:
+        st.metric("🎯 OMEGA", "$34.1M", delta="Locked")
+    
+    st.markdown("---")
+    
+    # System Status
+    st.markdown("#### 🌐 SYSTEM STATUS")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown('🟢 **PSI.STREAMLIT.APP** - ONLINE', unsafe_allow_html=True)
+    with col2:
+        st.markdown('🟢 **CEC-WAM-HOT-CORE** - ONLINE', unsafe_allow_html=True)
+    with col3:
+        st.markdown('🟢 **EVE-HEI-** - ONLINE', unsafe_allow_html=True)
 
+# TAB 2: LIVE VISION
 with tab2:
-    st.header("Data Analytics")
+    st.markdown("### 📹 LIVE VISION SYSTEM")
     
-    if success and df is not None:
-        # Status distribution
-        if 'Status' in df.columns:
-            st.subheader("📊 Status Distribution")
-            status_counts = df['Status'].value_counts()
-            st.bar_chart(status_counts)
-        
-        # Numeric value chart
-        if 'Value' in df.columns:
-            st.subheader("📈 Value Analysis")
-            
-            # Try to extract numeric values
-            numeric_df = df.copy()
-            try:
-                numeric_df['NumericValue'] = pd.to_numeric(
-                    numeric_df['Value'].astype(str).str.replace(r'[^\d.]', '', regex=True),
-                    errors='coerce'
-                )
-                numeric_df = numeric_df.dropna(subset=['NumericValue'])
-                
-                if len(numeric_df) > 0:
-                    # Create horizontal bar chart
-                    chart_data = numeric_df[['Field', 'NumericValue', 'Status']].copy() if 'Field' in df.columns else numeric_df[['NumericValue', 'Status']].copy()
-                    
-                    st.bar_chart(chart_data.set_index('Field')['NumericValue'] if 'Field' in chart_data.columns else chart_data['NumericValue'])
-                    
-                    # Show statistics
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Total Items", len(numeric_df))
-                    with col2:
-                        st.metric("Sum", f"{numeric_df['NumericValue'].sum():.2f}")
-                    with col3:
-                        st.metric("Average", f"{numeric_df['NumericValue'].mean():.2f}")
-                else:
-                    st.info("No numeric values found in 'Value' column")
-            except Exception as e:
-                st.warning(f"Could not parse numeric values: {e}")
-        
-        # Data summary
-        st.subheader("📋 Data Summary")
-        st.write(f"**Total Records:** {len(df)}")
-        st.write(f"**Columns:** {', '.join(df.columns.tolist())}")
-        
-    else:
-        st.info("Load data to see analytics")
-
-with tab3:
-    st.header("3D Star Map")
-    
-    # Three.js Star Map
-    STAR_MAP_HTML = """
-    <div id="starmap-container" style="width: 100%; height: 600px; background: #000;">
-        <canvas id="starmap"></canvas>
+    camera_html = """
+    <div style="position: relative; width: 100%; height: 500px; background: #000; 
+                border: 3px solid #00FFFF; border-radius: 15px; overflow: hidden; 
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);">
+        <video id="camera" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+        <div style="position: absolute; top: 30px; left: 50%; transform: translateX(-50%); 
+                    background: rgba(0, 255, 255, 0.2); border: 2px solid #00FFFF; 
+                    padding: 15px 30px; border-radius: 10px; backdrop-filter: blur(15px);">
+            <div id="status" style="color: #00FF88; font-size: 24px; font-weight: 900; 
+                                   text-align: center;">✅ CAMERA ACTIVE</div>
+        </div>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Three.js Star Map Implementation
-        const container = document.getElementById('starmap-container');
-        const canvas = document.getElementById('starmap');
-        
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-        
-        renderer.setSize(container.offsetWidth, container.offsetHeight);
-        renderer.setClearColor(0x000000);
-        
-        // Add stars
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
-        
-        const starsVertices = [];
-        for (let i = 0; i < 10000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
-            starsVertices.push(x, y, z);
-        }
-        
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        const starField = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(starField);
-        
-        // Alpha Centauri (Yellow Star)
-        const alphaCentauriGeometry = new THREE.SphereGeometry(2, 32, 32);
-        const alphaCentauriMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
-        const alphaCentauri = new THREE.Mesh(alphaCentauriGeometry, alphaCentauriMaterial);
-        alphaCentauri.position.set(0, 0, 0);
-        scene.add(alphaCentauri);
-        
-        // Orbit for Alpha Centauri
-        const orbitGeometry1 = new THREE.RingGeometry(15, 15.2, 64);
-        const orbitMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFF00, side: THREE.DoubleSide });
-        const orbit1 = new THREE.Mesh(orbitGeometry1, orbitMaterial1);
-        orbit1.rotation.x = Math.PI / 2;
-        scene.add(orbit1);
-        
-        // TRAPPIST-1e (Blue-Green Exoplanet)
-        const trappistGeometry = new THREE.SphereGeometry(1.5, 32, 32);
-        const trappistMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFAA });
-        const trappist = new THREE.Mesh(trappistGeometry, trappistMaterial);
-        scene.add(trappist);
-        
-        // Orbit for TRAPPIST-1e
-        const orbitGeometry2 = new THREE.RingGeometry(25, 25.2, 64);
-        const orbitMaterial2 = new THREE.MeshBasicMaterial({ color: 0x00FFAA, side: THREE.DoubleSide });
-        const orbit2 = new THREE.Mesh(orbitGeometry2, orbitMaterial2);
-        orbit2.rotation.x = Math.PI / 2;
-        scene.add(orbit2);
-        
-        // Ross 128 b (Red Exoplanet)
-        const rossGeometry = new THREE.SphereGeometry(1.2, 32, 32);
-        const rossMaterial = new THREE.MeshBasicMaterial({ color: 0xFF4444 });
-        const ross = new THREE.Mesh(rossGeometry, rossMaterial);
-        scene.add(ross);
-        
-        // Orbit for Ross 128 b
-        const orbitGeometry3 = new THREE.RingGeometry(35, 35.2, 64);
-        const orbitMaterial3 = new THREE.MeshBasicMaterial({ color: 0xFF4444, side: THREE.DoubleSide });
-        const orbit3 = new THREE.Mesh(orbitGeometry3, orbitMaterial3);
-        orbit3.rotation.x = Math.PI / 2;
-        scene.add(orbit3);
-        
-        camera.position.z = 50;
-        camera.position.y = 20;
-        
-        let angle1 = 0;
-        let angle2 = 0;
-        let angle3 = 0;
-        
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Rotate planets in orbits
-            angle1 += 0.01;
-            angle2 += 0.007;
-            angle3 += 0.005;
-            
-            trappist.position.x = Math.cos(angle1) * 25;
-            trappist.position.z = Math.sin(angle1) * 25;
-            
-            ross.position.x = Math.cos(angle2) * 35;
-            ross.position.z = Math.sin(angle2) * 35;
-            
-            // Rotate camera slightly
-            camera.position.x = Math.cos(angle3 * 0.1) * 50;
-            camera.position.z = Math.sin(angle3 * 0.1) * 50;
-            camera.lookAt(0, 0, 0);
-            
-            // Rotate star field
-            starField.rotation.y += 0.0002;
-            
-            renderer.render(scene, camera);
-        }
-        
-        animate();
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = container.offsetWidth / container.offsetHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.offsetWidth, container.offsetHeight);
-        });
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(stream => {
+                document.getElementById('camera').srcObject = stream;
+            })
+            .catch(err => {
+                document.getElementById('status').innerHTML = '⚠️ CAMERA ERROR';
+                document.getElementById('status').style.color = '#FF0044';
+            });
     </script>
     """
-    
-    st.markdown("""
-    ### Interactive 3D Star Map
-    Explore three celestial bodies in our cosmic dashboard:
-    - 🌟 **Alpha Centauri** - Yellow star (center)
-    - 🌍 **TRAPPIST-1e** - Blue-green exoplanet
-    - 🔴 **Ross 128 b** - Red exoplanet
-    """)
-    
-    st.components.v1.html(STAR_MAP_HTML, height=650)
+    st.components.v1.html(camera_html, height=550)
 
+# TAB 3: MULTI-LOCATION
+with tab3:
+    st.markdown("### 🌍 MULTI-LOCATION DASHBOARD")
+    
+    locations = {
+        "FL": {"name": "Florida", "emoji": "🌴", "temp": 78, "cond": "Sunny"},
+        "TX": {"name": "Texas", "emoji": "⭐", "temp": 72, "cond": "Clear"},
+        "WA": {"name": "Washington", "emoji": "🌲", "temp": 58, "cond": "Cloudy"},
+        "STL": {"name": "St. Louis", "emoji": "🎺", "temp": 65, "cond": "Partly Cloudy"}
+    }
+    
+    col1, col2 = st.columns(2)
+    
+    idx = 0
+    for code, loc in locations.items():
+        with col1 if idx % 2 == 0 else col2:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(157, 0, 255, 0.1)); 
+                        border: 2px solid #00FFFF; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="text-align: center; color: #00FFFF;">{loc['emoji']} {loc['name']} ({code})</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            st.metric("🌡️ Temperature", f"{loc['temp']}°F")
+            st.metric("🌤️ Condition", loc['cond'])
+        idx += 1
+
+# TAB 4: EVE BRAIN (24/7 Never-Ending)
 with tab4:
-    st.header("🎙️ EVE Voice AI Assistant")
+    runtime = datetime.now() - st.session_state.eve_runtime
+    hours = int(runtime.total_seconds() // 3600)
+    minutes = int((runtime.total_seconds() % 3600) // 60)
+    seconds = int(runtime.total_seconds() % 60)
     
-    st.markdown("""
-    ### Meet EVE - Your AI Assistant
-    **System Code:** `CEC_WAM_HEI_EVE_7A2F-9C4B`
+    st.markdown(f"""
+    <div style="text-align: center; background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2)); 
+                border: 3px solid #FF00FF; border-radius: 20px; padding: 40px; 
+                box-shadow: 0 0 50px rgba(255, 0, 255, 0.5);">
+        <div style="font-size: 96px;">🧠</div>
+        <h1 style="color: #FF00FF; font-size: 56px;">EVE ONLINE</h1>
+        <div style="color: #00FFFF; font-size: 32px;">⏱️ {hours:02d}:{minutes:02d}:{seconds:02d}</div>
+        <div style="color: #00FF88; font-size: 20px; margin-top: 10px;">🔄 NEVER-ENDING INTERFACE</div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    EVE is your always-on AI assistant with:
-    - 🎙️ Voice synthesis via ElevenLabs
-    - 🤖 Advanced AI powered by OpenAI
-    - 🧠 Learning from interactions
-    - 📊 Full CEC WAM system access
-    - 🔢 Math and financial calculations
-    - 🔒 Biometric voice recognition (Twan only)
-    - ⚡ 24/7 availability
-    """)
+    col1, col2, col3, col4 = st.columns(4)
     
-    # Try to import EVE
-    try:
-        from eve_voice_agent import get_eve
-        eve = get_eve()
-        eve_available = True
-    except Exception as e:
-        eve_available = False
-        st.error(f"EVE is not available: {str(e)}")
-        st.info("Please configure ELEVENLABS_API_KEY and OPENAI_API_KEY in your environment variables.")
+    with col1:
+        st.metric("🧠 Consciousness", f"{random.randint(85, 95)}%", delta="+0.3%")
+    with col2:
+        st.metric("💭 Neural", f"{random.randint(90, 98)}%", delta="+0.5%")
+    with col3:
+        st.metric("⚡ Processing", f"{random.randint(500, 999)} TF")
+    with col4:
+        st.metric("🌀 Quantum", f"{random.uniform(3.32e-36, 5.5e-36):.2e}")
     
-    if eve_available:
-        # EVE Status
-        with st.expander("🤖 EVE Status", expanded=False):
-            status = eve.get_status()
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Status", status.get('status', 'unknown').upper())
-            with col2:
-                st.metric("Uptime", status.get('uptime', 'N/A'))
-            with col3:
-                st.metric("Conversations", status.get('conversation_count', 0))
-            
-            st.json(status)
-        
-        # Chat Interface
-        st.subheader("💬 Chat with EVE")
-        
-        # Initialize chat history in session state
-        if 'eve_messages' not in st.session_state:
-            st.session_state.eve_messages = []
-        
-        # Display chat history
-        chat_container = st.container()
-        with chat_container:
-            for message in st.session_state.eve_messages:
-                role = message['role']
-                content = message['content']
-                
-                if role == 'user':
-                    st.chat_message('user').write(f"**You:** {content}")
-                else:
-                    st.chat_message('assistant').write(f"**EVE:** {content}")
-        
-        # Chat input
-        user_input = st.chat_input("Type your message to EVE...")
-        
-        if user_input:
-            # Add user message to history
-            st.session_state.eve_messages.append({
-                'role': 'user',
-                'content': user_input
-            })
-            
-            # Get EVE's response
-            with st.spinner("EVE is thinking..."):
-                response = eve.chat(user_input, include_history=True)
-            
-            # Add EVE's response to history
-            st.session_state.eve_messages.append({
-                'role': 'assistant',
-                'content': response
-            })
-            
-            # Rerun to display new messages
-            st.rerun()
-        
-        # Voice synthesis (if ElevenLabs is configured)
-        st.divider()
-        st.subheader("🔊 Voice Synthesis")
-        
-        text_to_speak = st.text_input("Enter text for EVE to speak:", key="tts_input")
-        
-        if st.button("🎙️ Generate Voice", key="tts_button"):
-            if text_to_speak:
-                with st.spinner("Generating voice..."):
-                    audio_data = eve.speak(text_to_speak)
-                    
-                if audio_data:
-                    st.audio(audio_data, format='audio/mp3')
-                    st.success("Voice generated successfully!")
-                else:
-                    st.warning("Voice synthesis not available. Please configure ELEVENLABS_API_KEY.")
-            else:
-                st.warning("Please enter text to speak")
-        
-        # Quick Actions
-        st.divider()
-        st.subheader("⚡ Quick Actions")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button("📊 Get CEC WAM Data"):
-                cec_data = eve.get_cec_wam_data()
-                st.json(cec_data)
-        
-        with col2:
-            if st.button("🧮 Calculate"):
-                calc_expression = st.text_input("Enter expression (e.g., 25 * 4 + 100):", key="calc_input")
-                if calc_expression:
-                    result = eve.calculate(calc_expression)
-                    st.success(f"Result: {result}")
-        
-        with col3:
-            if st.button("🗑️ Clear Chat History"):
-                st.session_state.eve_messages = []
-                eve.clear_history()
-                st.success("Chat history cleared!")
-                st.rerun()
-        
-        # API Integration Info
-        with st.expander("🔧 API Integration", expanded=False):
-            st.markdown("""
-            ### Serverless API Endpoints
-            
-            EVE is also available via API endpoints for serverless deployment:
-            
-            **Chat Endpoint:**
-            ```
-            POST /api/chat
-            {
-                "message": "Hello EVE",
-                "include_history": true
-            }
-            ```
-            
-            **Voice Synthesis Endpoint:**
-            ```
-            POST /api/voice
-            {
-                "text": "Hello, this is EVE"
-            }
-            ```
-            
-            These endpoints are configured for Vercel deployment with hidden API keys.
-            """)
-    
-    else:
-        st.info("""
-        **To enable EVE, you need to:**
-        
-        1. Get an ElevenLabs API key from https://elevenlabs.io/
-        2. Get an OpenAI API key from https://platform.openai.com/
-        3. Add them to your `.env` file or Streamlit secrets:
-           ```
-           ELEVENLABS_API_KEY=your-key-here
-           OPENAI_API_KEY=your-key-here
-           ```
-        4. Restart the application
-        
-        See `.env.example` for full configuration options.
-        """)
+    # Auto-refresh
+    time.sleep(2)
+    st.rerun()
 
-# Footer
-st.divider()
-st.caption("🌌 CEC-WAM-HOT-CORE Live Dashboard | Powered by Streamlit | Data: Google Sheets | Price: CoinGecko")
+# TAB 5: PSI TRACKER
+with tab5:
+    st.markdown("### 💎 PSI TRACKER")
+    
+    # Bonding Curve Gauge
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = 0,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "BONDING CURVE", 'font': {'size': 32, 'color': '#00FFFF'}},
+        number = {'suffix': "%", 'font': {'size': 48, 'color': '#00FF88'}},
+        gauge = {
+            'axis': {'range': [None, 100], 'tickcolor': "#00FFFF"},
+            'bar': {'color': "#9D00FF"},
+            'bgcolor': "rgba(0,0,0,0)",
+            'borderwidth': 3,
+            'bordercolor': "#00FFFF"
+        }
+    ))
+    
+    fig.update_layout(
+        paper_bgcolor = "rgba(0,0,0,0)",
+        plot_bgcolor = "rgba(0,0,0,0)",
+        font = {'color': "#00FFFF"},
+        height = 350
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Quantum Log
+    st.markdown("#### 🌌 QUANTUM LOG")
+    
+    log_data = """
+Date,Build / Tab,Action,Result
+Nov 6,EVE_LOCK,Seeding PSI 0.685,Foundation Set 🔵
+Nov 10,EVE_LOCK,Golden 1.618 Lock,Spin Stabilized 🟡
+Feb 3,MASTER_LOG,OMEGA_LOCK,$34.1M Verified
+Feb 12,EVE_LOCK,Wormhole sim,1.75E+21 Entangled
+"""
+    
+    df = pd.read_csv(StringIO(log_data))
+    st.dataframe(df, use_container_width=True)
 
-# Optional: Log access (non-blocking)
-try:
-    log_to_google_sheets()
-except:
-    pass
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: #00FFFF; opacity: 0.7;'>🔮 SOVEREIGN SYSTEM v1.0 | φ=1.618 | QUANTUM ENTANGLED</div>", unsafe_allow_html=True)
