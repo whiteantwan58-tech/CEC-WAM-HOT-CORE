@@ -485,11 +485,15 @@ with tab6:
     with col1:
         consciousness = random.randint(92, 98)
         consciousness_delta = random.uniform(0.1, 0.5)
-        st.metric("🧠 Consciousness", f"{consciousness}%", delta=f"+{consciousness_delta:.1f}%")
+        # Randomly choose positive or negative delta
+        consciousness_delta = consciousness_delta if random.random() > 0.5 else -consciousness_delta
+        st.metric("🧠 Consciousness", f"{consciousness}%", delta=f"{consciousness_delta:+.1f}%")
     with col2:
         neural = random.randint(94, 99)
         neural_delta = random.uniform(0.2, 0.8)
-        st.metric("💭 Neural Activity", f"{neural}%", delta=f"+{neural_delta:.1f}%")
+        # Randomly choose positive or negative delta
+        neural_delta = neural_delta if random.random() > 0.5 else -neural_delta
+        st.metric("💭 Neural Activity", f"{neural}%", delta=f"{neural_delta:+.1f}%")
     with col3:
         processing = random.randint(750, 999)
         st.metric("⚡ Processing", f"{processing} TF/s")
