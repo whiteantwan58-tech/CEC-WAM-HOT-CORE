@@ -33,11 +33,11 @@ jobs:
             # Backup original requirements
             cp requirements.txt requirements.txt.bak
             
-            # Try pip-upgrade first
-            echo "Attempting pip-upgrade..."
-            if pip-upgrade --skip-package-installation requirements.txt; then
+            # Try pip-upgrade with package installation for compatibility check
+            echo "Attempting pip-upgrade with compatibility validation..."
+            if pip-upgrade requirements.txt; then
               echo "upgrade_success=true" >> $GITHUB_OUTPUT
-              echo "✅ pip-upgrade succeeded"
+              echo "✅ pip-upgrade succeeded with compatibility check"
             else
               echo "⚠️ pip-upgrade failed, trying pip-compile..."
               # Restore backup and try pip-compile
@@ -63,6 +63,21 @@ jobs:
             echo "upgrade_success=false" >> $GITHUB_OUTPUT
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "❌ No requirements.txt found"
+          fi
+          
+      - name: Validate upgraded dependencies
+        if: steps.upgrade.outputs.has_changes == 'true'
+        run: |
+          echo "Validating upgraded dependencies..."
+          # Install upgraded dependencies to check for issues
+          if pip install -r requirements.txt; then
+            echo "✅ All upgraded dependencies install successfully"
+          else
+            echo "❌ Upgraded dependencies have installation issues"
+            # Restore original requirements
+            cp requirements.txt.bak requirements.txt
+            echo "Reverted to original requirements.txt"
+            exit 1
           fi
           
       - name: Create Pull Request
