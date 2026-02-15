@@ -752,6 +752,17 @@
             box-shadow: 0 0 30px rgba(0, 217, 255, 0.7);
         }
         
+        .unlock-button.override {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+            color: #FFC107;
+        }
+        
+        .unlock-button.override:hover {
+            background: rgba(255, 193, 7, 0.3);
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+        }
+        
         .lock-hint {
             margin-top: 30px;
             font-size: 0.9rem;
@@ -1033,7 +1044,7 @@
             
             <!-- Manual Override Button (always available as fallback) -->
             <div id="manualOverrideButton" style="display: none; margin-top: 20px;">
-                <button class="unlock-button" onclick="manualOverride()" style="background: rgba(255, 193, 7, 0.2); border-color: #FFC107; color: #FFC107;">
+                <button class="unlock-button override" onclick="manualOverride()">
                     ⚠️ MANUAL OVERRIDE
                 </button>
             </div>
@@ -2259,6 +2270,9 @@ micBtn.onclick = () => {
         // Configuration constants
         const AUTO_AUTH_DELAY_MS = 2000; // Delay before auto-authentication
         
+        // Global variable to track manual override timeout
+        let manualOverrideTimeout = null;
+        
         // Helper function to generate random challenge
         function generateRandomChallenge() {
             const array = new Uint8Array(32);
@@ -2469,6 +2483,12 @@ micBtn.onclick = () => {
         
         // Unlock the dashboard after successful authentication
         function unlockDashboard() {
+            // Clear the manual override timeout to prevent race condition
+            if (manualOverrideTimeout) {
+                clearTimeout(manualOverrideTimeout);
+                manualOverrideTimeout = null;
+            }
+            
             const lockScreen = document.getElementById('lockScreen');
             lockScreen.classList.add('hidden');
             
@@ -2487,8 +2507,8 @@ micBtn.onclick = () => {
             const manualOverrideButton = document.getElementById('manualOverrideButton');
             
             // Show manual override button after a delay as fallback
-            setTimeout(() => {
-                if (manualOverrideButton) {
+            manualOverrideTimeout = setTimeout(() => {
+                if (manualOverrideButton && !document.getElementById('lockScreen').classList.contains('hidden')) {
                     manualOverrideButton.style.display = 'block';
                 }
             }, 5000); // Show after 5 seconds
