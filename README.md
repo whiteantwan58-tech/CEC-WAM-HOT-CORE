@@ -1,5 +1,19 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
+## 🤖 Automated PR Management
+
+This repository features comprehensive automated pull request management! PRs are automatically synchronized, labeled, validated, and maintained. See the [PR Automation Guide](PR_AUTOMATION_GUIDE.md) for complete details.
+
+**Key Features:**
+- 🔄 Auto-sync PR branches with main
+- 🏷️ Auto-labeling based on changed files
+- ⚠️ Automatic conflict detection
+- 📊 PR size and progress tracking
+- 🧹 Stale PR cleanup
+- 🤖 Dependabot auto-merge
+
+---
+
 ## 🌌 CEC Matrix Dashboard (Streamlit)
 
 A complete operational dashboard system for the Conscious Energy Continuum (CEC) Matrix. This dashboard provides real-time monitoring, data visualization, and export capabilities for all CEC system metrics.
