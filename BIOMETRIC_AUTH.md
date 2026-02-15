@@ -66,8 +66,9 @@ The CEC-WAM-HOT-CORE dashboard now features **real biometric authentication** us
 
 1. **Registration Phase**:
    - Browser creates a public/private key pair
-   - Private key stored securely in device's secure enclave
-   - Public key stored in browser's localStorage
+   - Private key stored securely in device's secure enclave or platform authenticator
+   - Public key managed by the browser's credential manager (not stored in localStorage)
+   - A non-sensitive credential ID reference is stored in browser's localStorage (no cryptographic key material)
    - Your biometric data **never** leaves your device
 
 2. **Authentication Phase**:
