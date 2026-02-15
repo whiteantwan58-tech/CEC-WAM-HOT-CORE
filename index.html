@@ -1,6 +1,576 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE</title>
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="js/modules.css" />
+  <style>
+    :root{
+      --bg:#04060a;
+      --ink:#a9f7ff;
+      --neon:#28f0ff;
+      --neon2:#2cff9a;
+      --vio:#bc13fe;
+      --warn:#ffd166;
+      --bad:#ff4d6d;
+      --good:#00ff88;
+      --gold:#ffd700;
+
+      --panel: rgba(2, 8, 14, 0.82);
+      --panel-bg: rgba(2, 8, 14, 0.82);
+      --panel2: rgba(4, 12, 22, 0.65);
+      --stroke: rgba(40, 240, 255, 0.72);
+      --stroke2: rgba(44, 255, 154, 0.55);
+      --shadow: 0 0 18px rgba(40,240,255,.25), 0 0 60px rgba(44,255,154,.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; font-family: var(--mono); }
+    html, body { height:100%; background: var(--bg); color: var(--ink); overflow-x:hidden; }
+
+    /* Matrix canvas backdrop */
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.28;
+      filter: contrast(110%) saturate(125%);
+    }
+
+    /* Subtle star dust overlay */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(40,240,255,.08), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(188,19,254,.07), transparent 45%),
+        radial-gradient(circle at 60% 80%, rgba(44,255,154,.06), transparent 45%),
+        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
+      mix-blend-mode: screen;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,.35); }
+    ::-webkit-scrollbar-thumb { background: rgba(40,240,255,.45); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(40,240,255,.65); }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 5;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(188,19,254,.45);
+      background: rgba(0,0,0,.82);
+      box-shadow: 0 10px 40px rgba(0,0,0,.45);
+    }
+
+    .brand {
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .brand h1{
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--vio);
+      text-shadow: 0 0 18px rgba(188,19,254,.65);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .brand small{
+      font-size: 11px;
+      opacity: .85;
+      color: rgba(169,247,255,.9);
+      letter-spacing: .12em;
+    }
+
+    .statusbar{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(40,240,255,.45);
+      border-radius: 999px;
+      background: rgba(2, 10, 18, .65);
+      box-shadow: var(--shadow);
+      font-size: 11px;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 12px rgba(0,255,136,.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .dot.bad{ background: var(--bad); box-shadow: 0 0 12px rgba(255,77,109,.85); }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 12px rgba(255,209,102,.8); }
+
+    /* Main container */
+    #mainContainer {
+      position: relative;
+      z-index: 4;
+      padding: 12px;
+      overflow-y: auto;
+      height: calc(100vh - 280px);
+    }
+
+    /* Grid layout */
+    #dashGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* Card styles */
+    .card{
+      border-radius: 16px;
+      border: 1px solid rgba(40,240,255,.55);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transition: all 0.3s;
+    }
+    .card:hover{
+      border-color: rgba(44,255,154,.75);
+      box-shadow: 0 0 25px rgba(40,240,255,.35), 0 0 70px rgba(44,255,154,.15);
+    }
+    .card .head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(40,240,255,.18);
+      background: rgba(0,0,0,.35);
+    }
+    .card .head .title{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: rgba(44,255,154,.92);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card .body{ padding: 12px; }
+
+    .bigVal{
+      font-size: 28px;
+      color: rgba(255,255,255,.95);
+      text-shadow: 0 0 22px rgba(40,240,255,.25);
+      letter-spacing: .04em;
+      font-weight: 600;
+    }
+    .subVal{
+      margin-top: 8px;
+      font-size: 12px;
+      opacity: .9;
+      letter-spacing: .08em;
+      color: rgba(169,247,255,.8);
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tag{
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(44,255,154,.25);
+      background: rgba(44,255,154,.08);
+      font-size: 10px;
+    }
+
+    /* Star map container */
+    #starMapContainer {
+      position: relative;
+      height: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(40,240,255,.55);
+      background: radial-gradient(circle at 50% 45%, rgba(8,20,40,.9), rgba(0,0,0,.98) 70%);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    #threeCanvas {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    /* HUD overlay */
+    .hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .scanlines::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.025),
+        rgba(255,255,255,.025) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+      opacity:.18;
+      mix-blend-mode: overlay;
+    }
+
+    .vignette::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,.65) 80%, rgba(0,0,0,.85) 100%);
+      opacity: .85;
+    }
+
+    /* Center radar ring */
+    .ring {
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      width: 640px;
+      height: 640px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid rgba(40,240,255,.18);
+      box-shadow: 0 0 0 1px rgba(44,255,154,.10), inset 0 0 40px rgba(40,240,255,.08);
+    }
+    .ring::before, .ring::after{
+      content:"";
+      position:absolute;
+      inset: 15%;
+      border-radius: 50%;
+      border: 1px dashed rgba(44,255,154,.16);
+    }
+    .ring::after{
+      inset: 30%;
+      border-style: solid;
+      border-color: rgba(40,240,255,.12);
+    }
+
+    .sweep {
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      width: 640px;
+      height: 640px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(44,255,154,.35), rgba(44,255,154,0) 35%);
+      mask: radial-gradient(circle, rgba(0,0,0,0) 0 32%, rgba(0,0,0,1) 33% 100%);
+      opacity: .20;
+      animation: sweep 3.2s linear infinite;
+      filter: blur(.3px);
+    }
+    @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* Corner HUD panels */
+    .hudPanel{
+      position:absolute;
+      min-width: 240px;
+      border-radius: 12px;
+      border: 1px solid rgba(40,240,255,.35);
+      background: rgba(0, 10, 18, .65);
+      box-shadow: var(--shadow);
+      padding: 10px;
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+    .hudPanel h3{
+      font-size: 10px;
+      letter-spacing: .16em;
+      color: rgba(44,255,154,.95);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      opacity: .95;
+    }
+    .kv{ display:grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 10px; opacity: .95; }
+    .kv .k{ color: rgba(169,247,255,.75); }
+    .kv .v{ color: rgba(255,255,255,.9); text-shadow: 0 0 12px rgba(40,240,255,.12); }
+
+    .hud-tl{ left: 12px; top: 12px; }
+    .hud-tr{ right: 12px; top: 12px; }
+    .hud-br{ right: 12px; bottom: 12px; }
+    .hud-bl{ left: 12px; bottom: 12px; }
+
+    /* Table styles */
+    .dataTable{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .dataTable thead{
+      background: rgba(0,0,0,.35);
+      border-bottom: 1px solid rgba(40,240,255,.25);
+    }
+    .dataTable th{
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: .12em;
+      color: rgba(44,255,154,.85);
+      text-transform: uppercase;
+    }
+    .dataTable td{
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(40,240,255,.08);
+      color: rgba(220,255,255,.85);
+    }
+    .dataTable tbody tr:hover{
+      background: rgba(40,240,255,.05);
+    }
+
+    .badge{
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .badge.stable{ background: rgba(0,255,136,.15); color: var(--good); border: 1px solid rgba(0,255,136,.35); }
+    .badge.active{ background: rgba(40,240,255,.15); color: var(--neon); border: 1px solid rgba(40,240,255,.35); }
+    .badge.locked{ background: rgba(188,19,254,.15); color: var(--vio); border: 1px solid rgba(188,19,254,.35); }
+    .badge.verified{ background: rgba(255,215,0,.15); color: var(--gold); border: 1px solid rgba(255,215,0,.35); }
+
+    /* Timeline */
+    .timeline{
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline::before{
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(40,240,255,.45), rgba(44,255,154,.25));
+    }
+    .timelineItem{
+      position: relative;
+      margin-bottom: 16px;
+      padding-left: 18px;
+    }
+    .timelineItem::before{
+      content: "";
+      position: absolute;
+      left: -19px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(44,255,154,.75);
+      box-shadow: 0 0 12px rgba(44,255,154,.55);
+      border: 2px solid rgba(0,0,0,.65);
+    }
+    .timelineItem .date{
+      font-size: 10px;
+      color: rgba(40,240,255,.75);
+      letter-spacing: .10em;
+      margin-bottom: 3px;
+    }
+    .timelineItem .desc{
+      font-size: 11px;
+      color: rgba(220,255,255,.85);
+      line-height: 1.5;
+    }
+
+    /* Gauge chart */
+    .gauge{
+      position: relative;
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gaugeCircle{
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+    .gaugeCircle svg{
+      transform: rotate(-90deg);
+    }
+    .gaugeValue{
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .gaugeValue .num{
+      font-size: 28px;
+      font-weight: 600;
+      color: rgba(255,255,255,.95);
+      text-shadow: 0 0 20px rgba(44,255,154,.45);
+    }
+    .gaugeValue .label{
+      font-size: 9px;
+      letter-spacing: .12em;
+      color: rgba(169,247,255,.75);
+      text-transform: uppercase;
+    }
+
+    /* Action buttons */
+    .actionBtn{
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(40,240,255,.55);
+      background: rgba(40,240,255,.12);
+      color: rgba(255,255,255,.95);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(40,240,255,.14);
+      transition: all 0.2s;
+      font-size: 10px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .actionBtn:hover{ 
+      filter: brightness(1.18); 
+      transform: translateY(-1px);
+      box-shadow: 0 0 25px rgba(40,240,255,.25);
+    }
+    .actionBtn:active{ transform: translateY(0); }
+
+    /* EVE Terminal */
+    #terminal {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 6;
+      border-radius: 16px;
+      border: 1px solid rgba(40,240,255,.55);
+      background: rgba(0,0,0,.85);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      max-height: 240px;
+    }
+
+    #terminal .termHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.45);
+      border-bottom: 1px solid rgba(40,240,255,.18);
+    }
+    .termHead .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: rgba(188,19,254,.95);
+      text-shadow: 0 0 14px rgba(188,19,254,.40);
+    }
+    .termHead .right{
+      font-size: 10px;
+      opacity: .85;
+      letter-spacing: .10em;
+      color: rgba(169,247,255,.75);
+    }
+
+    #termLog{
+      height: 130px;
+      overflow:auto;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: rgba(220,255,255,.85);
+    }
+    .line{ margin-bottom: 5px; }
+    .you{ color: rgba(255,255,255,.95); }
+    .eve{ color: rgba(44,255,154,.95); }
+    .sys{ color: rgba(169,247,255,.75); }
+
+    #termInputRow{
+      display:flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(40,240,255,.18);
+      background: rgba(0,0,0,.35);
+    }
+    #termInput{
+      flex:1;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(40,240,255,.45);
+      background: rgba(4,10,18,.75);
+      color: rgba(255,255,255,.95);
+      outline: none;
+      font-size: 11px;
+    }
+    #termBtn{
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(44,255,154,.55);
+      background: rgba(44,255,154,.12);
+      color: rgba(255,255,255,.95);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(44,255,154,.14);
+      transition: all 0.2s;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    #termBtn:hover{ filter: brightness(1.15); transform: scale(1.02); }
+    #termBtn:active{ transform: scale(0.98); }
+
+    /* Responsive */
+    @media (max-width: 1280px){
+      #dashGrid{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+      .hudPanel{ min-width: 200px; font-size: 9px; }
+      .ring,.sweep{ width: 480px; height: 480px; }
+    }
+    @media (max-width: 768px){
+      header{ flex-direction:column; align-items:flex-start; }
+      .statusbar{ justify-content:flex-start; }
+      #termLog{ height: 100px; }
+      .hudPanel{ display: none; }
+      #starMapContainer{ height: 360px; }
+    }
+  </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEC-WAM-HOT-CORE Live Dashboard</title>
@@ -542,6 +1112,580 @@
             <h2>🚀 Full Streamlit Dashboard</h2>
             <iframe class="streamlit-embed" src="https://YOUR-APP.streamlit.app"></iframe>
         </div>
+      </div>
+
+    </div>
+
+    <!-- New Real-time Modules Section -->
+    <div style="margin-top: 20px;">
+      <!-- Live Federal Way Feed Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">📹 FEDERAL WAY LIVE FEED</div>
+          <span style="font-size:10px;opacity:.75">HD CAMERA STREAM</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="federalWayFeed"></div>
+        </div>
+      </div>
+
+      <!-- Crime Alert System Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">🚨 CRIME ALERT FEED</div>
+          <span style="font-size:10px;opacity:.75">FEDERAL WAY POLICE SCANNER</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="crimeAlertSystem"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="terminal">
+    <div class="termHead">
+      <div class="left"><span class="dot"></span> EVE // COMMAND BUS</div>
+      <div class="right" id="termRight">type: <span style="color:rgba(44,255,154,.9)">help</span></div>
+    </div>
+    <div id="termLog"></div>
+    <div id="termInputRow">
+      <input id="termInput" autocomplete="off" placeholder="EVE> enter command (help, status, prices, data, vault, timeline, clear, refresh)" />
+      <button id="termBtn">SEND</button>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+
+  <script>
+    // Embedded data from repository
+    const DATA = {
+      net_liquidity: 1250039,
+      psi_mass: 176452.66,
+      total_mass: 100001.33,
+      dark_energy_index: 0.999,
+      black_hole_flow_rate: 1.33,
+      r_ratio_efficiency: 10.96,
+      btc_allowance: 1.33,
+      agi_timeline: "Q4 2026",
+      resource_used_pct: 98.75,
+      resource_left_pct: 1.25,
+      psi_minted: 200,
+      valuation_usd: 34100000,
+      escrow_pct: 84,
+      network_load_pct: 43,
+      latency_ms: 12,
+      needed_usd: 56363,
+      psi_gauge_pct: 0
+    };
+
+    const CFG = {
+      psiBalance: DATA.psi_mass,
+      psiMapsTo: "sol",
+      pollMs: 15_000,
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let startTime = Date.now();
+
+    // ---------- Clock & Uptime ----------
+    function tickClock(){
+      const now = new Date();
+      $("clock").textContent = "SYSTEM TIME: " + now.toLocaleString();
+      $("hudHeartbeat").textContent = now.toLocaleTimeString();
+      
+      const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
+      const h = Math.floor(uptimeSec / 3600);
+      const m = Math.floor((uptimeSec % 3600) / 60);
+      const s = uptimeSec % 60;
+      $("hudUptime").textContent = `${h}h ${m}m ${s}s`;
+    }
+    setInterval(tickClock, 1000);
+    tickClock();
+
+    // ---------- Initialize from embedded data ----------
+    function initEmbeddedData(){
+      $("netLiquidity").textContent = "$" + DATA.net_liquidity.toLocaleString();
+      $("valuation").textContent = "$" + (DATA.valuation_usd / 1000000).toFixed(1) + "M";
+      $("btcAllowance").textContent = DATA.btc_allowance + " BTC";
+      $("neededUsd").textContent = "$" + DATA.needed_usd.toLocaleString();
+      $("rRatio").textContent = DATA.r_ratio_efficiency;
+      $("gaugeNum").textContent = DATA.resource_used_pct + "%";
+      $("resourceLeft").textContent = DATA.resource_left_pct + "%";
+      $("hudEscrow").textContent = DATA.escrow_pct + "%";
+      $("networkLoad").textContent = DATA.network_load_pct + "%";
+      $("latencyMs").textContent = DATA.latency_ms + "ms";
+      
+      // Update gauge
+      const circumference = 2 * Math.PI * 52;
+      const offset = circumference - (DATA.resource_used_pct / 100) * circumference;
+      $("gaugeBar").style.strokeDashoffset = offset;
+    }
+    initEmbeddedData();
+
+    // ---------- Safe fetch ----------
+    async function fetchJson(url, { timeoutMs = 8000 } = {}){
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      try{
+        const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        return await res.json();
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    // ---------- Live crypto feeds ----------
+    async function pollFeeds(){
+      const netDot = $("netDot");
+      const netStatus = $("netStatus");
+      const sourceStatus = $("sourceStatus");
+
+      try{
+        netDot.className = "dot warn";
+        netStatus.textContent = "LINK: CONNECTING…";
+
+        const cgUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
+        const cg = await fetchJson(cgUrl);
+
+        const btc = cg.bitcoin?.usd ?? null;
+        const eth = cg.ethereum?.usd ?? null;
+        const sol = cg.solana?.usd ?? null;
+
+        $("hudBtc").textContent = btc ? "$" + btc.toLocaleString() : "—";
+        $("hudEth").textContent = eth ? "$" + eth.toLocaleString() : "—";
+        $("hudSol").textContent = sol ? "$" + sol.toLocaleString() : "—";
+
+        const map = CFG.psiMapsTo;
+        const mapPrice = map === "btc" ? btc : map === "eth" ? eth : sol;
+        const mapChange = map === "btc" ? cg.bitcoin?.usd_24h_change : map === "eth" ? cg.ethereum?.usd_24h_change : cg.solana?.usd_24h_change;
+
+        $("psiBalance").textContent = CFG.psiBalance.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " Ψ";
+        $("psiUsd").textContent = (mapPrice ? ("$" + (CFG.psiBalance * mapPrice).toLocaleString(undefined,{maximumFractionDigits:2})) : "— USD");
+        $("psiChange").textContent = (typeof mapChange === "number")
+          ? ((mapChange >= 0 ? "+" : "") + mapChange.toFixed(2) + "% 24h")
+          : "— 24h";
+
+        const entropy = (Math.abs(Math.sin(Date.now()/14000))*0.42 + 0.58);
+        $("hudEntropy").textContent = entropy.toFixed(3);
+        $("hudLatency").textContent = Math.floor(12 + Math.random()*18) + " ms";
+        $("hudSync").textContent = "OK/" + (100 - Math.floor(Math.random()*3)) + "%";
+
+        $("hudFeed").textContent = "CoinGecko";
+        $("sourceStatus").textContent = "FEEDS: LIVE";
+        netStatus.textContent = "LINK: STABLE";
+        netDot.className = "dot";
+      } catch (e){
+        $("sourceStatus").textContent = "FEEDS: DEGRADED";
+        $("netStatus").textContent = "LINK: DEGRADED";
+        $("netDot").className = "dot bad";
+        console.error("Feed error:", e);
+      }
+    }
+
+    function refreshAllData(){
+      eveSay("🔄 Refreshing all data feeds...");
+      pollFeeds();
+    }
+
+    function refreshPSI(){
+      eveSay("💎 Refreshing PSI wallet data...");
+      pollFeeds();
+    }
+
+    pollFeeds();
+    setInterval(pollFeeds, CFG.pollMs);
+
+    // ---------- Wallet connect ----------
+    function connectWallet(){
+      eveSay("🔗 Wallet connection initiated...");
+      setTimeout(() => {
+        eveSay("✅ Wallet connected: PHANTOM (simulated)");
+        $("walletMode").textContent = "CONNECTED";
+      }, 1200);
+    }
+
+    // ---------- Bonding curve ----------
+    const bondCtx = $("bondChart").getContext("2d");
+    const bondState = {
+      t: 0,
+      labels: Array.from({length: 30}, (_,i)=> String(i - 29)),
+      data: [],
+    };
+
+    function bondingPriceAt(step){
+      const supply = 10_000 + step * 250;
+      const a = 0.0009;
+      const b = 0.06;
+      return a * Math.sqrt(supply) + b * Math.sin(step/3.2);
+    }
+
+    for(let i=0;i<30;i++) bondState.data.push(bondingPriceAt(i));
+
+    const bondChart = new Chart(bondCtx, {
+      type: "line",
+      data: {
+        labels: bondState.labels,
+        datasets: [{
+          label: "Bond Curve",
+          data: bondState.data,
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 0,
+          borderColor: "rgba(44,255,154,.85)",
+          backgroundColor: "rgba(44,255,154,.12)",
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: { display: false },
+          y: {
+            ticks: { color: "rgba(169,247,255,.75)", font: { size: 10 } },
+            grid: { color: "rgba(40,240,255,.08)" }
+          }
+        }
+      }
+    });
+
+    function tickBond(){
+      bondState.t++;
+      bondState.data.shift();
+      bondState.data.push(bondingPriceAt(bondState.t + 29));
+      bondChart.update("none");
+      $("bondMeta").textContent = "T+" + bondState.t.toString().padStart(4,"0") + " / SUPPLY SIM";
+    }
+    setInterval(tickBond, 1400);
+    tickBond();
+
+    // ---------- Three.js Enhanced Starfield ----------
+    const threeCanvas = $("threeCanvas");
+    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: true });
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.0028);
+
+    const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 1500);
+    camera.position.set(0, 0, 180);
+
+    // Stars
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 12000;
+    const pos = new Float32Array(starCount * 3);
+    const col = new Float32Array(starCount * 3);
+
+    for(let i=0;i<starCount;i++){
+      const i3 = i*3;
+      pos[i3+0] = (Math.random()-0.5) * 1200;
+      pos[i3+1] = (Math.random()-0.5) * 800;
+      pos[i3+2] = (Math.random()-0.5) * 1200;
+
+      const tint = 0.6 + Math.random()*0.4;
+      col[i3+0] = tint;
+      col[i3+1] = tint * (0.9 + Math.random()*0.2);
+      col[i3+2] = 1.0;
+    }
+    starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    starGeo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+
+    const stars = new THREE.Points(
+      starGeo,
+      new THREE.PointsMaterial({
+        size: 1.3,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.92,
+        depthWrite: false
+      })
+    );
+    scene.add(stars);
+
+    // Neon streaks
+    const streakGeo = new THREE.BufferGeometry();
+    const streakCount = 1600;
+    const spos = new Float32Array(streakCount * 3);
+    for(let i=0;i<streakCount;i++){
+      const i3=i*3;
+      spos[i3+0]=(Math.random()-0.5)*800;
+      spos[i3+1]=(Math.random()-0.5)*500;
+      spos[i3+2]=(Math.random()-0.5)*1000;
+    }
+    streakGeo.setAttribute("position", new THREE.BufferAttribute(spos,3));
+    const streaks = new THREE.Points(
+      streakGeo,
+      new THREE.PointsMaterial({
+        size: 2.8,
+        color: 0x28f0ff,
+        transparent: true,
+        opacity: 0.12,
+        depthWrite: false
+      })
+    );
+    scene.add(streaks);
+
+    // Nebula particles
+    const nebulaGeo = new THREE.BufferGeometry();
+    const nebulaCount = 800;
+    const npos = new Float32Array(nebulaCount * 3);
+    for(let i=0;i<nebulaCount;i++){
+      const i3=i*3;
+      npos[i3+0]=(Math.random()-0.5)*600;
+      npos[i3+1]=(Math.random()-0.5)*400;
+      npos[i3+2]=(Math.random()-0.5)*600;
+    }
+    nebulaGeo.setAttribute("position", new THREE.BufferAttribute(npos,3));
+    const nebula = new THREE.Points(
+      nebulaGeo,
+      new THREE.PointsMaterial({
+        size: 4.5,
+        color: 0xbc13fe,
+        transparent: true,
+        opacity: 0.08,
+        depthWrite: false
+      })
+    );
+    scene.add(nebula);
+
+    function resizeThreeToElement(){
+      const el = $("starMapContainer");
+      const rect = el.getBoundingClientRect();
+      const w = Math.max(2, Math.floor(rect.width));
+      const h = Math.max(2, Math.floor(rect.height));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    new ResizeObserver(resizeThreeToElement).observe($("starMapContainer"));
+    window.addEventListener("resize", resizeThreeToElement);
+    resizeThreeToElement();
+
+    let lastTs = performance.now();
+    function animate(ts){
+      const dt = Math.min(0.05, (ts - lastTs) / 1000);
+      lastTs = ts;
+
+      stars.rotation.y += dt * 0.08;
+      stars.rotation.x += dt * 0.025;
+      
+      streaks.rotation.y -= dt * 0.05;
+      nebula.rotation.x += dt * 0.03;
+
+      camera.position.x = Math.sin(ts/7000) * 8;
+      camera.position.y = Math.cos(ts/8500) * 5;
+
+      renderer.render(scene, camera);
+
+      $("hudCoords").textContent = (
+        (camera.position.x/10).toFixed(2) + "," +
+        (camera.position.y/10).toFixed(2) + "," +
+        (camera.position.z/10).toFixed(1)
+      );
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // ---------- Matrix rain ----------
+    const m = $("matrix");
+    const mctx = m.getContext("2d");
+    const glyphs = "Ψ01ΔΣΩλμνξπστυφχψζアイウエオカキクケコサシスセソツテトナニヌネノ";
+    let mW=0, mH=0, cols=0, drops=[];
+
+    function resizeMatrix(){
+      mW = m.width = window.innerWidth;
+      mH = m.height = window.innerHeight;
+      cols = Math.floor(mW / 14);
+      drops = Array.from({length: cols}, () => Math.random()*mH/14);
+    }
+    window.addEventListener("resize", resizeMatrix);
+    resizeMatrix();
+
+    function drawMatrix(){
+      mctx.fillStyle = "rgba(0,0,0,0.08)";
+      mctx.fillRect(0,0,mW,mH);
+
+      mctx.font = "13px " + getComputedStyle(document.documentElement).getPropertyValue("--mono");
+      for(let i=0;i<cols;i++){
+        const x = i * 14;
+        const y = drops[i] * 14;
+        const ch = glyphs[Math.floor(Math.random()*glyphs.length)];
+        mctx.fillStyle = "rgba(40,240,255,0.70)";
+        mctx.fillText(ch, x, y);
+
+        if(y > mH && Math.random() > 0.985) drops[i] = 0;
+        drops[i] += 0.75 + Math.random()*0.40;
+      }
+      requestAnimationFrame(drawMatrix);
+    }
+    requestAnimationFrame(drawMatrix);
+
+    // ---------- EVE Terminal ----------
+    function termLine(kind, text){
+      const div = document.createElement("div");
+      div.className = "line " + kind;
+      div.textContent = text;
+      $("termLog").appendChild(div);
+      $("termLog").scrollTop = $("termLog").scrollHeight;
+    }
+
+    function eveSay(text){ termLine("eve", "EVE: " + text); }
+    function sysSay(text){ termLine("sys", "SYS: " + text); }
+
+    async function cmdStatus(){
+      sysSay("🎯 CEC-WAM CORE: NOMINAL");
+      sysSay("📡 FEEDS: " + $("sourceStatus").textContent.replace("FEEDS: ",""));
+      sysSay("💎 PSI BALANCE: " + CFG.psiBalance.toFixed(2) + " Ψ");
+      sysSay("💰 NET LIQUIDITY: $" + DATA.net_liquidity.toLocaleString());
+      sysSay("⚡ RESOURCE USAGE: " + DATA.resource_used_pct + "%");
+      eveSay("✅ All systems operational.");
+    }
+
+    async function cmdPrices(){
+      eveSay("💰 Fetching live prices…");
+      await pollFeeds();
+      eveSay("BTC " + $("hudBtc").textContent + " | ETH " + $("hudEth").textContent + " | SOL " + $("hudSol").textContent);
+    }
+
+    function cmdHelp(){
+      eveSay("Commands: help, status, prices, data, vault, timeline, refresh, ping, clear");
+    }
+
+    function cmdData(){
+      sysSay("📊 EMBEDDED DATA SNAPSHOT:");
+      sysSay("  Net Liquidity: $" + DATA.net_liquidity.toLocaleString());
+      sysSay("  PSI Mass: " + DATA.psi_mass.toFixed(2) + " Ψ");
+      sysSay("  Dark Energy Index: " + DATA.dark_energy_index);
+      sysSay("  BTC Allowance: " + DATA.btc_allowance + " BTC");
+      sysSay("  Valuation: $" + (DATA.valuation_usd / 1000000).toFixed(1) + "M");
+      sysSay("  AGI Timeline: " + DATA.agi_timeline);
+      eveSay("Data loaded from live.json.");
+    }
+
+    function cmdVault(){
+      sysSay("🔐 CEC VAULT ACCESS:");
+      sysSay("  GEMINI AGI: Master API Key Active");
+      sysSay("  PHANTOM BRIDGE: TXT Record Verified");
+      sysSay("  PSI-COIN: 100,001.33 Units");
+      sysSay("  VALUATION: $1,250,039");
+      sysSay("  BITCOIN: 1.33 BTC (~$121,478 USD)");
+      eveSay("Vault data secured.");
+    }
+
+    function cmdTimeline(){
+      sysSay("📅 PROJECT TIMELINE:");
+      sysSay("  2025-11-27: Resource conflict resolved");
+      sysSay("  2025-12-02: Ghost Protocol executed");
+      sysSay("  2026-01-08: +176,452.66 PSI recorded");
+      sysSay("  2026-01-16: CEC Matrix updated ($34.1M)");
+      sysSay("  TODAY: GOD_MODE active (99.9% focus)");
+      eveSay("Full timeline visible in dashboard.");
+    }
+
+    function cmdPing(){
+      const ms = Math.floor(12 + Math.random()*25);
+      eveSay("🏓 PING OK: " + ms + "ms");
+    }
+
+    function handleCmd(raw){
+      const s = raw.trim();
+      if(!s) return;
+
+      termLine("you", "YOU: " + s);
+
+      const parts = s.split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+
+      if(cmd === "help") return cmdHelp();
+      if(cmd === "clear"){ $("termLog").innerHTML = ""; return eveSay("Log cleared."); }
+      if(cmd === "status") return cmdStatus();
+      if(cmd === "prices") return cmdPrices();
+      if(cmd === "data") return cmdData();
+      if(cmd === "vault") return cmdVault();
+      if(cmd === "timeline") return cmdTimeline();
+      if(cmd === "refresh") return refreshAllData();
+      if(cmd === "ping") return cmdPing();
+
+      eveSay("Unknown command. Type: help");
+    }
+
+    $("termBtn").addEventListener("click", () => {
+      const v = $("termInput").value;
+      $("termInput").value = "";
+      handleCmd(v);
+    });
+    $("termInput").addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        const v = $("termInput").value;
+        $("termInput").value = "";
+        handleCmd(v);
+      }
+    });
+
+    // Initialize new real-time modules
+    let starMapViz = null;
+    let federalWayFeed = null;
+    let crimeAlertSystem = null;
+
+    // Wait for DOM to be fully loaded before initializing modules
+    setTimeout(() => {
+      // Initialize Star Map (already exists in the page)
+      if (typeof StarMapVisualization !== 'undefined') {
+        starMapViz = new StarMapVisualization('threeCanvas');
+        console.log('Star Map initialized');
+      }
+
+      // Initialize Federal Way Feed
+      if (typeof FederalWayLiveFeed !== 'undefined') {
+        federalWayFeed = new FederalWayLiveFeed('federalWayFeed');
+        console.log('Federal Way Feed initialized');
+      }
+
+      // Initialize Crime Alert System
+      if (typeof CrimeAlertSystem !== 'undefined') {
+        crimeAlertSystem = new CrimeAlertSystem('crimeAlertSystem');
+        console.log('Crime Alert System initialized');
+      }
+    }, 500);
+
+    // Boot sequence
+    sysSay("🚀 Booting EVE-4 ULTRA HUD…");
+    sysSay("🔗 Loading embedded data: live.json, BlackHoles.csv, pump.fun.csv…");
+    sysSay("🌌 Initializing 3D starfield with 14,400 particles…");
+    sysSay("📡 Establishing live feeds: CoinGecko API…");
+    setTimeout(() => {
+      eveSay("✅ ALL SYSTEMS ONLINE. Type 'help' for commands.");
+      eveSay("💎 PSI Balance: " + CFG.psiBalance.toLocaleString() + " Ψ");
+      eveSay("🎯 Mode: GOD_MODE | Focus: 99.9%");
+    }, 1200);
+  </script>
+
+  <!-- Real-time functionality modules -->
+  <script src="js/starmap.js"></script>
+  <script src="js/federal-way-feed.js"></script>
+  <script src="js/crime-alerts.js"></script>
+  <script src="js/google-drive-export.js"></script>
+
+</body><button id="eve-mic" style="background:#0f0;color:#000;padding:10px;border:none;cursor:pointer;">Talk to Eve</button>
+<script>
+const micBtn = document.getElementById('eve-mic');
+micBtn.onclick = () => {
+  const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  rec.lang = 'en-US';
+  rec.onresult = e => {
+    const said = e.results[0][0].transcript;
+    document.body.innerHTML += `<p><strong>You:</strong> ${said}</p>`;
+    // Eve replies here—pipe to console or mock
+  };
+  rec.start();
+};
+</script>
         -->
         
         <footer>

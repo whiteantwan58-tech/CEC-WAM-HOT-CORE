@@ -90,6 +90,47 @@ git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
 cd CEC-WAM-HOT-CORE
 ```
 
+### Core Features
+- **Real-time Blockchain Data**: Live integration with Solana blockchain via RPC
+- **Token Tracking**: PSI-Coin holdings and price monitoring
+- **Wallet Monitoring**: SOL balance tracking
+- **Smart Fallback**: Automatic CSV backup when APIs are unavailable
+- **Health Monitoring**: Real-time system health checks and status indicators
+- **Error Handling**: Robust retry logic and user-friendly error messages
+- **Auto-refresh**: Automatic data updates every 30 seconds
+- **Security**: Environment-based configuration with no hardcoded secrets
+
+### 🆕 Real-time Enhancements (NEW)
+- **Star Map Visualization**: Animated 3D star field with HD visuals and constellation transitions
+  - Real-time celestial body tracking
+  - Smooth constellation animations (Orion, Ursa Major, Cassiopeia)
+  - Interactive 3D scene with 8,000+ stars
+  
+- **Federal Way Live Feed**: HD camera feed integration framework
+  - Multiple camera location support (Main St, City Hall, Transit Center)
+  - Auto-cycling between feeds every 15 seconds
+  - Screenshot capture functionality
+  - Animated placeholder with scan-line effects
+  
+- **Crime Alert System**: Real-time crime alerts and police scanner integration
+  - Live Federal Way police scanner feed simulation
+  - Severity-based alerts (Critical, High, Medium, Low)
+  - Alert categorization (Theft, Assault, Traffic, Suspicious Activity)
+  - Real-time notifications with timestamps and locations
+  - Filtering by severity and type
+  - Audio alert toggle
+  - Export alerts to CSV
+  
+- **Export & Backup System**: Data export and cloud integration
+  - Screenshot capture from live feeds
+  - Crime data export to CSV/JSON
+  - Star map data export
+  - Google Drive integration framework
+  - AppSheet sync capability
+  - Auto-export settings with customizable intervals
+  - Export history tracking
+
+## 🚀 Quick Start
 2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
@@ -393,6 +434,55 @@ Change cache TTL in `app.py`:
 - Click "OVERRIDE ACCESS" button
 - Refresh page if stuck
 
+## 🎯 Real-time Modules Usage
+
+### Star Map Visualization
+The star map is automatically initialized and displays:
+- 8,000+ animated stars with varied colors (white, blue, yellow)
+- Three major constellations that auto-cycle every 8 seconds
+- Smooth camera movements and constellation transitions
+- Interactive 3D rendering using Three.js
+
+### Federal Way Live Feed
+Access the live camera feed module:
+1. Use the ◀ ▶ buttons to switch between camera locations
+2. Click 📷 to capture screenshots
+3. Feeds auto-cycle every 15 seconds
+4. Screenshots are automatically timestamped
+
+**Available Camera Locations:**
+- Federal Way Main St & Pacific Highway
+- City Hall Campus
+- Transit Center Plaza
+
+### Crime Alert System
+Monitor real-time crime alerts:
+1. View active alerts with severity indicators
+2. Filter alerts by severity (Critical, High, Medium, Low) or type
+3. Toggle audio alerts with 🔇/🔊 button
+4. Click 🔄 to manually refresh alerts
+5. Export data with 💾 button
+
+**Alert Information Includes:**
+- Location and timestamp
+- Number of responding units
+- Alert severity and type
+- Real-time status updates
+
+### Export & Backup
+Click the 📤 floating button to access export features:
+1. **Capture Screenshot**: Take screenshots from live feeds
+2. **Export Crime Data**: Download alerts as CSV
+3. **Export Star Map Data**: Save celestial data as JSON
+4. **Export All Data**: Complete system data export
+
+**Integration Options:**
+- Connect to Google Drive for cloud storage
+- Sync with AppSheet for mobile access
+- Configure auto-export intervals
+- View export history
+
+## 🧪 Testing
 **Google Sheets Logging Fails**
 - Verify service account credentials are correct
 - Check if sheet is shared with service account email
