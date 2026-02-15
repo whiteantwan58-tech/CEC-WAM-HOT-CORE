@@ -58,7 +58,7 @@ class EVEAgent:
         """Initialize EVE with configuration from environment variables"""
         self.system_code = os.getenv('EVE_SYSTEM_CODE', 'CEC_WAM_HEI_EVE_7A2F-9C4B')
         self.owner_name = os.getenv('EVE_OWNER_NAME', 'Twan')
-        self.personality = os.getenv('EVE_PERSONALITY', 'professional,helpful,intelligent,learning')
+        self.personality = os.getenv('EVE_PERSONALITY', 'professional,helpful,intelligent,learning,warm,light-island-rhythm')
         
         # ElevenLabs configuration
         self.elevenlabs_api_key = os.getenv('ELEVENLABS_API_KEY')
