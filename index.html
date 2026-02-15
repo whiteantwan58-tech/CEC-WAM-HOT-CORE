@@ -2353,33 +2353,119 @@ micBtn.onclick = () => {
         // Authenticate using biometric
         async function authenticateBiometric() {
             const scanStatus = document.getElementById('scanStatus');
-            const biometricButtons = document.getElementById('biometricButtons');
-            
-            try {
-                scanStatus.innerHTML = '<span class="scanning">● Authenticating biometric...</span>';
-                biometricButtons.style.display = 'none';
-                
-                // Check WebAuthn support
-                if (!window.PublicKeyCredential) {
-                    throw new Error('WebAuthn is not supported on this device/browser');
+
+                // Fetch WebAuthn assertion (authentication) options from the server.
+                // The server must generate the challenge and allowed credentials based
+                // on the currently logged-in user.
+                const optionsResponse = await fetch('/webauthn/assertion-options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rpId: window.location.hostname
+                    })
+                });
+
+                if (!optionsResponse.ok) {
+                    throw new Error('Failed to obtain authentication options from server');
                 }
-                
-                const credentialId = localStorage.getItem('biometric_credential_id');
-                if (!credentialId) {
-                    throw new Error('No biometric credential found');
+
+                const options = await optionsResponse.json();
+
+                // Helper to convert base64/base64url to ArrayBuffer
+                function base64ToArrayBufferLocal(base64) {
+                    // Normalize base64url to standard base64
+                    base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+                    const pad = base64.length % 4;
+                    if (pad) {
+                        base64 += '='.repeat(4 - pad);
+                    }
+                    const binaryString = atob(base64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return bytes.buffer;
                 }
-                
-                const challenge = generateRandomChallenge();
-                const credentialIdBuffer = base64ToArrayBuffer(credentialId);
-                
+
+                // Convert received options' binary fields from base64/base64url to ArrayBuffer
                 const publicKeyCredentialRequestOptions = {
-                    challenge: challenge,
-                    allowCredentials: [{
-                        id: credentialIdBuffer,
-                        type: 'public-key',
-                        transports: ['internal', 'usb', 'nfc', 'ble']
-                    }],
-                    timeout: 60000,
+                    ...options,
+                    challenge: base64ToArrayBufferLocal(options.challenge),
+                    allowCredentials: Array.isArray(options.allowCredentials)
+                        ? options.allowCredentials.map(function (cred) {
+                            return {
+                                ...cred,
+                                id: base64ToArrayBufferLocal(cred.id)
+                            };
+                        })
+                        : undefined
+                };
+
+                // Authenticate with authenticator
+                const assertion = await navigator.credentials.get({
+                    publicKey: publicKeyCredentialRequestOptions
+                });
+
+                // Helper to convert ArrayBuffer to base64url string
+                function arrayBufferToBase64Url(buffer) {
+                    const bytes = new Uint8Array(buffer);
+                    let binary = '';
+                    for (let i = 0; i < bytes.byteLength; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    let base64 = btoa(binary);
+                    // Convert to base64url
+                    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+                    return base64;
+                }
+
+                // Serialize the assertion for server-side verification
+                const clientDataJSON = arrayBufferToBase64Url(assertion.response.clientDataJSON);
+                const authenticatorData = arrayBufferToBase64Url(assertion.response.authenticatorData);
+                const signature = arrayBufferToBase64Url(assertion.response.signature);
+                const userHandle = assertion.response.userHandle
+                    ? arrayBufferToBase64Url(assertion.response.userHandle)
+                    : null;
+
+                const verificationPayload = {
+                    id: assertion.id,
+                    type: assertion.type,
+                    rawId: arrayBufferToBase64Url(assertion.rawId),
+                    response: {
+                        clientDataJSON: clientDataJSON,
+                        authenticatorData: authenticatorData,
+                        signature: signature,
+                        userHandle: userHandle
+                    },
+                    clientExtensionResults: assertion.getClientExtensionResults
+                        ? assertion.getClientExtensionResults()
+                        : {}
+                };
+
+                // Send assertion to server for verification
+                const verifyResponse = await fetch('/webauthn/verify-assertion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(verificationPayload)
+                });
+
+                if (!verifyResponse.ok) {
+                    throw new Error('Server verification failed');
+                }
+
+                const verifyResult = await verifyResponse.json();
+                if (!verifyResult || !verifyResult.success) {
+                    throw new Error(verifyResult && verifyResult.error
+                        ? verifyResult.error
+                        : 'Authentication was not accepted by server');
+                }
+                
+                // Authentication successful (server-verified)
                     userVerification: "required",
                     rpId: window.location.hostname
                 };
