@@ -1,2094 +1,719 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE</title>
-
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-  <style>
-    :root{
-      --bg:#04060a;
-      --ink:#a9f7ff;
-      --neon:#28f0ff;
-      --neon2:#2cff9a;
-      --vio:#bc13fe;
-      --warn:#ffd166;
-      --bad:#ff4d6d;
-      --good:#00ff88;
-      --gold:#ffd700;
-
-      --panel: rgba(2, 8, 14, 0.82);
-      --panel2: rgba(4, 12, 22, 0.65);
-      --stroke: rgba(40, 240, 255, 0.72);
-      --stroke2: rgba(44, 255, 154, 0.55);
-      --shadow: 0 0 18px rgba(40,240,255,.25), 0 0 60px rgba(44,255,154,.10);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-
-    *{ box-sizing:border-box; margin:0; padding:0; font-family: var(--mono); }
-    html, body { height:100%; background: var(--bg); color: var(--ink); overflow-x:hidden; }
-
-    /* Matrix canvas backdrop */
-    #matrix {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: 0.28;
-      filter: contrast(110%) saturate(125%);
-    }
-
-    /* Subtle star dust overlay */
-    .grain {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(40,240,255,.08), transparent 40%),
-        radial-gradient(circle at 80% 20%, rgba(188,19,254,.07), transparent 45%),
-        radial-gradient(circle at 60% 80%, rgba(44,255,154,.06), transparent 45%),
-        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
-      mix-blend-mode: screen;
-    }
-
-    /* Scrollbar styling */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,.35); }
-    ::-webkit-scrollbar-thumb { background: rgba(40,240,255,.45); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(40,240,255,.65); }
-
-    /* Header */
-    header {
-      position: relative;
-      z-index: 5;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(188,19,254,.45);
-      background: rgba(0,0,0,.82);
-      box-shadow: 0 10px 40px rgba(0,0,0,.45);
-    }
-
-    .brand {
-      display:flex;
-      flex-direction:column;
-      gap: 2px;
-    }
-    .brand h1{
-      font-size: 14px;
-      letter-spacing: 0.18em;
-      color: var(--vio);
-      text-shadow: 0 0 18px rgba(188,19,254,.65);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .brand small{
-      font-size: 11px;
-      opacity: .85;
-      color: rgba(169,247,255,.9);
-      letter-spacing: .12em;
-    }
-
-    .statusbar{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
-      border: 1px solid rgba(40,240,255,.45);
-      border-radius: 999px;
-      background: rgba(2, 10, 18, .65);
-      box-shadow: var(--shadow);
-      font-size: 11px;
-      letter-spacing: .06em;
-      white-space: nowrap;
-    }
-    .dot{
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--good);
-      box-shadow: 0 0 12px rgba(0,255,136,.8);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-    .dot.bad{ background: var(--bad); box-shadow: 0 0 12px rgba(255,77,109,.85); }
-    .dot.warn{ background: var(--warn); box-shadow: 0 0 12px rgba(255,209,102,.8); }
-
-    /* Main container */
-    #mainContainer {
-      position: relative;
-      z-index: 4;
-      padding: 12px;
-      overflow-y: auto;
-      height: calc(100vh - 280px);
-    }
-
-    /* Grid layout */
-    #dashGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    /* Card styles */
-    .card{
-      border-radius: 16px;
-      border: 1px solid rgba(40,240,255,.55);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      transition: all 0.3s;
-    }
-    .card:hover{
-      border-color: rgba(44,255,154,.75);
-      box-shadow: 0 0 25px rgba(40,240,255,.35), 0 0 70px rgba(44,255,154,.15);
-    }
-    .card .head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(40,240,255,.18);
-      background: rgba(0,0,0,.35);
-    }
-    .card .head .title{
-      font-size: 11px;
-      letter-spacing: .16em;
-      color: rgba(44,255,154,.92);
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card .body{ padding: 12px; }
-
-    .bigVal{
-      font-size: 28px;
-      color: rgba(255,255,255,.95);
-      text-shadow: 0 0 22px rgba(40,240,255,.25);
-      letter-spacing: .04em;
-      font-weight: 600;
-    }
-    .subVal{
-      margin-top: 8px;
-      font-size: 12px;
-      opacity: .9;
-      letter-spacing: .08em;
-      color: rgba(169,247,255,.8);
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .tag{
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(44,255,154,.25);
-      background: rgba(44,255,154,.08);
-      font-size: 10px;
-    }
-
-    /* Star map container */
-    #starMapContainer {
-      position: relative;
-      height: 480px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid rgba(40,240,255,.55);
-      background: radial-gradient(circle at 50% 45%, rgba(8,20,40,.9), rgba(0,0,0,.98) 70%);
-      box-shadow: var(--shadow);
-      margin-bottom: 12px;
-    }
-
-    #threeCanvas {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      display:block;
-    }
-
-    /* HUD overlay */
-    .hud {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .scanlines::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.025),
-        rgba(255,255,255,.025) 1px,
-        rgba(0,0,0,0) 3px,
-        rgba(0,0,0,0) 6px
-      );
-      opacity:.18;
-      mix-blend-mode: overlay;
-    }
-
-    .vignette::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,.65) 80%, rgba(0,0,0,.85) 100%);
-      opacity: .85;
-    }
-
-    /* Center radar ring */
-    .ring {
-      position:absolute;
-      left: 50%;
-      top: 50%;
-      width: 640px;
-      height: 640px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border: 2px solid rgba(40,240,255,.18);
-      box-shadow: 0 0 0 1px rgba(44,255,154,.10), inset 0 0 40px rgba(40,240,255,.08);
-    }
-    .ring::before, .ring::after{
-      content:"";
-      position:absolute;
-      inset: 15%;
-      border-radius: 50%;
-      border: 1px dashed rgba(44,255,154,.16);
-    }
-    .ring::after{
-      inset: 30%;
-      border-style: solid;
-      border-color: rgba(40,240,255,.12);
-    }
-
-    .sweep {
-      position:absolute;
-      left: 50%;
-      top: 50%;
-      width: 640px;
-      height: 640px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(44,255,154,.35), rgba(44,255,154,0) 35%);
-      mask: radial-gradient(circle, rgba(0,0,0,0) 0 32%, rgba(0,0,0,1) 33% 100%);
-      opacity: .20;
-      animation: sweep 3.2s linear infinite;
-      filter: blur(.3px);
-    }
-    @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-    /* Quantum Ring Animation */
-    .quantumRing {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 480px;
-      height: 480px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border: 3px solid transparent;
-      background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  conic-gradient(from 0deg, var(--neon), var(--vio), var(--neon2), var(--neon)) border-box;
-      animation: quantumSpin 8s linear infinite, quantumPulse 2s ease-in-out infinite;
-      opacity: 0.35;
-      pointer-events: none;
-    }
-    @keyframes quantumSpin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    @keyframes quantumPulse {
-      0%, 100% { opacity: 0.35; filter: brightness(1); }
-      50% { opacity: 0.55; filter: brightness(1.3); }
-    }
-    .quantumRing::before {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      background: radial-gradient(circle, transparent 45%, rgba(40,240,255,0.15) 50%, transparent 55%);
-      animation: quantumGlow 3s ease-in-out infinite;
-    }
-    @keyframes quantumGlow {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.05); opacity: 0.6; }
-    }
-
-    /* Corner HUD panels */
-    .hudPanel{
-      position:absolute;
-      min-width: 240px;
-      border-radius: 12px;
-      border: 1px solid rgba(40,240,255,.35);
-      background: rgba(0, 10, 18, .65);
-      box-shadow: var(--shadow);
-      padding: 10px;
-      backdrop-filter: blur(8px);
-      pointer-events: auto;
-    }
-    .hudPanel h3{
-      font-size: 10px;
-      letter-spacing: .16em;
-      color: rgba(44,255,154,.95);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      opacity: .95;
-    }
-    .kv{ display:grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 10px; opacity: .95; }
-    .kv .k{ color: rgba(169,247,255,.75); }
-    .kv .v{ color: rgba(255,255,255,.9); text-shadow: 0 0 12px rgba(40,240,255,.12); }
-
-    .hud-tl{ left: 12px; top: 12px; }
-    .hud-tr{ right: 12px; top: 12px; }
-    .hud-br{ right: 12px; bottom: 12px; }
-    .hud-bl{ left: 12px; bottom: 12px; }
-
-    /* Table styles */
-    .dataTable{
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-    .dataTable thead{
-      background: rgba(0,0,0,.35);
-      border-bottom: 1px solid rgba(40,240,255,.25);
-    }
-    .dataTable th{
-      padding: 8px 10px;
-      text-align: left;
-      font-size: 10px;
-      letter-spacing: .12em;
-      color: rgba(44,255,154,.85);
-      text-transform: uppercase;
-    }
-    .dataTable td{
-      padding: 8px 10px;
-      border-bottom: 1px solid rgba(40,240,255,.08);
-      color: rgba(220,255,255,.85);
-    }
-    .dataTable tbody tr:hover{
-      background: rgba(40,240,255,.05);
-    }
-
-    .badge{
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 9px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .badge.stable{ background: rgba(0,255,136,.15); color: var(--good); border: 1px solid rgba(0,255,136,.35); }
-    .badge.active{ background: rgba(40,240,255,.15); color: var(--neon); border: 1px solid rgba(40,240,255,.35); }
-    .badge.locked{ background: rgba(188,19,254,.15); color: var(--vio); border: 1px solid rgba(188,19,254,.35); }
-    .badge.verified{ background: rgba(255,215,0,.15); color: var(--gold); border: 1px solid rgba(255,215,0,.35); }
-
-    /* Timeline */
-    .timeline{
-      position: relative;
-      padding-left: 24px;
-    }
-    .timeline::before{
-      content: "";
-      position: absolute;
-      left: 6px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, rgba(40,240,255,.45), rgba(44,255,154,.25));
-    }
-    .timelineItem{
-      position: relative;
-      margin-bottom: 16px;
-      padding-left: 18px;
-    }
-    .timelineItem::before{
-      content: "";
-      position: absolute;
-      left: -19px;
-      top: 4px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(44,255,154,.75);
-      box-shadow: 0 0 12px rgba(44,255,154,.55);
-      border: 2px solid rgba(0,0,0,.65);
-    }
-    .timelineItem .date{
-      font-size: 10px;
-      color: rgba(40,240,255,.75);
-      letter-spacing: .10em;
-      margin-bottom: 3px;
-    }
-    .timelineItem .desc{
-      font-size: 11px;
-      color: rgba(220,255,255,.85);
-      line-height: 1.5;
-    }
-
-    /* Gauge chart */
-    .gauge{
-      position: relative;
-      width: 100%;
-      height: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .gaugeCircle{
-      position: relative;
-      width: 120px;
-      height: 120px;
-    }
-    .gaugeCircle svg{
-      transform: rotate(-90deg);
-    }
-    .gaugeValue{
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .gaugeValue .num{
-      font-size: 28px;
-      font-weight: 600;
-      color: rgba(255,255,255,.95);
-      text-shadow: 0 0 20px rgba(44,255,154,.45);
-    }
-    .gaugeValue .label{
-      font-size: 9px;
-      letter-spacing: .12em;
-      color: rgba(169,247,255,.75);
-      text-transform: uppercase;
-    }
-
-    /* Action buttons */
-    .actionBtn{
-      padding: 10px 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(40,240,255,.55);
-      background: rgba(40,240,255,.12);
-      color: rgba(255,255,255,.95);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 0 18px rgba(40,240,255,.14);
-      transition: all 0.2s;
-      font-size: 10px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .actionBtn:hover{ 
-      filter: brightness(1.18); 
-      transform: translateY(-1px);
-      box-shadow: 0 0 25px rgba(40,240,255,.25);
-    }
-    .actionBtn:active{ transform: translateY(0); }
-
-    /* EVE Terminal */
-    #terminal {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 6;
-      border-radius: 16px;
-      border: 1px solid rgba(40,240,255,.55);
-      background: rgba(0,0,0,.85);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      max-height: 240px;
-    }
-
-    #terminal .termHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.45);
-      border-bottom: 1px solid rgba(40,240,255,.18);
-    }
-    .termHead .left{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      font-size: 11px;
-      color: rgba(188,19,254,.95);
-      text-shadow: 0 0 14px rgba(188,19,254,.40);
-    }
-    .termHead .right{
-      font-size: 10px;
-      opacity: .85;
-      letter-spacing: .10em;
-      color: rgba(169,247,255,.75);
-    }
-
-    #termLog{
-      height: 130px;
-      overflow:auto;
-      padding: 10px 12px;
-      font-size: 11px;
-      line-height: 1.5;
-      color: rgba(220,255,255,.85);
-    }
-    .line{ margin-bottom: 5px; }
-    .you{ color: rgba(255,255,255,.95); }
-    .eve{ color: rgba(44,255,154,.95); }
-    .sys{ color: rgba(169,247,255,.75); }
-
-    #termInputRow{
-      display:flex;
-      gap: 10px;
-      padding: 10px 12px;
-      border-top: 1px solid rgba(40,240,255,.18);
-      background: rgba(0,0,0,.35);
-    }
-    #termInput{
-      flex:1;
-      padding: 9px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(40,240,255,.45);
-      background: rgba(4,10,18,.75);
-      color: rgba(255,255,255,.95);
-      outline: none;
-      font-size: 11px;
-    }
-    #termBtn{
-      padding: 9px 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(44,255,154,.55);
-      background: rgba(44,255,154,.12);
-      color: rgba(255,255,255,.95);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(44,255,154,.14);
-      transition: all 0.2s;
-      font-size: 10px;
-      font-weight: 600;
-    }
-    #termBtn:hover{ filter: brightness(1.15); transform: scale(1.02); }
-    #termBtn:active{ transform: scale(0.98); }
-
-    /* Responsive */
-    @media (max-width: 1280px){
-      #dashGrid{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-      .hudPanel{ min-width: 200px; font-size: 9px; }
-      .ring,.sweep{ width: 480px; height: 480px; }
-    }
-    @media (max-width: 768px){
-      header{ flex-direction:column; align-items:flex-start; }
-      .statusbar{ justify-content:flex-start; }
-      #termLog{ height: 100px; }
-      .hudPanel{ display: none; }
-      #starMapContainer{ height: 360px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEC-WAM-HOT-CORE Live Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0E0E1A 0%, #1A1A2E 100%);
+            color: #EAEAEA;
+            overflow-x: hidden;
+        }
+        
+        /* Lock Screen Styles */
+        #lockScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        
+        #lockScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .lock-content {
+            text-align: center;
+            color: #00D9FF;
+        }
+        
+        .lock-title {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px #00D9FF;
+        }
+        
+        .lock-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+        
+        .scanner {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+        
+        .scanner-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #00D9FF;
+            animation: pulse 2s infinite;
+        }
+        
+        .scanner-ring:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 0;
+            left: 0;
+        }
+        
+        .scanner-ring:nth-child(2) {
+            width: 160px;
+            height: 160px;
+            top: 20px;
+            left: 20px;
+            border-width: 2px;
+            animation-delay: 0.5s;
+        }
+        
+        .scanner-ring:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            top: 40px;
+            left: 40px;
+            border-width: 1px;
+            animation-delay: 1s;
+        }
+        
+        .scanner-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+        
+        .scan-status {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #00FF88;
+        }
+        
+        .scanning {
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% {
+                opacity: 1;
+            }
+            25%, 75% {
+                opacity: 0.5;
+            }
+        }
+        
+        .unlock-button {
+            background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .unlock-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.7);
+        }
+        
+        .lock-hint {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        
+        /* Main Content Styles */
+        #mainContent {
+            display: none;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        #mainContent.visible {
+            display: block;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+        
+        h1 {
+            color: #00D9FF;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .status-bar {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #00D9FF;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+        
+        .card h2 {
+            color: #00D9FF;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: bold;
+        }
+        
+        .metric-value {
+            color: #00FF88;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th {
+            background: rgba(0, 217, 255, 0.2);
+            padding: 12px;
+            text-align: left;
+            color: #00D9FF;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: rgba(0, 217, 255, 0.05);
+        }
+        
+        .status-perfect {
+            background-color: rgba(0, 255, 136, 0.2) !important;
+            border-left: 4px solid #00FF88;
+        }
+        
+        .status-todo {
+            background-color: rgba(255, 193, 7, 0.2) !important;
+            border-left: 4px solid #FFC107;
+        }
+        
+        .status-active {
+            background-color: rgba(33, 150, 243, 0.2) !important;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-stable {
+            background-color: rgba(158, 158, 158, 0.2) !important;
+            border-left: 4px solid #9E9E9E;
+        }
+        
+        #starmap-container {
+            width: 100%;
+            height: 600px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .refresh-button {
+            background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .refresh-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .streamlit-embed {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #00D9FF;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            opacity: 0.7;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #00D9FF;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #starmap-container {
+                height: 400px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="grain"></div>
-
-  <header>
-    <div class="brand">
-      <h1>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE Ψ</h1>
-      <small id="clock">SYSTEM TIME: —</small>
+    <!-- Lock Screen -->
+    <div id="lockScreen">
+        <div class="lock-content">
+            <h1 class="lock-title">🔐 BIOMETRIC AUTHENTICATION</h1>
+            <p class="lock-subtitle">CEC-WAM-HOT-CORE SECURITY PROTOCOL</p>
+            
+            <div class="scanner">
+                <div class="scanner-ring"></div>
+                <div class="scanner-ring"></div>
+                <div class="scanner-ring"></div>
+                <div class="scanner-icon">🔍</div>
+            </div>
+            
+            <div id="scanStatus" class="scan-status">
+                <span class="scanning">● Scanning biometric data...</span>
+            </div>
+            
+            <button class="unlock-button" onclick="unlockDashboard()">OVERRIDE ACCESS</button>
+            
+            <p class="lock-hint">Press ENTER or click button to bypass</p>
+        </div>
     </div>
-
-    <div class="statusbar">
-      <div class="pill"><span id="netDot" class="dot"></span><span id="netStatus">LINK: INITIALIZING</span></div>
-      <div class="pill"><span class="dot"></span><span id="eveStatus">EVE: ONLINE</span></div>
-      <div class="pill"><span class="dot warn"></span><span id="sourceStatus">FEEDS: LOADING</span></div>
-      <div class="pill"><span class="dot"></span><span id="modeStatus">MODE: GOD_MODE</span></div>
-    </div>
-  </header>
-
-  <div id="mainContainer">
-    <!-- Star Map -->
-    <div id="starMapContainer">
-      <canvas id="threeCanvas"></canvas>
-
-      <div class="hud scanlines vignette">
-        <div class="ring"></div>
-        <div class="sweep"></div>
-        <div class="quantumRing" id="quantumRing"></div>
-
-        <div class="hudPanel hud-tl">
-          <h3>🌌 Quantum Core</h3>
-          <div class="kv">
-            <div class="k">Status</div><div class="v" id="hudCore">ONLINE</div>
-            <div class="k">Entropy</div><div class="v" id="hudEntropy">—</div>
-            <div class="k">Latency</div><div class="v" id="hudLatency">—</div>
-            <div class="k">Sync</div><div class="v" id="hudSync">—</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-tr">
-          <h3>📡 Network Telemetry</h3>
-          <div class="kv">
-            <div class="k">BTC</div><div class="v" id="hudBtc">—</div>
-            <div class="k">ETH</div><div class="v" id="hudEth">—</div>
-            <div class="k">SOL</div><div class="v" id="hudSol">—</div>
-            <div class="k">PSI</div><div class="v" id="hudPsi">—</div>
-            <div class="k">Feed</div><div class="v" id="hudFeed">—</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-bl">
-          <h3>🔐 Security Status</h3>
-          <div class="kv">
-            <div class="k">Protocol</div><div class="v">OMEGA_LOCK</div>
-            <div class="k">Escrow</div><div class="v" id="hudEscrow">84%</div>
-            <div class="k">Identity</div><div class="v">SOVEREIGN</div>
-            <div class="k">Threat</div><div class="v" style="color:var(--good)">LOW</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-br">
-          <h3>⏱ System Clock</h3>
-          <div class="kv">
-            <div class="k">Heartbeat</div><div class="v" id="hudHeartbeat">—</div>
-            <div class="k">Uptime</div><div class="v" id="hudUptime">—</div>
-            <div class="k">Coords</div><div class="v" id="hudCoords">—</div>
-          </div>
-          <button class="actionBtn" onclick="refreshAllData()" style="margin-top:8px;width:100%;font-size:9px">🔄 REFRESH</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard Grid -->
-    <div id="dashGrid">
-      
-      <!-- PSI Wallet Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💎 PSI WALLET</div>
-          <div class="pill" style="padding:5px 10px;">
-            <span class="dot"></span><span id="walletMode">SOVEREIGN</span>
-          </div>
-        </div>
-        <div class="body">
-          <div class="bigVal" id="psiBalance">176,452.66 Ψ</div>
-          <div class="subVal">
-            <span class="tag" id="psiUsd">— USD</span>
-            <span class="tag" id="psiChange">— 24h</span>
-            <span class="tag" id="psiSource">SOURCE: LIVE</span>
-          </div>
-          <div style="margin-top:12px;display:flex;gap:8px;">
-            <button class="actionBtn" onclick="connectWallet()" style="flex:1">🔗 CONNECT</button>
-            <button class="actionBtn" onclick="refreshPSI()" style="flex:1">🔄 REFRESH</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Net Liquidity Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💰 NET LIQUIDITY</div>
-        </div>
-        <div class="body">
-          <div class="bigVal" id="netLiquidity">$1,250,039</div>
-          <div class="subVal">
-            <span class="tag">Valuation: <span id="valuation">$34.1M</span></span>
-            <span class="tag">BTC: <span id="btcAllowance">1.33 BTC</span></span>
-            <span class="tag">Needed: <span id="neededUsd">$56,363</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Resource Gauge Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">⚡ RESOURCE USAGE</div>
-        </div>
-        <div class="body">
-          <div class="gauge">
-            <div class="gaugeCircle">
-              <svg width="120" height="120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(40,240,255,.15)" stroke-width="8"/>
-                <circle id="gaugeBar" cx="60" cy="60" r="52" fill="none" stroke="url(#gaugeGrad)" stroke-width="8" 
-                  stroke-dasharray="326.73" stroke-dashoffset="13.07" stroke-linecap="round"/>
-                <defs>
-                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:rgba(44,255,154,1);stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:rgba(40,240,255,1);stop-opacity:1" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="gaugeValue">
-                <div class="num" id="gaugeNum">98.75%</div>
-                <div class="label">USED</div>
-              </div>
+    
+    <!-- Main Content -->
+    <div id="mainContent">
+        <header>
+            <h1>🌌 CEC-WAM-HOT-CORE Live Dashboard</h1>
+            <div class="status-bar">
+                <strong>System Status:</strong> <span style="color: #00FF88;">OPERATIONAL</span> | 
+                <strong>Last Sync:</strong> <span id="lastSync">--:--:--</span>
             </div>
-          </div>
-          <div style="margin-top:8px;text-align:center;font-size:10px;color:rgba(169,247,255,.75)">
-            <span style="color:var(--good)">●</span> LEFT: <span id="resourceLeft">1.25%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- System Mode Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">🎯 SYSTEM MODE</div>
-        </div>
-        <div class="body">
-          <div class="bigVal" style="font-size:22px;color:var(--gold)">GOD_MODE</div>
-          <div class="subVal">
-            <span class="tag">Focus: 99.9%</span>
-            <span class="tag">AGI: Q4 2026</span>
-            <span class="tag">R-Ratio: <span id="rRatio">10.96</span></span>
-          </div>
-          <div style="margin-top:10px;font-size:10px;color:rgba(220,255,255,.75)">
-            <div>✅ Matrix Sync: COMPLETE</div>
-            <div>✅ Ghost Protocol: EXECUTED</div>
-            <div>✅ Patent: REGISTERED</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Black Hole Discoveries Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">🌀 BLACK HOLE DISCOVERIES</div>
-          <span style="font-size:10px;opacity:.75">LIVE QUANTUM DATA + COMPUTED METRICS</span>
-        </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Value</th>
-                <th>Status</th>
-                <th>Distance</th>
-                <th>Severity</th>
-              </tr>
-            </thead>
-            <tbody id="blackHoleTable">
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Timeline Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📅 PROJECT TIMELINE</div>
-        </div>
-        <div class="body">
-          <div class="timeline" id="timelineContainer">
-            <div class="timelineItem">
-              <div class="date">2025-11-06</div>
-              <div class="desc">Project Kickoff — Initial roadmap creation</div>
+        </header>
+        
+        <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
+        
+        <div class="dashboard-grid">
+            <!-- PSI Price Card -->
+            <div class="card">
+                <h2>💎 PSI-COIN PRICE</h2>
+                <div id="psiPrice" class="loading">Loading...</div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-11-27</div>
-              <div class="desc">Resource conflict (T-3) detected and resolved via mutex lock</div>
+            
+            <!-- Data Summary Card -->
+            <div class="card">
+                <h2>📊 Data Summary</h2>
+                <div id="dataSummary" class="loading">Loading...</div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-11-30</div>
-              <div class="desc">Global synchronization finished; BTC allowance transfer verified (1.33 BTC)</div>
+            
+            <!-- Status Distribution Card -->
+            <div class="card">
+                <h2>📈 Status Distribution</h2>
+                <div id="statusDist" class="loading">Loading...</div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-12-02</div>
-              <div class="desc">Ghost Protocol executed, activating expendable funds</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">2025-12-12</div>
-              <div class="desc">Master Archive generated — patent and copyrights registered</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">2026-01-08</div>
-              <div class="desc">Incoming asset recorded: +176,452.66 PSI tokens; net worth validated at ~176M</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">2026-01-16</div>
-              <div class="desc">CEC Matrix metrics updated — valuation $34.1M; escrow status 84%; security OMEGA_LOCK</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">TODAY</div>
-              <div class="desc" style="color:var(--gold)">System operating in GOD_MODE with 99.9% focus; star map visuals upgraded</div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Transaction Feed Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">💸 TRANSACTION FEED (PUMP.FUN)</div>
-          <span style="font-size:10px;opacity:.75">SOLANA MAINNET</span>
+        
+        <!-- Data Table -->
+        <div class="card">
+            <h2>📋 Live Data Feed</h2>
+            <div id="dataTable" class="loading">Loading data from Google Sheets...</div>
         </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Action</th>
-                <th>Amount</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2026-01-10 04:32:39</td>
-                <td>TRANSFER</td>
-                <td>6.802M</td>
-                <td>0.9233 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2026-01-10 01:40:02</td>
-                <td>CLOSE ACCOUNT</td>
-                <td>2.039M</td>
-                <td>0.2774 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2026-01-10 01:40:02</td>
-                <td>CREATE ACCOUNT</td>
-                <td>2.039M</td>
-                <td>0.2774 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2025-12-22 15:03:48</td>
-                <td>TRANSFER</td>
-                <td>50M</td>
-                <td>6.3934 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-            </tbody>
-          </table>
+        
+        <!-- 3D Star Map -->
+        <div class="card">
+            <h2>🌟 3D Star Map</h2>
+            <p style="margin-bottom: 15px;">Explore three celestial bodies:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+                <li>🌟 <strong>Alpha Centauri</strong> - Yellow star (center)</li>
+                <li>🌍 <strong>TRAPPIST-1e</strong> - Blue-green exoplanet</li>
+                <li>🔴 <strong>Ross 128 b</strong> - Red exoplanet</li>
+            </ul>
+            <div id="starmap-container">
+                <canvas id="starmap"></canvas>
+            </div>
         </div>
-      </div>
-
-      <!-- CEC Vault Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">🔐 CEC VAULT</div>
+        
+        <!-- Streamlit Embed (Optional - uncomment and add your URL) -->
+        <!--
+        <div class="card">
+            <h2>🚀 Full Streamlit Dashboard</h2>
+            <iframe class="streamlit-embed" src="https://YOUR-APP.streamlit.app"></iframe>
         </div>
-        <div class="body">
-          <div style="font-size:10px;color:rgba(220,255,255,.85);line-height:1.6">
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">GEMINI AGI:</strong> Master API Key Active</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">PHANTOM BRIDGE:</strong> TXT Record Verified</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">PSI-COIN:</strong> 100,001.33 Units</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">VALUATION:</strong> $1,250,039</div>
-            <div><strong style="color:var(--neon2)">BITCOIN:</strong> 1.33 BTC (~$121,478 USD)</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NASA Eyes Visualization Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">🛰️ NASA EYES LIVE</div>
-          <span style="font-size:10px;opacity:.75">SOLAR SYSTEM VISUALIZATION</span>
-        </div>
-        <div class="body" style="padding:0;height:400px;">
-          <iframe 
-            id="nasaEyesFrame"
-            src="https://eyes.nasa.gov/apps/solar-system/#/home" 
-            style="width:100%;height:100%;border:none;border-radius:0 0 16px 16px;"
-            title="Interactive NASA Eyes live solar system visualization (embedded content)"
-            sandbox="allow-scripts"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            loading="lazy">
-            <p style="padding:12px;font-size:12px;color:rgba(220,255,255,.85);background-color:#04060a;">
-              This section contains an embedded interactive NASA Eyes live solar system visualization. If you cannot view embedded content, 
-              you can access the visualization directly at 
-              <a href="https://eyes.nasa.gov/apps/solar-system/#/home" target="_blank" rel="noopener noreferrer">eyes.nasa.gov/apps/solar-system</a>.
+        -->
+        
+        <footer>
+            <p>🌌 CEC-WAM-HOT-CORE Live Dashboard</p>
+            <p>Powered by Google Sheets | CoinGecko API | Three.js</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+                <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv" 
+                   style="color: #00D9FF; text-decoration: none;" target="_blank">View Data Source</a>
             </p>
-          </iframe>
-        </div>
-      </div>
-
-      <!-- Finance Hub Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💳 FINANCE HUB</div>
-        </div>
-        <div class="body">
-          <div style="font-size:10px;color:rgba(220,255,255,.85);line-height:1.7">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Psi-Coins (Phantom)</span>
-              <span style="color:var(--good)">176,452.66</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Escrow Bridge</span>
-              <span style="color:var(--warn)">$21,000.00</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Master Seed</span>
-              <span style="color:var(--bad)">[REDACTED]</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Daily Tranche</span>
-              <span style="color:var(--good)">$300.00/Day</span>
-            </div>
-            <div style="display:flex;justify-content:space-between">
-              <span>Unemployment UI</span>
-              <span style="color:var(--good)">$2,000.00</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Domain & Uptime Monitor Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">🌐 DOMAIN & UPTIME</div>
-        </div>
-        <div class="body">
-          <div style="font-size:10px;color:rgba(220,255,255,.85);line-height:1.7">
-            <div style="margin-bottom:10px">
-              <strong style="color:var(--neon2);font-size:9px;letter-spacing:0.1em">DOMAIN CHECK</strong>
-              <div style="margin-top:6px;display:flex;gap:6px;">
-                <label for="domainInput" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">Domain name to check</label>
-                <input id="domainInput" type="text" placeholder="example.com" aria-label="Domain name to check" style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid rgba(40,240,255,.35);background:rgba(4,10,18,.75);color:rgba(255,255,255,.95);font-size:9px;outline:none;" />
-                <button onclick="checkDomain()" class="actionBtn" style="padding:6px 10px;font-size:8px;" aria-label="Check domain status">CHECK</button>
-              </div>
-              <div id="domainResult" style="margin-top:6px;font-size:9px;opacity:0.85;"></div>
-            </div>
-            <div style="border-top:1px solid rgba(40,240,255,.15);padding-top:10px;">
-              <strong style="color:var(--neon2);font-size:9px;letter-spacing:0.1em">COMPONENT UPTIME</strong>
-              <div style="margin-top:6px;">
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                  <span>API Server</span>
-                  <span style="color:var(--good)" id="uptimeAPI">● 99.9%</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                  <span>Database</span>
-                  <span style="color:var(--good)" id="uptimeDB">● 100%</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                  <span>Blockchain Node</span>
-                  <span style="color:var(--good)" id="uptimeBC">● 98.5%</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;">
-                  <span>Price Feeds</span>
-                  <span style="color:var(--good)" id="uptimePF">● 97.2%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bonding Curve Chart Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📈 BONDING CURVE TIMELINE</div>
-          <div style="font-size:10px;opacity:.75" id="bondMeta">T+0000 / SUPPLY SIM</div>
-        </div>
-        <div class="body">
-          <canvas id="bondChart" height="160"></canvas>
-        </div>
-      </div>
-
-      <!-- System Logs Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📋 SYSTEM LOGS</div>
-          <button class="actionBtn" onclick="exportLogsToCSV()" style="font-size:9px;padding:6px 12px;">📥 EXPORT CSV</button>
-        </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Metric</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="systemLogsTable">
-              <tr>
-                <td>Finance</td>
-                <td>Valuation</td>
-                <td>$1.25M</td>
-                <td><span class="badge verified">Verified</span></td>
-              </tr>
-              <tr>
-                <td>Finance</td>
-                <td>PSI-Coins</td>
-                <td>200 PSI</td>
-                <td><span class="badge stable">Minted</span></td>
-              </tr>
-              <tr>
-                <td>System</td>
-                <td>Mode</td>
-                <td>GOD_MODE</td>
-                <td><span class="badge active">Optimal</span></td>
-              </tr>
-              <tr>
-                <td>Network</td>
-                <td>Load</td>
-                <td id="networkLoad">43%</td>
-                <td><span class="badge stable">Stable</span></td>
-              </tr>
-              <tr>
-                <td>Network</td>
-                <td>Latency</td>
-                <td id="latencyMs">12ms</td>
-                <td><span class="badge stable">Fast</span></td>
-              </tr>
-              <tr>
-                <td>Security</td>
-                <td>Identity</td>
-                <td>Sovereign Architect</td>
-                <td><span class="badge locked">Encrypted</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+        </footer>
     </div>
-  </div>
-
-  <section id="terminal">
-    <div class="termHead">
-      <div class="left"><span class="dot"></span> EVE // COMMAND BUS</div>
-      <div class="right" id="termRight">type: <span style="color:rgba(44,255,154,.9)">help</span></div>
-    </div>
-    <div id="termLog"></div>
-    <div id="termInputRow">
-      <input id="termInput" autocomplete="off" placeholder="EVE> enter command (help, status, prices, export, domain, uptime, autolock)" />
-      <button id="termBtn">SEND</button>
-    </div>
-  </section>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-
-  <script>
-    // Embedded data from repository
-    const DATA = {
-      net_liquidity: 1250039,
-      psi_mass: 176452.66,
-      total_mass: 100001.33,
-      dark_energy_index: 0.999,
-      black_hole_flow_rate: 1.33,
-      r_ratio_efficiency: 10.96,
-      btc_allowance: 1.33,
-      agi_timeline: "Q4 2026",
-      resource_used_pct: 98.75,
-      resource_left_pct: 1.25,
-      psi_minted: 200,
-      valuation_usd: 34100000,
-      escrow_pct: 84,
-      network_load_pct: 43,
-      latency_ms: 12,
-      needed_usd: 56363,
-      psi_gauge_pct: 0
-    };
-
-    const CFG = {
-      psiBalance: DATA.psi_mass,
-      psiMapsTo: "sol",
-      pollMs: 15_000,
-      autoSaveMs: 30_000, // Auto-save interval
-      psiToSolMultiplier: 0.000001, // PSI price mapping multiplier
-    };
-
-    const $ = (id) => document.getElementById(id);
-    let startTime = Date.now();
-
-    // ---------- Silent Command Bus ----------
-    const CommandBus = {
-      queue: [],
-      processing: false,
-      silent: true,
-      
-      // Add command to queue
-      enqueue(command, params = {}) {
-        this.queue.push({ command, params, timestamp: Date.now() });
-        if (!this.processing) {
-          this.processQueue();
-        }
-      },
-      
-      // Process command queue
-      async processQueue() {
-        if (this.queue.length === 0) {
-          this.processing = false;
-          return;
+    
+    <script>
+        // Lock Screen Functions
+        function unlockDashboard() {
+            const scanStatus = document.getElementById('scanStatus');
+            scanStatus.innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED</span>';
+            
+            setTimeout(() => {
+                const lockScreen = document.getElementById('lockScreen');
+                lockScreen.classList.add('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('mainContent').classList.add('visible');
+                    initDashboard();
+                }, 500);
+            }, 800);
         }
         
-        this.processing = true;
-        try {
-          while (this.queue.length > 0) {
-            const task = this.queue.shift();
-
+        // Allow Enter key to unlock
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !document.getElementById('lockScreen').classList.contains('hidden')) {
+                unlockDashboard();
+            }
+        });
+        
+        // Dashboard Functions
+        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv';
+        const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
+        
+        let dashboardData = null;
+        
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastSync').textContent = timeString;
+        }
+        
+        async function fetchPSIPrice() {
             try {
-              await this.execute(task);
-            } catch (e) {
-              console.error("Silent Command Bus Error:", e);
+                const response = await fetch(COINGECKO_API_URL);
+                const data = await response.json();
+                
+                const price = data.tridentdao?.usd || 0;
+                const change = data.tridentdao?.usd_24h_change || 0;
+                
+                const changeColor = change >= 0 ? '#00FF88' : '#FF4444';
+                const changeSymbol = change >= 0 ? '+' : '';
+                
+                document.getElementById('psiPrice').innerHTML = `
+                    <div class="metric">
+                        <span class="metric-label">TridentDAO (PSI)</span>
+                        <span class="metric-value">$${price.toFixed(6)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">24h Change</span>
+                        <span class="metric-value" style="color: ${changeColor};">${changeSymbol}${change.toFixed(2)}%</span>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('psiPrice').innerHTML = '<p style="color: #FF4444;">Price unavailable</p>';
             }
-
-            // Delay between tasks to avoid tight looping
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-        } finally {
-          // Ensure processing flag is always reset, even if an unexpected error occurs
-          this.processing = false;
         }
-      },
-      
-      // Execute command
-      async execute(task) {
-        switch(task.command) {
-          case "refresh_prices":
-            await pollFeeds();
-            break;
-          case "export_logs":
-            exportLogsToCSV();
-            break;
-          case "update_uptime":
-            updateUptimeStats();
-            break;
-          case "check_domain":
-            if (task.params.domain) {
-              $("domainInput").value = task.params.domain;
-              await checkDomain();
-            }
-            break;
-          case "load_blackholes":
-            await loadBlackHolesData();
-            break;
-          case "auto_save":
-            // Auto-save state (localStorage)
-            this.autoSave();
-            break;
-          default:
-            console.log("Unknown command:", task.command);
-        }
-      },
-      
-      // Auto-save functionality
-      autoSave() {
-        try {
-          // Check localStorage availability and quota
-          if (typeof localStorage === "undefined") {
-            return;
-          }
-          
-          const state = {
-            timestamp: Date.now(),
-            psiBalance: CFG.psiBalance,
-            netLiquidity: DATA.net_liquidity,
-            uptime: $("hudUptime") ? $("hudUptime").textContent : "",
-            lastPrices: {
-              btc: $("hudBtc") ? $("hudBtc").textContent : "",
-              eth: $("hudEth") ? $("hudEth").textContent : "",
-              sol: $("hudSol") ? $("hudSol").textContent : "",
-              psi: $("hudPsi") ? $("hudPsi").textContent : ""
-            }
-          };
-          localStorage.setItem("CEC_WAM_STATE", JSON.stringify(state));
-        } catch(e) {
-          // Handle quota exceeded or disabled localStorage
-          if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-            console.warn("localStorage quota exceeded. Auto-save disabled.");
-            // Clear old saves to free space
+        
+        async function fetchGoogleSheetsData() {
             try {
-              localStorage.removeItem("CEC_WAM_STATE");
-            } catch(clearError) {
-              console.error("Failed to clear localStorage:", clearError);
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                const csvText = await response.text();
+                
+                // Parse CSV
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+                
+                dashboardData = data;
+                displayData(data, headers);
+                updateDataSummary(data);
+                updateStatusDistribution(data);
+                
+            } catch (error) {
+                document.getElementById('dataTable').innerHTML = `
+                    <p style="color: #FF4444;">❌ Failed to load data: ${error.message}</p>
+                    <p>Please check your internet connection or verify the Google Sheets URL.</p>
+                `;
             }
-          } else {
-            console.error("Auto-save failed:", e);
-          }
-        }
-      },
-      
-      // Load saved state
-      loadState() {
-        try {
-          if (typeof localStorage === "undefined") {
-            return null;
-          }
-          const saved = localStorage.getItem("CEC_WAM_STATE");
-          if (saved) {
-            return JSON.parse(saved);
-          }
-        } catch(e) {
-          console.error("Load state failed:", e);
-        }
-        return null;
-      }
-    };
-    
-    // Restore saved state (if any) on initialization
-    (function restoreSavedState() {
-      const savedState = CommandBus.loadState();
-      if (!savedState) {
-        return;
-      }
-
-      // Restore configuration/state objects if available
-      if (typeof CFG !== "undefined" && typeof savedState.psiBalance === "number") {
-        CFG.psiBalance = savedState.psiBalance;
-      }
-      if (typeof DATA !== "undefined" && typeof savedState.netLiquidity === "number") {
-        DATA.net_liquidity = savedState.netLiquidity;
-      }
-
-      // Restore HUD elements if helper and elements are available
-      if (typeof $ === "function") {
-        if (savedState.uptime && $("hudUptime")) {
-          $("hudUptime").textContent = savedState.uptime;
-        }
-        if (savedState.lastPrices) {
-          const prices = savedState.lastPrices;
-          if (prices.btc && $("hudBtc")) {
-            $("hudBtc").textContent = prices.btc;
-          }
-          if (prices.eth && $("hudEth")) {
-            $("hudEth").textContent = prices.eth;
-          }
-          if (prices.sol && $("hudSol")) {
-            $("hudSol").textContent = prices.sol;
-          }
-          if (prices.psi && $("hudPsi")) {
-            $("hudPsi").textContent = prices.psi;
-          }
-        }
-      }
-    })();
-    
-    // Schedule periodic auto-save
-    setInterval(() => {
-      CommandBus.enqueue("auto_save");
-    }, CFG.autoSaveMs);
-
-    // ---------- Clock & Uptime ----------
-    function tickClock(){
-      const now = new Date();
-      $("clock").textContent = "SYSTEM TIME: " + now.toLocaleString();
-      $("hudHeartbeat").textContent = now.toLocaleTimeString();
-      
-      const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
-      const h = Math.floor(uptimeSec / 3600);
-      const m = Math.floor((uptimeSec % 3600) / 60);
-      const s = uptimeSec % 60;
-      $("hudUptime").textContent = `${h}h ${m}m ${s}s`;
-    }
-    setInterval(tickClock, 1000);
-    tickClock();
-
-    // ---------- Initialize from embedded data ----------
-    function initEmbeddedData(){
-      $("netLiquidity").textContent = "$" + DATA.net_liquidity.toLocaleString();
-      $("valuation").textContent = "$" + (DATA.valuation_usd / 1000000).toFixed(1) + "M";
-      $("btcAllowance").textContent = DATA.btc_allowance + " BTC";
-      $("neededUsd").textContent = "$" + DATA.needed_usd.toLocaleString();
-      $("rRatio").textContent = DATA.r_ratio_efficiency;
-      $("gaugeNum").textContent = DATA.resource_used_pct + "%";
-      $("resourceLeft").textContent = DATA.resource_left_pct + "%";
-      $("hudEscrow").textContent = DATA.escrow_pct + "%";
-      $("networkLoad").textContent = DATA.network_load_pct + "%";
-      $("latencyMs").textContent = DATA.latency_ms + "ms";
-      
-      // Update gauge
-      const circumference = 2 * Math.PI * 52;
-      const offset = circumference - (DATA.resource_used_pct / 100) * circumference;
-      $("gaugeBar").style.strokeDashoffset = offset;
-      
-      // Initialize system logs table
-      const logsTable = $("systemLogsTable");
-      logsTable.innerHTML = `
-        <tr>
-          <td>Finance</td>
-          <td>Valuation</td>
-          <td>$1.25M</td>
-          <td><span class="badge verified">Verified</span></td>
-        </tr>
-        <tr>
-          <td>Finance</td>
-          <td>PSI-Coins</td>
-          <td>200 PSI</td>
-          <td><span class="badge stable">Minted</span></td>
-        </tr>
-        <tr>
-          <td>System</td>
-          <td>Mode</td>
-          <td>GOD_MODE</td>
-          <td><span class="badge active">Optimal</span></td>
-        </tr>
-        <tr>
-          <td>Network</td>
-          <td>Load</td>
-          <td id="networkLoad">${DATA.network_load_pct}%</td>
-          <td><span class="badge stable">Stable</span></td>
-        </tr>
-        <tr>
-          <td>Network</td>
-          <td>Latency</td>
-          <td id="latencyMs">${DATA.latency_ms}ms</td>
-          <td><span class="badge stable">Fast</span></td>
-        </tr>
-        <tr>
-          <td>Security</td>
-          <td>Identity</td>
-          <td>Sovereign Architect</td>
-          <td><span class="badge locked">Encrypted</span></td>
-        </tr>
-      `;
-    }
-    initEmbeddedData();
-
-    // ---------- Safe fetch ----------
-    async function fetchJson(url, { timeoutMs = 8000 } = {}){
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), timeoutMs);
-      try{
-        const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
-        if(!res.ok) throw new Error("HTTP " + res.status);
-        return await res.json();
-      } finally {
-        clearTimeout(t);
-      }
-    }
-
-    // ---------- Parse and display Black Holes CSV ----------
-    async function loadBlackHolesData(){
-      try{
-        const response = await fetch("BlackHoles.csv");
-        const csvText = await response.text();
-        const lines = csvText.trim().split("\n");
-        
-        const blackHoleTable = $("blackHoleTable");
-        blackHoleTable.innerHTML = "";
-        
-        for(let i = 1; i < lines.length; i++){
-          const values = lines[i].split(",");
-          if(values.length < 5) continue;
-          
-          const id = values[1] || "—";
-          const desc = values[2] || "—";
-          const value = values[3] || "—";
-          const status = values[4] || "UNKNOWN";
-          
-          // Calculate distance metric (simulated: ID number * 4.2 LY - representing Alpha Centauri as reference)
-          const idNum = parseInt(id.replace(/[^0-9]/g, "")) || 0;
-          const distance = (idNum * 4.2).toFixed(1) + " LY";
-          
-          // Calculate severity (based on status)
-          const severityMap = {
-            "STABLE": "LOW",
-            "LOCKED": "MEDIUM",
-            "ACTIVE": "HIGH",
-            "VERIFIED": "LOW",
-            "PATENTED": "LOW",
-            "EXECUTED": "CRITICAL"
-          };
-          const severity = severityMap[status.trim()] || "UNKNOWN";
-          
-          const statusClass = status.trim().toLowerCase().replace(/[^a-z]/g, "");
-          
-          // Create row with safe DOM manipulation to prevent XSS
-          const row = document.createElement("tr");
-          
-          const idCell = document.createElement("td");
-          idCell.textContent = id;
-          row.appendChild(idCell);
-
-          const descCell = document.createElement("td");
-          descCell.textContent = desc;
-          row.appendChild(descCell);
-
-          const valueCell = document.createElement("td");
-          valueCell.textContent = value;
-          row.appendChild(valueCell);
-
-          const statusCell = document.createElement("td");
-          const statusBadge = document.createElement("span");
-          statusBadge.className = "badge " + statusClass;
-          statusBadge.textContent = status;
-          statusCell.appendChild(statusBadge);
-          row.appendChild(statusCell);
-
-          const distanceCell = document.createElement("td");
-          distanceCell.style.fontSize = "9px";
-          distanceCell.style.opacity = "0.8";
-          distanceCell.textContent = distance;
-          row.appendChild(distanceCell);
-
-          const severityCell = document.createElement("td");
-          severityCell.style.fontSize = "9px";
-          severityCell.style.opacity = "0.8";
-          severityCell.style.color = severity === "CRITICAL"
-            ? "var(--bad)"
-            : severity === "HIGH"
-              ? "var(--warn)"
-              : "var(--good)";
-          severityCell.textContent = severity;
-          row.appendChild(severityCell);
-          
-          blackHoleTable.appendChild(row);
         }
         
-        eveSay("✅ Black Hole data loaded with computed metrics");
-      } catch(e){
-        console.error("Failed to load BlackHoles.csv:", e);
-        eveSay("⚠️ Failed to load Black Hole data, using fallback");
-        
-        // Provide a clear in-table message so the user understands what happened
-        const blackHoleTable = $("blackHoleTable");
-        if (blackHoleTable){
-          const tableEl = blackHoleTable.closest("table");
-          const headerRow = tableEl ? tableEl.querySelector("thead tr") : null;
-          let colSpan = 6; // Default to known column count
-          if (headerRow && headerRow.children.length > 0){
-            colSpan = headerRow.children.length;
-          }
-          
-          blackHoleTable.innerHTML = "";
-          const row = document.createElement("tr");
-          const cell = document.createElement("td");
-          cell.colSpan = colSpan;
-          cell.textContent = "Unable to load Black Hole data at this time.";
-          cell.style.textAlign = "center";
-          cell.style.opacity = "0.8";
-          row.appendChild(cell);
-          blackHoleTable.appendChild(row);
-        }
-      }
-    }
-
-    // ---------- Live crypto feeds ----------
-    async function pollFeeds(){
-      const netDot = $("netDot");
-      const netStatus = $("netStatus");
-      const sourceStatus = $("sourceStatus");
-
-      try{
-        netDot.className = "dot warn";
-        netStatus.textContent = "LINK: CONNECTING…";
-
-        const cgUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
-        const cg = await fetchJson(cgUrl);
-
-        const btc = cg.bitcoin?.usd ?? null;
-        const eth = cg.ethereum?.usd ?? null;
-        const sol = cg.solana?.usd ?? null;
-
-        $("hudBtc").textContent = btc ? "$" + btc.toLocaleString() : "—";
-        $("hudEth").textContent = eth ? "$" + eth.toLocaleString() : "—";
-        $("hudSol").textContent = sol ? "$" + sol.toLocaleString() : "—";
-
-        const map = CFG.psiMapsTo;
-        const mapPrice = map === "btc" ? btc : map === "eth" ? eth : sol;
-        const mapChange = map === "btc" ? cg.bitcoin?.usd_24h_change : map === "eth" ? cg.ethereum?.usd_24h_change : cg.solana?.usd_24h_change;
-        
-        // Calculate PSI price (mapped to SOL with configured multiplier)
-        const psiPrice = sol ? (sol * CFG.psiToSolMultiplier).toFixed(6) : null;
-        $("hudPsi").textContent = psiPrice ? "$" + psiPrice : "—";
-
-        $("psiBalance").textContent = CFG.psiBalance.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " Ψ";
-        $("psiUsd").textContent = (mapPrice ? ("$" + (CFG.psiBalance * mapPrice).toLocaleString(undefined,{maximumFractionDigits:2})) : "— USD");
-        $("psiChange").textContent = (typeof mapChange === "number")
-          ? ((mapChange >= 0 ? "+" : "") + mapChange.toFixed(2) + "% 24h")
-          : "— 24h";
-
-        const entropy = (Math.abs(Math.sin(Date.now()/14000))*0.42 + 0.58);
-        $("hudEntropy").textContent = entropy.toFixed(3);
-        $("hudLatency").textContent = Math.floor(12 + Math.random()*18) + " ms";
-        $("hudSync").textContent = "OK/" + (100 - Math.floor(Math.random()*3)) + "%";
-
-        $("hudFeed").textContent = "CoinGecko";
-        $("sourceStatus").textContent = "FEEDS: LIVE";
-        netStatus.textContent = "LINK: STABLE";
-        netDot.className = "dot";
-        
-        // Reset error counter on success
-        if (!window.feedErrorCount) {
-          window.feedErrorCount = 0;
-        }
-        // Reset after some time of successful operation
-        if (window.feedErrorCount > 0) {
-          window.feedErrorResetTimer = setTimeout(() => {
-            window.feedErrorCount = 0;
-          }, 60000); // Reset after 1 minute of successful operation
-        }
-        window.feedErrorCount = 0;
-      } catch (e){
-        $("sourceStatus").textContent = "FEEDS: DEGRADED";
-        $("netStatus").textContent = "LINK: DEGRADED";
-        $("netDot").className = "dot bad";
-        console.error("Feed error:", e);
-        
-        // Auto-fix: Retry with exponential backoff
-        // Base delay: 5000ms, Growth factor: 2x, Max delay: 30000ms
-        window.feedErrorCount = (window.feedErrorCount || 0) + 1;
-        
-        // Clear any pending reset timer
-        if (window.feedErrorResetTimer) {
-          clearTimeout(window.feedErrorResetTimer);
+        function displayData(data, headers) {
+            let html = '<table class="data-table"><thead><tr>';
+            
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                const statusClass = getStatusClass(row.Status || row.status || '');
+                html += `<tr class="${statusClass}">`;
+                headers.forEach(header => {
+                    html += `<td>${row[header] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('dataTable').innerHTML = html;
         }
         
-        // Keep retrying with capped backoff instead of giving up
-        const retryDelay = Math.min(5000 * Math.pow(2, Math.min(window.feedErrorCount, 3)), 30000);
-        setTimeout(() => {
-          CommandBus.enqueue("refresh_prices");
-        }, retryDelay);
-      }
-    }
-
-    function refreshAllData(){
-      eveSay("🔄 Refreshing all data feeds...");
-      pollFeeds();
-    }
-
-    function refreshPSI(){
-      eveSay("💎 Refreshing PSI wallet data...");
-      pollFeeds();
-    }
-
-    pollFeeds();
-    setInterval(pollFeeds, CFG.pollMs);
-    
-    // Load Black Holes CSV data
-    loadBlackHolesData();
-
-    // ---------- Wallet connect ----------
-    function connectWallet(){
-      eveSay("🔗 Wallet connection initiated...");
-      setTimeout(() => {
-        eveSay("✅ Wallet connected: PHANTOM (simulated)");
-        $("walletMode").textContent = "CONNECTED";
-      }, 1200);
-    }
-
-    // ---------- Bonding curve ----------
-    const bondCtx = $("bondChart").getContext("2d");
-    const bondState = {
-      t: 0,
-      labels: Array.from({length: 30}, (_,i)=> String(i - 29)),
-      data: [],
-    };
-
-    function bondingPriceAt(step){
-      const supply = 10_000 + step * 250;
-      const a = 0.0009;
-      const b = 0.06;
-      return a * Math.sqrt(supply) + b * Math.sin(step/3.2);
-    }
-
-    for(let i=0;i<30;i++) bondState.data.push(bondingPriceAt(i));
-
-    const bondChart = new Chart(bondCtx, {
-      type: "line",
-      data: {
-        labels: bondState.labels,
-        datasets: [{
-          label: "Bond Curve",
-          data: bondState.data,
-          tension: 0.3,
-          borderWidth: 2,
-          pointRadius: 0,
-          borderColor: "rgba(44,255,154,.85)",
-          backgroundColor: "rgba(44,255,154,.12)",
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          x: { display: false },
-          y: {
-            ticks: { color: "rgba(169,247,255,.75)", font: { size: 10 } },
-            grid: { color: "rgba(40,240,255,.08)" }
-          }
-        }
-      }
-    });
-
-    function tickBond(){
-      bondState.t++;
-      bondState.data.shift();
-      bondState.data.push(bondingPriceAt(bondState.t + 29));
-      bondChart.update("none");
-      $("bondMeta").textContent = "T+" + bondState.t.toString().padStart(4,"0") + " / SUPPLY SIM";
-    }
-    setInterval(tickBond, 1400);
-    tickBond();
-
-    // ---------- Three.js Enhanced Starfield ----------
-    const threeCanvas = $("threeCanvas");
-    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: true });
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.0028);
-
-    const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 1500);
-    camera.position.set(0, 0, 180);
-
-    // Stars
-    const starGeo = new THREE.BufferGeometry();
-    const starCount = 12000;
-    const pos = new Float32Array(starCount * 3);
-    const col = new Float32Array(starCount * 3);
-
-    for(let i=0;i<starCount;i++){
-      const i3 = i*3;
-      pos[i3+0] = (Math.random()-0.5) * 1200;
-      pos[i3+1] = (Math.random()-0.5) * 800;
-      pos[i3+2] = (Math.random()-0.5) * 1200;
-
-      const tint = 0.6 + Math.random()*0.4;
-      col[i3+0] = tint;
-      col[i3+1] = tint * (0.9 + Math.random()*0.2);
-      col[i3+2] = 1.0;
-    }
-    starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    starGeo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-
-    const stars = new THREE.Points(
-      starGeo,
-      new THREE.PointsMaterial({
-        size: 1.3,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.92,
-        depthWrite: false
-      })
-    );
-    scene.add(stars);
-
-    // Neon streaks
-    const streakGeo = new THREE.BufferGeometry();
-    const streakCount = 1600;
-    const spos = new Float32Array(streakCount * 3);
-    for(let i=0;i<streakCount;i++){
-      const i3=i*3;
-      spos[i3+0]=(Math.random()-0.5)*800;
-      spos[i3+1]=(Math.random()-0.5)*500;
-      spos[i3+2]=(Math.random()-0.5)*1000;
-    }
-    streakGeo.setAttribute("position", new THREE.BufferAttribute(spos,3));
-    const streaks = new THREE.Points(
-      streakGeo,
-      new THREE.PointsMaterial({
-        size: 2.8,
-        color: 0x28f0ff,
-        transparent: true,
-        opacity: 0.12,
-        depthWrite: false
-      })
-    );
-    scene.add(streaks);
-
-    // Nebula particles
-    const nebulaGeo = new THREE.BufferGeometry();
-    const nebulaCount = 800;
-    const npos = new Float32Array(nebulaCount * 3);
-    for(let i=0;i<nebulaCount;i++){
-      const i3=i*3;
-      npos[i3+0]=(Math.random()-0.5)*600;
-      npos[i3+1]=(Math.random()-0.5)*400;
-      npos[i3+2]=(Math.random()-0.5)*600;
-    }
-    nebulaGeo.setAttribute("position", new THREE.BufferAttribute(npos,3));
-    const nebula = new THREE.Points(
-      nebulaGeo,
-      new THREE.PointsMaterial({
-        size: 4.5,
-        color: 0xbc13fe,
-        transparent: true,
-        opacity: 0.08,
-        depthWrite: false
-      })
-    );
-    scene.add(nebula);
-
-    function resizeThreeToElement(){
-      const el = $("starMapContainer");
-      const rect = el.getBoundingClientRect();
-      const w = Math.max(2, Math.floor(rect.width));
-      const h = Math.max(2, Math.floor(rect.height));
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-
-    new ResizeObserver(resizeThreeToElement).observe($("starMapContainer"));
-    window.addEventListener("resize", resizeThreeToElement);
-    resizeThreeToElement();
-
-    let lastTs = performance.now();
-    function animate(ts){
-      const dt = Math.min(0.05, (ts - lastTs) / 1000);
-      lastTs = ts;
-
-      stars.rotation.y += dt * 0.08;
-      stars.rotation.x += dt * 0.025;
-      
-      streaks.rotation.y -= dt * 0.05;
-      nebula.rotation.x += dt * 0.03;
-
-      camera.position.x = Math.sin(ts/7000) * 8;
-      camera.position.y = Math.cos(ts/8500) * 5;
-
-      renderer.render(scene, camera);
-
-      $("hudCoords").textContent = (
-        (camera.position.x/10).toFixed(2) + "," +
-        (camera.position.y/10).toFixed(2) + "," +
-        (camera.position.z/10).toFixed(1)
-      );
-
-      requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-
-    // ---------- Matrix rain ----------
-    const m = $("matrix");
-    const mctx = m.getContext("2d");
-    const glyphs = "Ψ01ΔΣΩλμνξπστυφχψζアイウエオカキクケコサシスセソツテトナニヌネノ";
-    let mW=0, mH=0, cols=0, drops=[];
-
-    function resizeMatrix(){
-      mW = m.width = window.innerWidth;
-      mH = m.height = window.innerHeight;
-      cols = Math.floor(mW / 14);
-      drops = Array.from({length: cols}, () => Math.random()*mH/14);
-    }
-    window.addEventListener("resize", resizeMatrix);
-    resizeMatrix();
-
-    function drawMatrix(){
-      mctx.fillStyle = "rgba(0,0,0,0.08)";
-      mctx.fillRect(0,0,mW,mH);
-
-      mctx.font = "13px " + getComputedStyle(document.documentElement).getPropertyValue("--mono");
-      for(let i=0;i<cols;i++){
-        const x = i * 14;
-        const y = drops[i] * 14;
-        const ch = glyphs[Math.floor(Math.random()*glyphs.length)];
-        mctx.fillStyle = "rgba(40,240,255,0.70)";
-        mctx.fillText(ch, x, y);
-
-        if(y > mH && Math.random() > 0.985) drops[i] = 0;
-        drops[i] += 0.75 + Math.random()*0.40;
-      }
-      requestAnimationFrame(drawMatrix);
-    }
-    requestAnimationFrame(drawMatrix);
-
-    // ---------- EVE Terminal ----------
-    function termLine(kind, text){
-      const div = document.createElement("div");
-      div.className = "line " + kind;
-      div.textContent = text;
-      $("termLog").appendChild(div);
-      $("termLog").scrollTop = $("termLog").scrollHeight;
-    }
-
-    function eveSay(text){ termLine("eve", "EVE: " + text); }
-    function sysSay(text){ termLine("sys", "SYS: " + text); }
-
-    // ---------- Export Logs to CSV ----------
-    function exportLogsToCSV(){
-      eveSay("📥 Generating CSV export...");
-      
-      const timestamp = new Date().toISOString();
-      const filename = `CEC_WAM_Logs_${Date.now()}.csv`;
-      
-      // Helper function to escape CSV values and prevent injection
-      function escapeCsvValue(value) {
-        if (value === null || value === undefined) {
-          return "";
-        }
-        let stringValue = String(value);
-        
-        // Prevent CSV injection by prefixing formula characters with a single quote
-        if (/^[=+\-@]/.test(stringValue)) {
-          stringValue = "'" + stringValue;
+        function getStatusClass(status) {
+            const statusUpper = status.toUpperCase();
+            if (statusUpper.includes('PERFECT')) return 'status-perfect';
+            if (statusUpper.includes('TODO')) return 'status-todo';
+            if (statusUpper.includes('ACTIVE')) return 'status-active';
+            if (statusUpper.includes('STABLE')) return 'status-stable';
+            return '';
         }
         
-        // Escape quotes and wrap in quotes if value contains special characters
-        if (/[",\n\r]/.test(stringValue)) {
-          return '"' + stringValue.replace(/"/g, '""') + '"';
+        function updateDataSummary(data) {
+            document.getElementById('dataSummary').innerHTML = `
+                <div class="metric">
+                    <span class="metric-label">Total Records</span>
+                    <span class="metric-value">${data.length}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Last Updated</span>
+                    <span class="metric-value">${new Date().toLocaleString()}</span>
+                </div>
+            `;
         }
-        return stringValue;
-      }
-      
-      const logs = [
-        ["Timestamp", "Category", "Metric", "Value", "Status"],
-        [timestamp, "Finance", "Valuation", "$1.25M", "Verified"],
-        [timestamp, "Finance", "PSI-Coins", "200 PSI", "Minted"],
-        [timestamp, "System", "Mode", "GOD_MODE", "Optimal"],
-        [timestamp, "Network", "Load", $("networkLoad").textContent, "Stable"],
-        [timestamp, "Network", "Latency", $("latencyMs").textContent, "Fast"],
-        [timestamp, "Security", "Identity", "Sovereign Architect", "Encrypted"],
-        [timestamp, "Finance", "Net Liquidity", $("netLiquidity").textContent, "Active"],
-        [timestamp, "Wallet", "PSI Balance", $("psiBalance").textContent, "Live"],
-        [timestamp, "Network", "BTC Price", $("hudBtc").textContent, "Live"],
-        [timestamp, "Network", "ETH Price", $("hudEth").textContent, "Live"],
-        [timestamp, "Network", "SOL Price", $("hudSol").textContent, "Live"],
-        [timestamp, "Network", "PSI Price", $("hudPsi").textContent, "Live"],
-        [timestamp, "System", "Uptime", $("hudUptime").textContent, "Running"],
-        [timestamp, "System", "Resource Usage", $("gaugeNum").textContent, "Monitored"]
-      ];
-      
-      const csvContent = logs
-        .map(row => row.map(escapeCsvValue).join(","))
-        .join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url); // Clean up memory
-      
-      eveSay("✅ Logs exported successfully!");
-      sysSay("📄 File: " + filename);
-    }
-
-    // ---------- Domain Delegation Check ----------
-    async function checkDomain(){
-      const rawDomain = $("domainInput").value.trim();
-      const resultDiv = $("domainResult");
-      
-      if(!rawDomain){
-        resultDiv.innerHTML = '<span style="color:var(--warn)">⚠️ Please enter a domain</span>';
-        return;
-      }
-      
-      // Sanitize domain input - only allow alphanumeric, dots, and hyphens
-      const domain = rawDomain.replace(/[^a-zA-Z0-9.-]/g, '');
-      if (domain !== rawDomain) {
-        resultDiv.innerHTML = '<span style="color:var(--bad)">❌ Invalid domain format</span>';
-        return;
-      }
-      
-      resultDiv.innerHTML = '<span style="color:var(--neon)">🔍 Checking...</span>';
-      
-      // Create safe text node to prevent XSS
-      const domainTextNode = document.createTextNode(domain);
-      const tempSpan = document.createElement("span");
-      tempSpan.appendChild(domainTextNode);
-      const safeDomain = tempSpan.textContent;
-      
-      eveSay("🌐 Checking domain: " + safeDomain);
-      
-      // NOTE: This is a simulated DNS check for demonstration purposes
-      // In production, this should call a backend API that performs actual DNS lookups
-      setTimeout(() => {
-        // Deterministic simulation based on domain name so repeated checks are consistent
-        let hash = 0;
-        for (let i = 0; i < domain.length; i++) {
-          hash = ((hash << 5) - hash) + domain.charCodeAt(i);
-          hash |= 0; // Convert to 32-bit integer
-        }
-        const normalized = Math.abs(hash);
-        // Approximate original probabilities (valid ~70%, delegated ~60%) in a deterministic way
-        const isValid = (normalized % 100) >= 30;
-        const isDelegated = (Math.floor(normalized / 100) % 100) >= 40;
         
-        if(isValid && isDelegated){
-          resultDiv.innerHTML = '<span style="color:var(--good)">✅ ACTIVE | Delegation: OK</span>';
-          eveSay("✅ Domain " + safeDomain + " is active and properly delegated");
-        } else if(isValid){
-          resultDiv.innerHTML = '<span style="color:var(--warn)">⚠️ ACTIVE | Delegation: PENDING</span>';
-          eveSay("⚠️ Domain " + safeDomain + " is active but delegation is pending");
-        } else {
-          resultDiv.innerHTML = '<span style="color:var(--bad)">❌ INACTIVE or UNREACHABLE</span>';
-          eveSay("❌ Domain " + safeDomain + " is inactive or unreachable");
+        function updateStatusDistribution(data) {
+            const statusCount = {};
+            data.forEach(row => {
+                const status = row.Status || row.status || 'Unknown';
+                statusCount[status] = (statusCount[status] || 0) + 1;
+            });
+            
+            let html = '';
+            Object.entries(statusCount).forEach(([status, count]) => {
+                html += `
+                    <div class="metric">
+                        <span class="metric-label">${status}</span>
+                        <span class="metric-value">${count}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('statusDist').innerHTML = html || '<p>No status data</p>';
         }
-      }, 1500);
-    }
-
-    // ---------- Uptime Monitor Update ----------
-    // NOTE: This generates simulated uptime data for demonstration
-    // In production, this should query actual service health endpoints
-    function updateUptimeStats(){
-      const variation = () => (99 + Math.random() * 1).toFixed(1);
-      $("uptimeAPI").textContent = "● " + variation() + "%";
-      $("uptimeDB").textContent = "● " + variation() + "%";
-      $("uptimeBC").textContent = "● " + (98 + Math.random() * 1.5).toFixed(1) + "%";
-      $("uptimePF").textContent = "● " + (97 + Math.random() * 2).toFixed(1) + "%";
-    }
-    
-    setInterval(updateUptimeStats, 5000);
-    updateUptimeStats();
-
-    async function cmdStatus(){
-      sysSay("🎯 CEC-WAM CORE: NOMINAL");
-      sysSay("📡 FEEDS: " + $("sourceStatus").textContent.replace("FEEDS: ",""));
-      sysSay("💎 PSI BALANCE: " + CFG.psiBalance.toFixed(2) + " Ψ");
-      sysSay("💰 NET LIQUIDITY: $" + DATA.net_liquidity.toLocaleString());
-      sysSay("⚡ RESOURCE USAGE: " + DATA.resource_used_pct + "%");
-      eveSay("✅ All systems operational.");
-    }
-
-    async function cmdPrices(){
-      eveSay("💰 Fetching live prices…");
-      await pollFeeds();
-      eveSay("BTC " + $("hudBtc").textContent + " | ETH " + $("hudEth").textContent + " | SOL " + $("hudSol").textContent + " | PSI " + $("hudPsi").textContent);
-    }
-
-    function cmdHelp(){
-      eveSay("Commands: help, status, prices, data, vault, timeline, refresh, ping, clear, export, domain, uptime, autolock");
-    }
-
-    function cmdData(){
-      sysSay("📊 EMBEDDED DATA SNAPSHOT:");
-      sysSay("  Net Liquidity: $" + DATA.net_liquidity.toLocaleString());
-      sysSay("  PSI Mass: " + DATA.psi_mass.toFixed(2) + " Ψ");
-      sysSay("  Dark Energy Index: " + DATA.dark_energy_index);
-      sysSay("  BTC Allowance: " + DATA.btc_allowance + " BTC");
-      sysSay("  Valuation: $" + (DATA.valuation_usd / 1000000).toFixed(1) + "M");
-      sysSay("  AGI Timeline: " + DATA.agi_timeline);
-      eveSay("Data loaded from live.json.");
-    }
-
-    function cmdVault(){
-      sysSay("🔐 CEC VAULT ACCESS:");
-      sysSay("  GEMINI AGI: Master API Key Active");
-      sysSay("  PHANTOM BRIDGE: TXT Record Verified");
-      sysSay("  PSI-COIN: 100,001.33 Units");
-      sysSay("  VALUATION: $1,250,039");
-      sysSay("  BITCOIN: 1.33 BTC (~$121,478 USD)");
-      eveSay("Vault data secured.");
-    }
-
-    function cmdTimeline(){
-      sysSay("📅 PROJECT TIMELINE:");
-      sysSay("  2025-11-27: Resource conflict resolved");
-      sysSay("  2025-12-02: Ghost Protocol executed");
-      sysSay("  2026-01-08: +176,452.66 PSI recorded");
-      sysSay("  2026-01-16: CEC Matrix updated ($34.1M)");
-      sysSay("  TODAY: GOD_MODE active (99.9% focus)");
-      eveSay("Full timeline visible in dashboard.");
-    }
-
-    function cmdPing(){
-      const ms = Math.floor(12 + Math.random()*25);
-      eveSay("🏓 PING OK: " + ms + "ms");
-    }
-
-    function handleCmd(raw){
-      const s = raw.trim();
-      if(!s) return;
-
-      termLine("you", "YOU: " + s);
-
-      const parts = s.split(/\s+/);
-      const cmd = parts[0].toLowerCase();
-
-      if(cmd === "help") return cmdHelp();
-      if(cmd === "clear"){ $("termLog").innerHTML = ""; return eveSay("Log cleared."); }
-      if(cmd === "status") return cmdStatus();
-      if(cmd === "prices") return cmdPrices();
-      if(cmd === "data") return cmdData();
-      if(cmd === "vault") return cmdVault();
-      if(cmd === "timeline") return cmdTimeline();
-      if(cmd === "refresh") return refreshAllData();
-      if(cmd === "ping") return cmdPing();
-      if(cmd === "export") return exportLogsToCSV();
-      if(cmd === "domain") {
-        const domain = parts[1];
-        if(domain) {
-          $("domainInput").value = domain;
-          return checkDomain();
+        
+        function refreshData() {
+            fetchPSIPrice();
+            fetchGoogleSheetsData();
+            updateTimestamp();
         }
-        return eveSay("Usage: domain <domain.com>");
-      }
-      if(cmd === "uptime") {
-        sysSay("📊 COMPONENT UPTIME:");
-        sysSay("  API Server: " + $("uptimeAPI").textContent);
-        sysSay("  Database: " + $("uptimeDB").textContent);
-        sysSay("  Blockchain: " + $("uptimeBC").textContent);
-        sysSay("  Price Feeds: " + $("uptimePF").textContent);
-        return eveSay("Uptime stats refreshed");
-      }
-      if(cmd === "autolock") {
-        eveSay("🔒 Activating auto-lock and auto-save...");
-        CommandBus.enqueue("auto_save");
-        setTimeout(() => eveSay("✅ System locked and state saved"), 800);
-        return;
-      }
-
-      eveSay("Unknown command. Type: help");
-    }
-
-    $("termBtn").addEventListener("click", () => {
-      const v = $("termInput").value;
-      $("termInput").value = "";
-      handleCmd(v);
-    });
-    $("termInput").addEventListener("keydown", (e) => {
-      if(e.key === "Enter"){
-        const v = $("termInput").value;
-        $("termInput").value = "";
-        handleCmd(v);
-      }
-    });
-
-    // Boot sequence
-    sysSay("🚀 Booting EVE-4 ULTRA HUD…");
-    sysSay("🔗 Loading embedded data: live.json, BlackHoles.csv, pump.fun.csv…");
-    sysSay("🌌 Initializing 3D starfield with 14,400 particles…");
-    sysSay("📡 Establishing live feeds: CoinGecko API…");
-    sysSay("⚙️ Starting Silent Command Bus…");
-    sysSay("🛰️ Loading NASA Eyes integration…");
-    sysSay("🌐 Initializing Domain & Uptime monitors…");
-    setTimeout(() => {
-      eveSay("✅ ALL SYSTEMS ONLINE. Type 'help' for commands.");
-      eveSay("💎 PSI Balance: " + CFG.psiBalance.toLocaleString() + " Ψ");
-      eveSay("🎯 Mode: GOD_MODE | Focus: 99.9%");
-      eveSay("🔄 Auto-save: ENABLED | Interval: 30s");
-    }, 1200);
-  </script>
-</body><button id="eve-mic" style="background:#0f0;color:#000;padding:10px;border:none;cursor:pointer;">Talk to Eve</button>
-<script>
-const micBtn = document.getElementById('eve-mic');
-micBtn.onclick = () => {
-  const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  rec.lang = 'en-US';
-  rec.onresult = e => {
-    const said = e.results[0][0].transcript;
-    document.body.innerHTML += `<p><strong>You:</strong> ${said}</p>`;
-    // Eve replies here—pipe to console or mock
-  };
-  rec.start();
-};
-</script>
+        
+        function initDashboard() {
+            updateTimestamp();
+            fetchPSIPrice();
+            fetchGoogleSheetsData();
+            initStarMap();
+            
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                refreshData();
+            }, 300000);
+        }
+        
+        // 3D Star Map Implementation
+        function initStarMap() {
+            const container = document.getElementById('starmap-container');
+            const canvas = document.getElementById('starmap');
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setClearColor(0x000000);
+            
+            // Add stars
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const starField = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starField);
+            
+            // Alpha Centauri (Yellow Star)
+            const alphaCentauriGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const alphaCentauriMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+            const alphaCentauri = new THREE.Mesh(alphaCentauriGeometry, alphaCentauriMaterial);
+            alphaCentauri.position.set(0, 0, 0);
+            scene.add(alphaCentauri);
+            
+            // Orbit for Alpha Centauri
+            const orbitGeometry1 = new THREE.RingGeometry(15, 15.2, 64);
+            const orbitMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFF00, side: THREE.DoubleSide });
+            const orbit1 = new THREE.Mesh(orbitGeometry1, orbitMaterial1);
+            orbit1.rotation.x = Math.PI / 2;
+            scene.add(orbit1);
+            
+            // TRAPPIST-1e (Blue-Green Exoplanet)
+            const trappistGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+            const trappistMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFAA });
+            const trappist = new THREE.Mesh(trappistGeometry, trappistMaterial);
+            scene.add(trappist);
+            
+            // Orbit for TRAPPIST-1e
+            const orbitGeometry2 = new THREE.RingGeometry(25, 25.2, 64);
+            const orbitMaterial2 = new THREE.MeshBasicMaterial({ color: 0x00FFAA, side: THREE.DoubleSide });
+            const orbit2 = new THREE.Mesh(orbitGeometry2, orbitMaterial2);
+            orbit2.rotation.x = Math.PI / 2;
+            scene.add(orbit2);
+            
+            // Ross 128 b (Red Exoplanet)
+            const rossGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+            const rossMaterial = new THREE.MeshBasicMaterial({ color: 0xFF4444 });
+            const ross = new THREE.Mesh(rossGeometry, rossMaterial);
+            scene.add(ross);
+            
+            // Orbit for Ross 128 b
+            const orbitGeometry3 = new THREE.RingGeometry(35, 35.2, 64);
+            const orbitMaterial3 = new THREE.MeshBasicMaterial({ color: 0xFF4444, side: THREE.DoubleSide });
+            const orbit3 = new THREE.Mesh(orbitGeometry3, orbitMaterial3);
+            orbit3.rotation.x = Math.PI / 2;
+            scene.add(orbit3);
+            
+            camera.position.z = 50;
+            camera.position.y = 20;
+            
+            let angle1 = 0;
+            let angle2 = 0;
+            let angle3 = 0;
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate planets in orbits
+                angle1 += 0.01;
+                angle2 += 0.007;
+                angle3 += 0.005;
+                
+                trappist.position.x = Math.cos(angle1) * 25;
+                trappist.position.z = Math.sin(angle1) * 25;
+                
+                ross.position.x = Math.cos(angle2) * 35;
+                ross.position.z = Math.sin(angle2) * 35;
+                
+                // Rotate camera slightly
+                camera.position.x = Math.cos(angle3 * 0.1) * 50;
+                camera.position.z = Math.sin(angle3 * 0.1) * 50;
+                camera.lookAt(0, 0, 0);
+                
+                // Rotate star field
+                starField.rotation.y += 0.0002;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            });
+        }
+    </script>
+</body>
 </html>

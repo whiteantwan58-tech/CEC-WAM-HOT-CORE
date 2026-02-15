@@ -1,32 +1,33 @@
 {
-  "name": "CEC-WAM OMEGA CORE",
+  "name": "Python 3",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
   "customizations": {
     "codespaces": {
       "openFiles": [
         "README.md",
-        "omega_eve.py"
+        "app.py"
       ]
     },
     "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
-      },
+      "settings": {},
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance"
       ]
     }
   },
-  "updateContentCommand": "pip3 install --user streamlit google-generativeai pandas",
+  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
   "postAttachCommand": {
-    "server": "streamlit run omega_eve.py --server.port 8501 --server.address 0.0.0.0"
+    "server": "streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false"
   },
-  "forwardPorts": [8501],
   "portsAttributes": {
     "8501": {
-      "label": "CEC-WAM OMEGA INTERFACE",
+      "label": "Application",
       "onAutoForward": "openPreview"
     }
-  }
+  },
+  "forwardPorts": [
+    8501
+  ]
 }
