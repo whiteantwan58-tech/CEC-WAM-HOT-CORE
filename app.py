@@ -38,7 +38,7 @@ NASA_APOD_URL = f"https://api.nasa.gov/planetary/apod?api_key={NASA_API_KEY}"
 # Google Sheets CSV (your CEC WAM Master Ledger)
 GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
 
-# Holographic CSS with Particle Effects
+# Holographic CSS with Enhanced Particle Effects and HD Visuals
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -59,17 +59,19 @@ st.markdown("""
         width: 100%;
         height: 100%;
         background-image: 
-            linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px);
         background-size: 50px 50px;
         animation: gridScroll 20s linear infinite;
         pointer-events: none;
         z-index: 0;
+        opacity: 0.6;
     }
     
     @keyframes gridScroll {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(50px, 50px); }
+        0% { transform: translate(0, 0); opacity: 0.5; }
+        50% { opacity: 0.8; }
+        100% { transform: translate(50px, 50px); opacity: 0.5; }
     }
     
     .stApp::after {
@@ -78,19 +80,27 @@ st.markdown("""
         width: 100%;
         height: 100%;
         background-image: 
-            radial-gradient(2px 2px at 20% 30%, #00FFFF, transparent),
-            radial-gradient(2px 2px at 60% 70%, #9D00FF, transparent),
-            radial-gradient(1px 1px at 50% 50%, #00FF88, transparent),
-            radial-gradient(1px 1px at 80% 10%, #FF00FF, transparent);
-        background-size: 200% 200%;
-        animation: particleFloat 15s ease-in-out infinite;
+            radial-gradient(circle, #00FFFF 1px, transparent 1px),
+            radial-gradient(circle, #9D00FF 1px, transparent 1px),
+            radial-gradient(circle, #00FF88 1px, transparent 1px),
+            radial-gradient(circle, #FF00FF 1px, transparent 1px);
+        background-size: 300px 300px, 400px 400px, 250px 250px, 350px 350px;
+        background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
+        animation: particleFloat 20s ease-in-out infinite, particlePulse 8s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
     }
     
     @keyframes particleFloat {
-        0%, 100% { background-position: 0% 0%; }
-        50% { background-position: 100% 100%; }
+        0%, 100% { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%; }
+        25% { background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%; }
+        50% { background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%; }
+        75% { background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%; }
+    }
+    
+    @keyframes particlePulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.8; }
     }
     
     div[data-testid="stMetricValue"] {
