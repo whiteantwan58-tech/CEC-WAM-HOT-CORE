@@ -579,7 +579,19 @@
         });
         
         // Dashboard Functions
-        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv';
+        // Configuration for multiple data sources
+        const DATA_SOURCES = {
+            'main': {
+                name: 'Main Ledger',
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv'
+            }
+            // Add more sheets here as needed:
+            // 'sheet2': { name: 'Secondary Data', url: 'https://...' },
+            // 'sheet3': { name: 'Analytics', url: 'https://...' }
+        };
+        
+        let currentDataSource = 'main';
+        const GOOGLE_SHEETS_CSV_URL = DATA_SOURCES[currentDataSource].url;
         const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
         
         let dashboardData = null;
@@ -685,7 +697,8 @@
         async function fetchGoogleSheetsData() {
             const loadStart = Date.now();
             try {
-                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                const url = DATA_SOURCES[currentDataSource].url;
+                const response = await fetch(url);
                 const csvText = await response.text();
                 
                 // Parse CSV
