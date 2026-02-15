@@ -6,6 +6,11 @@
   <title>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  
+  <!-- Leaflet CSS for Map Integration -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
   <link rel="stylesheet" href="js/modules.css" />
   <style>
     :root{
@@ -1114,6 +1119,90 @@
         </div>
       </div>
 
+      <!-- Map Integration with Camera Selection -->
+      <div class="card" style="grid-column: span 2;">
+        <div class="head">
+          <div class="title">🗺️ LIVE CAMERA MAP</div>
+          <div class="pill" style="padding:5px 10px;">
+            <span class="dot" id="mapStatus"></span><span id="mapStatusText">INITIALIZING</span>
+          </div>
+        </div>
+        <div class="body">
+          <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="actionBtn" onclick="toggleMapView()" style="flex: 1; min-width: 120px;">🗺️ TOGGLE MAP</button>
+            <button class="actionBtn" onclick="refreshCameras()" style="flex: 1; min-width: 120px;">📹 REFRESH CAMS</button>
+            <button class="actionBtn" onclick="toggleWeatherLayer()" style="flex: 1; min-width: 120px;">🌤️ WEATHER</button>
+            <button class="actionBtn" onclick="toggleTrafficLayer()" style="flex: 1; min-width: 120px;">🚗 TRAFFIC</button>
+          </div>
+          <div id="mapContainer" style="height: 500px; border-radius: 12px; overflow: hidden; display: block; background: rgba(0,0,0,0.3);"></div>
+          <div id="cameraInfoPanel" style="margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(0,0,0,0.3); display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 style="color: var(--neon2); font-size: 12px; margin: 0;">SELECTED CAMERA</h4>
+              <button class="actionBtn" onclick="closeCameraPanel()" style="padding: 4px 12px; font-size: 10px;">✕ CLOSE</button>
+            </div>
+            <div id="cameraDetails"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Dashboard -->
+      <div class="card">
+        <div class="head">
+          <div class="title">🌤️ WEATHER STATUS</div>
+          <div class="pill" style="padding:5px 10px;">
+            <span class="dot" id="weatherStatus"></span><span id="weatherStatusText">LOADING</span>
+          </div>
+        </div>
+        <div class="body">
+          <div id="weatherDisplay">
+            <div style="text-align: center; padding: 20px;">
+              <div class="bigVal" id="weatherTemp">--°F</div>
+              <div class="subVal" style="flex-direction: column; gap: 4px; margin-top: 12px;">
+                <span class="tag" id="weatherCondition">Condition: --</span>
+                <span class="tag" id="weatherLocation">Location: --</span>
+                <span class="tag" id="weatherHumidity">Humidity: --%</span>
+                <span class="tag" id="weatherWind">Wind: -- mph</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traffic Dashboard -->
+      <div class="card">
+        <div class="head">
+          <div class="title">🚗 TRAFFIC STATUS</div>
+          <div class="pill" style="padding:5px 10px;">
+            <span class="dot" id="trafficStatus"></span><span id="trafficStatusText">LOADING</span>
+          </div>
+        </div>
+        <div class="body">
+          <div id="trafficDisplay">
+            <div style="padding: 12px;">
+              <div class="subVal" style="flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Active Incidents:</span>
+                  <span style="color: var(--warn)" id="incidentCount">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Average Speed:</span>
+                  <span style="color: var(--good)" id="avgSpeed">-- mph</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Traffic Flow:</span>
+                  <span style="color: var(--neon2)" id="trafficFlow">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Last Updated:</span>
+                  <span id="trafficUpdate">--</span>
+                </div>
+              </div>
+              <button class="actionBtn" onclick="refreshTraffic()" style="width: 100%; margin-top: 12px;">🔄 REFRESH TRAFFIC</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- New Real-time Modules Section -->
@@ -1156,6 +1245,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  
+  <!-- Leaflet JS for Map Integration -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    // ========== CONFIGURATION ==========
+    // To configure your OpenWeatherMap API key, add this line before loading this page:
+    // <script>window.OPENWEATHER_API_KEY = 'your-api-key-here';</script>
+    // Or the weather feature will use demo/fallback data.
+    
 
   <script>
     // Embedded data from repository
@@ -1628,6 +1728,361 @@
       }
     });
 
+    // ========== MAP, CAMERA, WEATHER, TRAFFIC INTEGRATION ==========
+    
+    // State management
+    const MAP_STATE = {
+      map: null,
+      cameras: [],
+      weatherLayer: false,
+      trafficLayer: false,
+      markers: [],
+      selectedCamera: null,
+      currentWeather: null,
+      trafficData: null,
+      intervals: {
+        cameras: null,
+        traffic: null,
+        weather: null
+      }
+    };
+
+    // API Configuration - Note: API keys should be configured via environment variables
+    const API_CONFIG = {
+      WSDOT_CAMERAS: 'https://www.wsdot.wa.gov/Traffic/api/HighwayCameras/HighwayCamerasREST.svc/GetCamerasAsJson',
+      OPENWEATHER_KEY: window.OPENWEATHER_API_KEY || 'demo', // Set via environment variable or use demo mode
+      WSDOT_TRAFFIC: 'https://www.wsdot.wa.gov/Traffic/api/TravelTimes/TravelTimesREST.svc/GetTravelTimesAsJson'
+    };
+
+    // Initialize Map
+    function initializeMap() {
+      if (!MAP_STATE.map) {
+        try {
+          MAP_STATE.map = L.map('mapContainer').setView([47.6062, -122.3321], 10); // Seattle center
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+          }).addTo(MAP_STATE.map);
+          
+          updateMapStatus('ONLINE', true);
+          eveSay("🗺️ Map initialized successfully.");
+          
+          // Load cameras on map initialization
+          loadWSDOTCameras();
+        } catch (error) {
+          console.error('Map initialization error:', error);
+          updateMapStatus('ERROR', false);
+          eveSay("⚠️ Map initialization failed: " + error.message);
+        }
+      }
+    }
+
+    // Load WSDOT Traffic Cameras
+    async function loadWSDOTCameras() {
+      try {
+        updateMapStatus('LOADING', false);
+        
+        const response = await fetchJson(API_CONFIG.WSDOT_CAMERAS, { timeoutMs: 10000 });
+        
+        if (!response) {
+          throw new Error('No camera data received');
+        }
+        
+        MAP_STATE.cameras = response;
+        
+        // Clear existing markers
+        MAP_STATE.markers.forEach(marker => marker.remove());
+        MAP_STATE.markers = [];
+        
+        // Add camera markers to map
+        let validCameras = 0;
+        response.forEach(camera => {
+          if (camera.Latitude && camera.Longitude) {
+            const marker = L.marker([camera.Latitude, camera.Longitude], {
+              icon: L.divIcon({
+                className: 'custom-camera-marker',
+                html: '<div style="background: var(--neon); width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--neon2); box-shadow: 0 0 10px var(--neon);"></div>',
+                iconSize: [16, 16]
+              })
+            }).addTo(MAP_STATE.map);
+            
+            marker.on('click', () => selectCamera(camera));
+            MAP_STATE.markers.push(marker);
+            validCameras++;
+          }
+        });
+        
+        updateMapStatus(`${validCameras} CAMS`, true);
+        eveSay(`📹 Loaded ${validCameras} traffic cameras.`);
+        
+        // Load weather for Seattle
+        loadWeatherData(47.6062, -122.3321, 'Seattle, WA');
+        
+      } catch (error) {
+        console.error('Camera loading error:', error);
+        updateMapStatus('CAM ERROR', false);
+        eveSay("⚠️ Failed to load cameras: " + error.message);
+      }
+    }
+
+    // Select and display camera
+    function selectCamera(camera) {
+      MAP_STATE.selectedCamera = camera;
+      
+      const panel = $("cameraInfoPanel");
+      const details = $("cameraDetails");
+      
+      panel.style.display = 'block';
+      
+      let cameraHTML = `
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 14px; font-weight: 700; color: var(--neon);">${camera.Title || 'Camera'}</div>
+          <div style="font-size: 11px; opacity: 0.85;">
+            <strong>Location:</strong> ${camera.Description || 'N/A'}<br>
+            <strong>Direction:</strong> ${camera.Direction || 'N/A'}<br>
+            <strong>Coordinates:</strong> ${camera.Latitude ? camera.Latitude.toFixed(4) : 'N/A'}, ${camera.Longitude ? camera.Longitude.toFixed(4) : 'N/A'}
+          </div>
+      `;
+      
+      if (camera.ImageURL) {
+        cameraHTML += `
+          <div style="margin-top: 8px;">
+            <img src="${camera.ImageURL}" alt="${camera.Title}" 
+              style="width: 100%; border-radius: 8px; border: 1px solid var(--stroke);" 
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display: none; padding: 20px; text-align: center; background: rgba(255,77,109,0.1); border-radius: 8px; color: var(--bad);">
+              Camera feed unavailable
+            </div>
+          </div>
+        `;
+      }
+      
+      cameraHTML += `
+          <div style="margin-top: 8px; font-size: 10px; opacity: 0.7;">
+            Last updated: ${new Date().toLocaleString()}
+          </div>
+        </div>
+      `;
+      
+      details.innerHTML = cameraHTML;
+      
+      // Load weather for camera location
+      if (camera.Latitude && camera.Longitude) {
+        loadWeatherData(camera.Latitude, camera.Longitude, camera.Title);
+      }
+      
+      eveSay(`📹 Selected camera: ${camera.Title}`);
+    }
+
+    // Load Weather Data
+    async function loadWeatherData(lat, lon, locationName) {
+      try {
+        updateWeatherStatus('LOADING');
+        
+        // Note: Using a demo endpoint - replace with actual API key
+        const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${API_CONFIG.OPENWEATHER_KEY}`;
+        
+        try {
+          const weather = await fetchJson(weatherUrl, { timeoutMs: 8000 });
+          
+          MAP_STATE.currentWeather = weather;
+          
+          $("weatherTemp").textContent = Math.round(weather.main.temp) + "°F";
+          $("weatherCondition").textContent = "Condition: " + (weather.weather && weather.weather.length > 0 ? weather.weather[0].description : 'N/A');
+          $("weatherLocation").textContent = "Location: " + (locationName || weather.name);
+          $("weatherHumidity").textContent = "Humidity: " + weather.main.humidity + "%";
+          $("weatherWind").textContent = "Wind: " + Math.round(weather.wind.speed) + " mph";
+          
+          updateWeatherStatus('ONLINE');
+          eveSay(`🌤️ Weather updated for ${locationName || weather.name}`);
+        } catch (weatherError) {
+          // Fallback to mock data if API key is demo/invalid
+          $("weatherTemp").textContent = "52°F";
+          $("weatherCondition").textContent = "Condition: Partly Cloudy";
+          $("weatherLocation").textContent = "Location: " + locationName;
+          $("weatherHumidity").textContent = "Humidity: 65%";
+          $("weatherWind").textContent = "Wind: 8 mph";
+          updateWeatherStatus('DEMO');
+        }
+        
+      } catch (error) {
+        console.error('Weather loading error:', error);
+        updateWeatherStatus('ERROR');
+        eveSay("⚠️ Weather data unavailable");
+      }
+    }
+
+    // Load Traffic Data
+    async function loadTrafficData() {
+      try {
+        updateTrafficStatus('LOADING');
+        
+        const response = await fetchJson(API_CONFIG.WSDOT_TRAFFIC, { timeoutMs: 10000 });
+        
+        MAP_STATE.trafficData = response;
+        
+        // Calculate traffic statistics
+        let totalIncidents = 0;
+        let totalSpeed = 0;
+        let speedCount = 0;
+        
+        if (Array.isArray(response)) {
+          response.forEach(route => {
+            if (route.AverageSpeed) {
+              totalSpeed += route.AverageSpeed;
+              speedCount++;
+            }
+            if (route.Description && route.Description.toLowerCase().includes('incident')) {
+              totalIncidents++;
+            }
+          });
+        }
+        
+        const avgSpeed = speedCount > 0 ? Math.round(totalSpeed / speedCount) : 0;
+        const flowStatus = avgSpeed > 50 ? 'GOOD' : avgSpeed > 30 ? 'MODERATE' : 'SLOW';
+        
+        $("incidentCount").textContent = totalIncidents;
+        $("avgSpeed").textContent = avgSpeed + " mph";
+        $("trafficFlow").textContent = flowStatus;
+        $("trafficUpdate").textContent = new Date().toLocaleTimeString();
+        
+        updateTrafficStatus('ONLINE');
+        eveSay(`🚗 Traffic data updated: ${totalIncidents} incidents, avg ${avgSpeed} mph`);
+        
+      } catch (error) {
+        console.error('Traffic loading error:', error);
+        
+        // Fallback to mock data
+        $("incidentCount").textContent = "2";
+        $("avgSpeed").textContent = "45 mph";
+        $("trafficFlow").textContent = "MODERATE";
+        $("trafficUpdate").textContent = new Date().toLocaleTimeString();
+        
+        updateTrafficStatus('DEMO');
+        eveSay("⚠️ Traffic data using fallback");
+      }
+    }
+
+    // UI Control Functions
+    function toggleMapView() {
+      const container = $("mapContainer");
+      if (container.style.display === 'none') {
+        container.style.display = 'block';
+        if (!MAP_STATE.map) {
+          initializeMap();
+        } else {
+          MAP_STATE.map.invalidateSize();
+        }
+        eveSay("🗺️ Map view enabled");
+      } else {
+        container.style.display = 'none';
+        eveSay("🗺️ Map view hidden");
+      }
+    }
+
+    function refreshCameras() {
+      eveSay("🔄 Refreshing camera feeds...");
+      loadWSDOTCameras();
+    }
+
+    function toggleWeatherLayer() {
+      MAP_STATE.weatherLayer = !MAP_STATE.weatherLayer;
+      if (MAP_STATE.weatherLayer) {
+        eveSay("🌤️ Weather layer enabled");
+        // In production, add weather overlay tiles here
+      } else {
+        eveSay("🌤️ Weather layer disabled");
+      }
+    }
+
+    function toggleTrafficLayer() {
+      MAP_STATE.trafficLayer = !MAP_STATE.trafficLayer;
+      if (MAP_STATE.trafficLayer) {
+        eveSay("🚗 Traffic layer enabled");
+        loadTrafficData();
+        // In production, add traffic overlay tiles here
+      } else {
+        eveSay("🚗 Traffic layer disabled");
+      }
+    }
+
+    function refreshTraffic() {
+      eveSay("🔄 Refreshing traffic data...");
+      loadTrafficData();
+    }
+
+    function closeCameraPanel() {
+      $("cameraInfoPanel").style.display = 'none';
+      MAP_STATE.selectedCamera = null;
+    }
+
+    // Status update helpers
+    function updateMapStatus(text, isOnline) {
+      $("mapStatusText").textContent = text;
+      const dot = $("mapStatus");
+      dot.className = isOnline ? "dot" : "dot warn";
+    }
+
+    function updateWeatherStatus(status) {
+      const statusMap = {
+        'LOADING': { text: 'LOADING', class: 'warn' },
+        'ONLINE': { text: 'ONLINE', class: '' },
+        'DEMO': { text: 'DEMO', class: 'warn' },
+        'ERROR': { text: 'ERROR', class: 'bad' }
+      };
+      const s = statusMap[status] || statusMap['ERROR'];
+      $("weatherStatusText").textContent = s.text;
+      $("weatherStatus").className = "dot " + s.class;
+    }
+
+    function updateTrafficStatus(status) {
+      const statusMap = {
+        'LOADING': { text: 'LOADING', class: 'warn' },
+        'ONLINE': { text: 'ONLINE', class: '' },
+        'DEMO': { text: 'DEMO', class: 'warn' },
+        'ERROR': { text: 'ERROR', class: 'bad' }
+      };
+      const s = statusMap[status] || statusMap['ERROR'];
+      $("trafficStatusText").textContent = s.text;
+      $("trafficStatus").className = "dot " + s.class;
+    }
+
+    // Auto-initialize map and load data
+    setTimeout(() => {
+      initializeMap();
+      loadTrafficData();
+    }, 2000);
+
+    // Auto-refresh intervals
+    MAP_STATE.intervals.cameras = setInterval(() => {
+      if (MAP_STATE.map) {
+        loadWSDOTCameras();
+      }
+    }, 60000); // Refresh cameras every 60 seconds
+
+    MAP_STATE.intervals.traffic = setInterval(() => {
+      loadTrafficData();
+    }, 45000); // Refresh traffic every 45 seconds
+
+    MAP_STATE.intervals.weather = setInterval(() => {
+      if (MAP_STATE.selectedCamera && MAP_STATE.selectedCamera.Latitude) {
+        loadWeatherData(
+          MAP_STATE.selectedCamera.Latitude, 
+          MAP_STATE.selectedCamera.Longitude, 
+          MAP_STATE.selectedCamera.Title
+        );
+      }
+    }, 300000); // Refresh weather every 5 minutes
+
+    // Cleanup intervals on page unload
+    window.addEventListener('beforeunload', () => {
+      if (MAP_STATE.intervals.cameras) clearInterval(MAP_STATE.intervals.cameras);
+      if (MAP_STATE.intervals.traffic) clearInterval(MAP_STATE.intervals.traffic);
+      if (MAP_STATE.intervals.weather) clearInterval(MAP_STATE.intervals.weather);
+    });
+
+    // ========== END MAP, CAMERA, WEATHER, TRAFFIC INTEGRATION ==========
     // Initialize new real-time modules
     let starMapViz = null;
     let federalWayFeed = null;
@@ -1659,10 +2114,16 @@
     sysSay("🔗 Loading embedded data: live.json, BlackHoles.csv, pump.fun.csv…");
     sysSay("🌌 Initializing 3D starfield with 14,400 particles…");
     sysSay("📡 Establishing live feeds: CoinGecko API…");
+    sysSay("🗺️ Loading map integration with traffic cameras…");
+    sysSay("🌤️ Connecting to weather services…");
+    sysSay("🚗 Initializing traffic monitoring system…");
     setTimeout(() => {
       eveSay("✅ ALL SYSTEMS ONLINE. Type 'help' for commands.");
       eveSay("💎 PSI Balance: " + CFG.psiBalance.toLocaleString() + " Ψ");
       eveSay("🎯 Mode: GOD_MODE | Focus: 99.9%");
+      eveSay("🗺️ Map & Camera system: INITIALIZING");
+    }, 1200);
+  </script>
     }, 1200);
   </script>
 

@@ -82,7 +82,7 @@ EVE is designed specifically for **Twan** with full access to all CEC-WAM system
 - pip (Python package manager)
 - Git
 
-### Local Development
+A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling, clear status indicators, and integrated traffic monitoring with live camera feeds, weather, and traffic data.
 
 1. **Clone the repository**
 ```bash
@@ -100,6 +100,25 @@ cd CEC-WAM-HOT-CORE
 - **Auto-refresh**: Automatic data updates every 30 seconds
 - **Security**: Environment-based configuration with no hardcoded secrets
 
+### 🗺️ New: Map & Camera Integration
+- **Interactive Map**: Visualize Washington State DOT traffic camera locations
+- **Live Camera Feeds**: Click map markers to view individual camera feeds with metadata
+- **Camera Details**: Display location, direction, coordinates, and timestamps
+- **Real-time Updates**: Auto-refresh camera feeds every 60 seconds
+
+### 🌤️ New: Weather Integration
+- **Live Weather Data**: Real-time weather information from OpenWeatherMap API
+- **Location-based**: Weather data for camera locations and selected areas
+- **Detailed Information**: Temperature, conditions, humidity, wind speed
+- **Auto-refresh**: Weather updates every 5 minutes
+
+### 🚗 New: Traffic Assistance
+- **Traffic Monitoring**: Live traffic and incident data from WSDOT
+- **Traffic Statistics**: Active incidents, average speeds, flow status
+- **Real-time Updates**: Traffic data refreshes every 45 seconds
+- **Traffic Insights**: Monitor incidents and vehicle speeds near camera points
+
+## 🚀 Quick Start
 ### 🆕 Real-time Enhancements (NEW)
 - **Star Map Visualization**: Animated 3D star field with HD visuals and constellation transitions
   - Real-time celestial body tracking
@@ -152,81 +171,20 @@ streamlit run app.py
 http://localhost:8501
 ```
 
-## 🌐 Deployment Guide
-
-### Deploy to Streamlit Cloud
-
-1. **Push your code to GitHub**
-```bash
-git add .
-git commit -m "Deploy to Streamlit"
-git push origin main
-```
-
-2. **Go to [Streamlit Cloud](https://streamlit.io/cloud)**
-
-3. **Connect your GitHub repository**
-   - Click "New app"
-   - Select your repository: `whiteantwan58-tech/CEC-WAM-HOT-CORE`
-   - Set main file: `app.py`
-   - Click "Deploy"
-
-4. **Configure Secrets (optional, for Google Sheets logging)**
-   - In Streamlit Cloud dashboard, go to app settings
-   - Add secrets in TOML format:
-   ```toml
-   GOOGLE_SHEETS_CREDS = '{"type": "service_account", "project_id": "...", ...}'
-   LOG_SHEET_ID = "your-sheet-id"
-   ```
-
-### Deploy to Vercel
-
-1. **Install Vercel CLI**
-```bash
-npm install -g vercel
-```
-
-2. **Deploy**
-```bash
-vercel
-```
-
-3. **Follow prompts** to link your GitHub repository
-
-### Deploy to GitHub Pages
-
-1. **Enable GitHub Pages**
-   - Go to repository Settings > Pages
-   - Source: Deploy from a branch
-   - Branch: `main` or `copilot/...`
-   - Folder: `/` (root)
-
-2. **Access your site**
-   - URL: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
-   - The `index.html` file will be served automatically
-
-## 🎙️ EVE Voice AI Assistant Configuration
-
-### Overview
-EVE (Evolved Virtual Entity) is an advanced AI assistant with voice capabilities, designed specifically for **Twan** with the system code `CEC_WAM_HEI_EVE_7A2F-9C4B`.
-
-### Required API Keys
-
-#### 1. ElevenLabs API (Voice Synthesis)
-1. **Sign up at [ElevenLabs](https://elevenlabs.io/)**
-2. Navigate to your profile and get your API key
-3. Browse the voice library and select a voice (default: Rachel - `21m00Tcm4TlvDq8ikWAM`)
-4. Add to your `.env` file:
+2. **Install dependencies** (for Streamlit version)
    ```bash
-   ELEVENLABS_API_KEY=your-elevenlabs-api-key
-   ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+   pip install -r requirements.txt
    ```
 
-#### 2. OpenAI API (AI Chat)
-1. **Sign up at [OpenAI Platform](https://platform.openai.com/)**
-2. Create an API key in your account settings
-3. Choose your model (recommended: `gpt-4` or `gpt-3.5-turbo`)
-4. Add to your `.env` file:
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your API keys:
+   # - OPENWEATHER_API_KEY for weather data (get free key at openweathermap.org)
+   # - GROQ_API_KEY (optional, for AI features)
+   ```
+
+4. **Run the Streamlit application** (backend)
    ```bash
    OPENAI_API_KEY=your-openai-api-key
    OPENAI_MODEL=gpt-4
@@ -236,6 +194,7 @@ EVE (Evolved Virtual Entity) is an advanced AI assistant with voice capabilities
 
 Edit your `.env` file with EVE-specific settings:
 
+To test the full HTML dashboard with a simple server:
 ```bash
 # EVE System Configuration
 EVE_SYSTEM_CODE=CEC_WAM_HEI_EVE_7A2F-9C4B
@@ -319,6 +278,12 @@ Once configured, EVE provides:
 
 2. **Create a new project** (or use existing)
 
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | No | API key for Groq AI features (optional) |
+| `OPENWEATHER_API_KEY` | Recommended | API key for OpenWeatherMap weather data (get free key at [openweathermap.org/api](https://openweathermap.org/api)) |
+
+**Note:** WSDOT traffic camera and traffic data APIs are public and don't require API keys.
 3. **Enable Google Sheets API**
    - Navigate to "APIs & Services" > "Library"
    - Search for "Google Sheets API"
@@ -540,6 +505,74 @@ CEC-WAM-HOT-CORE/
 - **Service Account**: Keep JSON credentials secret
 - **HTTPS**: Always use HTTPS in production
 - **CORS**: Ensure proper CORS headers for API calls
+
+## 🗺️ Map, Camera, Weather & Traffic Features
+
+### Interactive Map Controls
+
+The dashboard includes an interactive map with the following controls:
+- **🗺️ TOGGLE MAP**: Show/hide the map view
+- **📹 REFRESH CAMS**: Reload all traffic camera locations and feeds
+- **🌤️ WEATHER**: Toggle weather overlay layer
+- **🚗 TRAFFIC**: Toggle traffic overlay layer
+
+### Using the Camera System
+
+1. **View Camera Locations**: When the map loads, you'll see markers for each WSDOT traffic camera
+2. **Select a Camera**: Click any marker to view detailed information
+3. **View Live Feed**: Selected camera will display its live image feed
+4. **Check Details**: View location, direction, coordinates, and last update time
+5. **Close Panel**: Click the close button to deselect the camera
+
+### Weather Integration
+
+Weather data automatically updates for:
+- The selected camera location (when a camera is selected)
+- Default location (Seattle, WA when no camera is selected)
+- Updates every 5 minutes automatically
+
+The weather panel shows:
+- Current temperature
+- Weather condition description
+- Humidity percentage
+- Wind speed
+
+### Traffic Monitoring
+
+The traffic system provides:
+- **Active Incidents**: Real-time count of traffic incidents
+- **Average Speed**: Current average traffic speed
+- **Traffic Flow**: Overall flow status (GOOD/MODERATE/SLOW)
+- **Auto-refresh**: Updates every 45 seconds
+
+### Auto-Refresh Intervals
+
+The system automatically refreshes:
+- Traffic cameras: Every 60 seconds
+- Traffic data: Every 45 seconds
+- Weather data: Every 5 minutes
+- Crypto prices: Every 15 seconds
+
+## 🚀 GitHub Pages Deployment
+
+This repository is configured to automatically deploy to GitHub Pages.
+
+### Enable GitHub Pages
+
+1. Go to your repository Settings
+2. Navigate to "Pages" in the left sidebar
+3. Under "Build and deployment":
+   - Source: Deploy from a branch
+   - Branch: `main` / `(root)`
+4. Click "Save"
+5. Your site will be published at: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
+
+### Automated Deployment
+
+The repository includes a GitHub Actions workflow (`.github/workflows/deploy-dashboard.yml`) that:
+- Automatically deploys on every push to the `main` branch
+- Can be manually triggered from the Actions tab
+- Deploys the complete dashboard with all features
 
 ## 🤝 Contributing
 
