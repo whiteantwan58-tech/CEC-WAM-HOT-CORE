@@ -1,8 +1,63 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
-## 🌌 CEC Matrix Dashboard (Streamlit)
+## 🔮 NEW: Standalone HTML Dashboard (Recommended)
+
+**A comprehensive, standalone HTML dashboard that replaces the Streamlit interface with better data syncing and display.**
+
+### Key Features
+- ✅ **No Dependencies**: Pure HTML/CSS/JS - works in any modern browser
+- ✅ **Real-time Data Sync**: Auto-refresh every 60 seconds with manual refresh option
+- ✅ **Complete Data Display**: Shows all CEC Matrix assets, tasks, Google Sheets data, PSI prices, and NASA APOD
+- ✅ **Export Functionality**: Export any data table to CSV with one click
+- ✅ **Responsive Design**: Works on desktop, tablet, and mobile
+- ✅ **Visual Appeal**: Cyberpunk/neon theme with animated backgrounds
+- ✅ **Error Handling**: Graceful fallbacks when APIs are unavailable
+
+### Quick Start
+
+**Option 1: Direct Browser Access** (Easiest)
+Simply double-click `dashboard.html` to open it in your browser!
+- Works for local CSV files
+- External APIs (Google Sheets, NASA, PSI prices) may have CORS restrictions
+
+**Option 2: Local Web Server** (Recommended for full functionality)
+```bash
+# Navigate to the repository
+cd CEC-WAM-HOT-CORE
+
+# Option A: Using Python 3 (requires Python 3 installed)
+python3 -m http.server 8080
+
+# Option B: Using Node.js (requires Node.js and npm)
+npx http-server -p 8080
+
+# Option C: Using PHP (requires PHP installed)
+php -S localhost:8080
+
+# Then visit: http://localhost:8080/dashboard.html
+```
+
+### What's Displayed
+1. **Financial KPIs**: PSI-Coin Balance, Liquidity Reserves, Net Worth (auto-calculated)
+2. **CEC Matrix Assets**: Complete asset table from `data/CEC_Matrix_System_Operational_Metrics_and_Assets.csv`
+3. **PSI Price Tracker**: Live TridentDAO (PSI) price with 24h change and historical chart
+4. **EVE Task Management**: All tasks from `data/EVE_UNFINISHED_TASKS.csv` with color-coded priorities
+5. **Google Sheets Live Data**: Real-time sync with your published Google Sheet
+6. **NASA APOD**: Daily astronomy picture from NASA
+
+### Data Sources
+- **Local CSV Files**: Automatically loads from `data/` directory
+- **Google Sheets**: Fetches from published CSV URL
+- **CoinGecko API**: Real-time PSI cryptocurrency prices
+- **NASA API**: Astronomy Picture of the Day
+
+---
+
+## 🌌 CEC Matrix Dashboard (Streamlit - Legacy)
 
 A complete operational dashboard system for the Conscious Energy Continuum (CEC) Matrix. This dashboard provides real-time monitoring, data visualization, and export capabilities for all CEC system metrics.
+
+**Note**: The new HTML dashboard above is recommended for better performance and data syncing.
 
 ### Features
 - **Financial HUD**: Live KPIs including PSI-Coin Balance, Liquidity Reserves, Total Spendable, CEC_WAM Status, Net Worth, and Current Valuation
