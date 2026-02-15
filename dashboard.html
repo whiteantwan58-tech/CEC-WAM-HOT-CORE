@@ -459,6 +459,8 @@
         // Configuration
         const CONFIG = {
             GOOGLE_SHEETS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv',
+            // NASA API Key: DEMO_KEY has rate limits (30 requests/hour, 50 requests/day)
+            // For production use, get your own free API key from https://api.nasa.gov/
             NASA_API_KEY: 'DEMO_KEY',
             COINGECKO_API: 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24h_change=true',
             REFRESH_INTERVAL: 60000, // 1 minute
@@ -565,7 +567,11 @@
                 
             } catch (error) {
                 console.error('Error loading assets:', error);
-                document.getElementById('assetsTable').innerHTML = `<div class="error">Failed to load assets data: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Failed to load assets data: ${error.message}. Please ensure the file exists at data/CEC_Matrix_System_Operational_Metrics_and_Assets.csv and the server is running.`;
+                document.getElementById('assetsTable').innerHTML = '';
+                document.getElementById('assetsTable').appendChild(errorDiv);
             }
         }
         
@@ -581,7 +587,11 @@
                 
             } catch (error) {
                 console.error('Error loading tasks:', error);
-                document.getElementById('tasksTable').innerHTML = `<div class="error">Failed to load tasks data: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Failed to load tasks data: ${error.message}. Please ensure the file exists at data/EVE_UNFINISHED_TASKS.csv and the server is running.`;
+                document.getElementById('tasksTable').innerHTML = '';
+                document.getElementById('tasksTable').appendChild(errorDiv);
             }
         }
         
@@ -606,7 +616,11 @@
                 
             } catch (error) {
                 console.error('Error loading Google Sheets:', error);
-                document.getElementById('sheetsTable').innerHTML = `<div class="error">Failed to load Google Sheets data: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Failed to load Google Sheets data: ${error.message}. Please check your internet connection and ensure the Google Sheets URL is publicly accessible.`;
+                document.getElementById('sheetsTable').innerHTML = '';
+                document.getElementById('sheetsTable').appendChild(errorDiv);
             }
         }
         
@@ -653,24 +667,51 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                const apodHtml = `
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <h3 style="color: var(--neon2);">${data.title || 'No title'}</h3>
-                        <p style="font-size: 0.9rem; color: var(--ink);">${data.explanation || 'No description available'}</p>
-                        ${data.url ? `
-                            <a href="${data.url}" target="_blank" style="color: var(--neon); text-decoration: none;">
-                                <img src="${data.url}" alt="${data.title}" style="max-width: 100%; border-radius: 10px; box-shadow: var(--shadow);">
-                            </a>
-                        ` : ''}
-                        <p style="font-size: 0.85rem; opacity: 0.7;">Date: ${data.date || 'Unknown'}</p>
-                    </div>
-                `;
+                // Create elements safely to prevent XSS
+                const container = document.createElement('div');
+                container.style.cssText = 'display: flex; flex-direction: column; gap: 1rem;';
                 
-                document.getElementById('nasaApod').innerHTML = apodHtml;
+                const title = document.createElement('h3');
+                title.style.color = 'var(--neon2)';
+                title.textContent = data.title || 'No title';
+                container.appendChild(title);
+                
+                const explanation = document.createElement('p');
+                explanation.style.cssText = 'font-size: 0.9rem; color: var(--ink);';
+                explanation.textContent = data.explanation || 'No description available';
+                container.appendChild(explanation);
+                
+                if (data.url) {
+                    const link = document.createElement('a');
+                    link.setAttribute('href', data.url);
+                    link.setAttribute('target', '_blank');
+                    link.setAttribute('rel', 'noopener noreferrer');
+                    link.style.cssText = 'color: var(--neon); text-decoration: none;';
+                    
+                    const img = document.createElement('img');
+                    img.setAttribute('src', data.url);
+                    img.setAttribute('alt', data.title || 'NASA APOD');
+                    img.style.cssText = 'max-width: 100%; border-radius: 10px; box-shadow: var(--shadow);';
+                    
+                    link.appendChild(img);
+                    container.appendChild(link);
+                }
+                
+                const date = document.createElement('p');
+                date.style.cssText = 'font-size: 0.85rem; opacity: 0.7;';
+                date.textContent = `Date: ${data.date || 'Unknown'}`;
+                container.appendChild(date);
+                
+                document.getElementById('nasaApod').innerHTML = '';
+                document.getElementById('nasaApod').appendChild(container);
                 
             } catch (error) {
                 console.error('Error loading NASA APOD:', error);
-                document.getElementById('nasaApod').innerHTML = `<div class="error">Failed to load NASA APOD: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Failed to load NASA APOD: ${error.message}. This may be due to API rate limits or network issues.`;
+                document.getElementById('nasaApod').innerHTML = '';
+                document.getElementById('nasaApod').appendChild(errorDiv);
             }
         }
         
@@ -910,14 +951,23 @@
                 return;
             }
             
-            // Convert to CSV
+            // Convert to CSV with proper escaping
             const headers = Object.keys(data[0]);
-            let csv = headers.join(',') + '\n';
+            
+            // Escape headers properly
+            const escapedHeaders = headers.map(header => {
+                if (header.includes(',') || header.includes('"') || header.includes('\n')) {
+                    return '"' + header.replace(/"/g, '""') + '"';
+                }
+                return header;
+            });
+            
+            let csv = escapedHeaders.join(',') + '\n';
             
             data.forEach(row => {
                 const values = headers.map(header => {
                     let value = row[header] || '';
-                    // Escape CSV special characters
+                    // Escape CSV special characters (RFC 4180)
                     if (value.includes(',') || value.includes('"') || value.includes('\n')) {
                         value = '"' + value.replace(/"/g, '""') + '"';
                     }

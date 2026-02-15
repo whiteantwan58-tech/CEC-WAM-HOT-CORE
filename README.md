@@ -14,18 +14,28 @@
 - ✅ **Error Handling**: Graceful fallbacks when APIs are unavailable
 
 ### Quick Start
+
+**Option 1: Direct Browser Access** (Easiest)
+Simply double-click `dashboard.html` to open it in your browser!
+- Works for local CSV files
+- External APIs (Google Sheets, NASA, PSI prices) may have CORS restrictions
+
+**Option 2: Local Web Server** (Recommended for full functionality)
 ```bash
 # Navigate to the repository
 cd CEC-WAM-HOT-CORE
 
-# Start a simple HTTP server (Python 3)
+# Option A: Using Python 3 (requires Python 3 installed)
 python3 -m http.server 8080
 
-# Open in your browser
-# Visit: http://localhost:8080/dashboard.html
-```
+# Option B: Using Node.js (requires Node.js and npm)
+npx http-server -p 8080
 
-**Or simply open `dashboard.html` directly in your browser!**
+# Option C: Using PHP (requires PHP installed)
+php -S localhost:8080
+
+# Then visit: http://localhost:8080/dashboard.html
+```
 
 ### What's Displayed
 1. **Financial KPIs**: PSI-Coin Balance, Liquidity Reserves, Net Worth (auto-calculated)
