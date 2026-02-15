@@ -752,6 +752,17 @@
             box-shadow: 0 0 30px rgba(0, 217, 255, 0.7);
         }
         
+        .unlock-button.override {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+            color: #FFC107;
+        }
+        
+        .unlock-button.override:hover {
+            background: rgba(255, 193, 7, 0.3);
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+        }
+        
         .lock-hint {
             margin-top: 30px;
             font-size: 0.9rem;
@@ -1029,6 +1040,13 @@
             
             <div id="setupButtons" style="display: none; margin-top: 20px;">
                 <button class="unlock-button" onclick="registerBiometric()">📱 REGISTER BIOMETRIC</button>
+            </div>
+            
+            <!-- Manual Override Button (always available as fallback) -->
+            <div id="manualOverrideButton" style="display: none; margin-top: 20px;">
+                <button class="unlock-button override" onclick="manualOverride()">
+                    ⚠️ MANUAL OVERRIDE
+                </button>
             </div>
             
             <p id="lockHint" class="lock-hint">Checking biometric availability...</p>
@@ -2252,6 +2270,9 @@ micBtn.onclick = () => {
         // Configuration constants
         const AUTO_AUTH_DELAY_MS = 2000; // Delay before auto-authentication
         
+        // Global variable to track manual override timeout
+        let manualOverrideTimeout = null;
+        
         // Helper function to generate random challenge
         function generateRandomChallenge() {
             const array = new Uint8Array(32);
@@ -2357,6 +2378,12 @@ micBtn.onclick = () => {
                 
                 scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
                 setupButtons.style.display = 'block';
+                
+                // Show manual override button on registration failure
+                const manualOverrideButton = document.getElementById('manualOverrideButton');
+                if (manualOverrideButton) {
+                    manualOverrideButton.style.display = 'block';
+                }
             }
         }
         
@@ -2434,14 +2461,34 @@ micBtn.onclick = () => {
                 scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
                 biometricButtons.style.display = 'block';
                 
+                // Show manual override button on authentication failure
+                const manualOverrideButton = document.getElementById('manualOverrideButton');
+                if (manualOverrideButton) {
+                    manualOverrideButton.style.display = 'block';
+                }
+                
                 // Show hint
                 document.getElementById('lockHint').textContent = 
-                    'Use your fingerprint sensor or Face ID to authenticate. Make sure your sensor is clean and properly positioned.';
+                    'Authentication failed. Try again or use Manual Override to proceed.';
+            }
+        }
+        
+        // Manual override function to bypass biometric authentication
+        function manualOverride() {
+            if (confirm('⚠️ SECURITY WARNING\n\nManual override will bypass biometric authentication and grant access to the dashboard.\n\nOnly use this if:\n• Biometric hardware is not available\n• Authentication is not working\n• You are in development/troubleshooting mode\n\nProceed with manual override?')) {
+                console.log('Manual override activated by user');
+                unlockDashboard();
             }
         }
         
         // Unlock the dashboard after successful authentication
         function unlockDashboard() {
+            // Clear the manual override timeout to prevent race condition
+            if (manualOverrideTimeout) {
+                clearTimeout(manualOverrideTimeout);
+                manualOverrideTimeout = null;
+            }
+            
             const lockScreen = document.getElementById('lockScreen');
             lockScreen.classList.add('hidden');
             
@@ -2457,11 +2504,20 @@ micBtn.onclick = () => {
             const biometricButtons = document.getElementById('biometricButtons');
             const setupButtons = document.getElementById('setupButtons');
             const lockHint = document.getElementById('lockHint');
+            const manualOverrideButton = document.getElementById('manualOverrideButton');
+            
+            // Show manual override button after a delay as fallback
+            manualOverrideTimeout = setTimeout(() => {
+                if (manualOverrideButton && !document.getElementById('lockScreen').classList.contains('hidden')) {
+                    manualOverrideButton.style.display = 'block';
+                }
+            }, 5000); // Show after 5 seconds
             
             // Check if WebAuthn is supported
             if (!window.PublicKeyCredential) {
                 scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Biometric authentication not available</span>';
-                lockHint.textContent = 'Your browser does not support biometric authentication. Please use a modern browser (Chrome, Firefox, Safari, Edge).';
+                lockHint.textContent = 'Your browser does not support biometric authentication. Use Manual Override to proceed.';
+                manualOverrideButton.style.display = 'block'; // Show immediately if not supported
                 return;
             }
             
@@ -2471,7 +2527,8 @@ micBtn.onclick = () => {
                 
                 if (!available) {
                     scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ No biometric hardware detected</span>';
-                    lockHint.textContent = 'No fingerprint sensor or Face ID detected on this device.';
+                    lockHint.textContent = 'No fingerprint sensor or Face ID detected. Use Manual Override to proceed.';
+                    manualOverrideButton.style.display = 'block'; // Show immediately if no hardware
                     return;
                 }
                 
@@ -2493,7 +2550,8 @@ micBtn.onclick = () => {
             } catch (error) {
                 console.error('Error checking biometric availability:', error);
                 scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Could not check biometric availability</span>';
-                lockHint.textContent = 'Error checking biometric support: ' + error.message;
+                lockHint.textContent = 'Error checking biometric support. Use Manual Override to proceed.';
+                manualOverrideButton.style.display = 'block'; // Show immediately on error
             }
         }
         
