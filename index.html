@@ -555,6 +555,17 @@
     </div>
     
     <script>
+        // =================================================================
+        // CEC-WAM-HOT-CORE Live Dashboard - JavaScript
+        // 
+        // Performance Optimizations:
+        // - Cached star field generation (10k vertices)
+        // - Parallel API calls with Promise.all()
+        // - Debounced resize handler (250ms)
+        // - Visibility-based auto-refresh
+        // - Improved error messages
+        // =================================================================
+        
         // Lock Screen Functions
         function unlockDashboard() {
             const scanStatus = document.getElementById('scanStatus');
@@ -612,6 +623,9 @@
         async function fetchPSIPrice() {
             try {
                 const response = await fetch(COINGECKO_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
                 
                 const price = data.tridentdao?.usd || 0;
@@ -648,7 +662,11 @@
                 
                 updatePriceChart();
             } catch (error) {
-                document.getElementById('psiPrice').innerHTML = '<p style="color: #FF4444;">Price unavailable</p>';
+                console.error('Error fetching PSI price:', error);
+                document.getElementById('psiPrice').innerHTML = `
+                    <p style="color: #FF4444;">❌ Price data unavailable</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                `;
             }
         }
         
@@ -698,11 +716,14 @@
         async function fetchGoogleSheetsData() {
             const loadStart = Date.now();
             try {
-                const url = DATA_SOURCES[currentDataSource].url;
-                const response = await fetch(url);
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const csvText = await response.text();
                 
-                // Parse CSV
+                // Simple CSV parsing (handles basic cases)
+                // Note: For production, consider using a CSV parsing library for complex data
                 const lines = csvText.trim().split('\n');
                 const headers = lines[0].split(',').map(h => h.trim());
                 
@@ -727,9 +748,11 @@
                 updateTrendsChart(data);
                 
             } catch (error) {
+                console.error('Error fetching Google Sheets data:', error);
                 document.getElementById('dataTable').innerHTML = `
-                    <p style="color: #FF4444;">❌ Failed to load data: ${error.message}</p>
-                    <p>Please check your internet connection or verify the Google Sheets URL.</p>
+                    <p style="color: #FF4444;">❌ Failed to load spreadsheet data</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Please check your internet connection and verify the Google Sheets URL is accessible.</p>
                 `;
             }
         }
@@ -917,9 +940,17 @@
         }
         
         function refreshData() {
-            fetchPSIPrice();
-            fetchGoogleSheetsData();
-            updateTimestamp();
+            // Parallelize API calls for better performance
+            // Both requests execute simultaneously instead of sequentially
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                updateTimestamp();
+            }).catch(error => {
+                console.error('Error refreshing data:', error);
+                updateTimestamp();
+            });
         }
         
         function filterData(status, event) {
@@ -983,17 +1014,61 @@
         
         function initDashboard() {
             updateTimestamp();
-            fetchPSIPrice();
-            fetchGoogleSheetsData();
+            
+            // Parallelize initial data fetch for faster load time
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                console.log('✓ Dashboard data loaded successfully');
+            }).catch(error => {
+                console.error('✗ Error loading dashboard data:', error);
+            });
+            
             initStarMap();
             
-            // Auto-refresh every 5 minutes
+            // Auto-refresh every 5 minutes only if page is visible
+            // Saves bandwidth and API calls when user is on another tab
             setInterval(() => {
-                refreshData();
-            }, 300000);
+                if (!document.hidden) {
+                    refreshData();
+                }
+            }, 300000);  // 300000ms = 5 minutes
+            
+            // Also refresh when page becomes visible after being hidden
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    console.log('Page became visible - refreshing data');
+                    refreshData();
+                }
+            });
         }
         
-        // 3D Star Map Implementation
+        // =================================================================
+        // 3D Star Map Implementation with Caching
+        // Generates 10,000 star vertices once and reuses them
+        // =================================================================
+        
+        // Cache star vertices to avoid regenerating on every call
+        let cachedStarsVertices = null;
+        
+        function generateStarVertices() {
+            if (cachedStarsVertices) {
+                return cachedStarsVertices;
+            }
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            cachedStarsVertices = starsVertices;
+            return starsVertices;
+        }
+        
         function initStarMap() {
             const container = document.getElementById('starmap-container');
             const canvas = document.getElementById('starmap');
@@ -1005,17 +1080,11 @@
             renderer.setSize(container.offsetWidth, container.offsetHeight);
             renderer.setClearColor(0x000000);
             
-            // Add stars
+            // Add stars using cached vertices
             const starsGeometry = new THREE.BufferGeometry();
             const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
             
-            const starsVertices = [];
-            for (let i = 0; i < 10000; i++) {
-                const x = (Math.random() - 0.5) * 2000;
-                const y = (Math.random() - 0.5) * 2000;
-                const z = (Math.random() - 0.5) * 2000;
-                starsVertices.push(x, y, z);
-            }
+            const starsVertices = generateStarVertices();
             
             starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
             const starField = new THREE.Points(starsGeometry, starsMaterial);
@@ -1096,11 +1165,15 @@
             
             animate();
             
-            // Handle window resize
+            // Debounced window resize handler to prevent excessive updates
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                camera.aspect = container.offsetWidth / container.offsetHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.offsetWidth, container.offsetHeight);
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    camera.aspect = container.offsetWidth / container.offsetHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.offsetWidth, container.offsetHeight);
+                }, 250);  // 250ms debounce delay
             });
         }
     </script>
