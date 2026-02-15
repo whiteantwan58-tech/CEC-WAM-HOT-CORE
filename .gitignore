@@ -1,64 +1,28 @@
-# Environment variables
-.env
-.env.local
-.env.*.local
+# Google Sheets API Credentials (Service Account JSON – Inline)
+# Replace with your actual service account key (from Google Cloud → IAM → Service Accounts → Keys → JSON)
+GOOGLE_SHEETS_CREDS={"type": "service_account", "project_id": "your-project-id", "private_key_id": "your-private-key-id", "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----", "client_email": "your-service-account@your-project.iam.gserviceaccount.com", "client_id": "your-client-id", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token", "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs", "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/your-service-account%40your-project.iam.gserviceaccount.com"}
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-PIPFILE.lock
+# OR – safer: Store as file and reference path (recommended)
+# GOOGLE_SHEETS_CREDS_FILE=C:/Users/Valued Customer/OneDrive/Documents/CEC SYSTEM/service-account-key.json
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv
+# Your Live Ledger Live Sheet ID (from your pub CSV link)
+LOG_SHEET_ID=your-sheet-id-from-pub-link-here  # e.g., 2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
+# CoinGecko API Key (free tier – optional, leave blank if not using)
+COINGECKO_API_KEY=
 
-# Streamlit
-.streamlit/secrets.toml
+# ElevenLabs Voice AI (for Eve voice)
+ELEVENLABS_API_KEY=your-elevenlabs-api-key-here
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM  # Rachel voice – change if needed
 
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.log
+# OpenAI API (for advanced processing if needed)
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_MODEL=gpt-4
 
-# Export files
-EVE_MASTER_EXPORT_*.csv
+# EVE Configuration
+EVE_SYSTEM_CODE=CEC_WAM_HEI_EVE_7A2F-9C4B
+EVE_OWNER_NAME=Twan
+EVE_PERSONALITY=professional,helpful,intelligent,learning,warm,light-island-rhythm
 
-# Node modules
-node_modules/
-
-# Vercel
-.vercel/
-
-# OS
-Thumbs.db
+# Vercel & Deployment (locked from your key)
+VERCEL_API_KEY=8Aft4kIVuIf7J3R3K3yIpVC0
