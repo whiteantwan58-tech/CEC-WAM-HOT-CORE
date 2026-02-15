@@ -1253,11 +1253,9 @@
   <script>
     // ========== CONFIGURATION ==========
     // To configure your OpenWeatherMap API key, add this line before loading this page:
-    // <script>window.OPENWEATHER_API_KEY = 'your-api-key-here';</script>
+    // window.OPENWEATHER_API_KEY = 'your-api-key-here';
     // Or the weather feature will use demo/fallback data.
     
-
-  <script>
     // Embedded data from repository
     const DATA = {
       net_liquidity: 1250039,
@@ -2216,7 +2214,7 @@ micBtn.onclick = () => {
         let statusChart = null;
         let trendsChart = null;
         let priceHistory = [];
-        const startTime = Date.now();
+        const dashboardStartTime = Date.now();
         const TOTAL_SUPPLY = 1000000; // Total supply for market cap calculation
         
         function updateTimestamp() {
