@@ -138,6 +138,7 @@ A cutting-edge, real-time dashboard featuring live Google Sheets data synchroniz
 ## ✨ Features
 
 ### Core Functionality
+- **🔐 Real Biometric Authentication** - WebAuthn-powered fingerprint and Face ID login (NEW!)
 - **Live Google Sheets Integration** - Auto-fetches CSV data from Google Sheets with 5-minute auto-refresh
 - **Color-Coded Status System** - Visual status indicators (PERFECT=Green, TODO=Yellow, ACTIVE=Blue, STABLE=Gray)
 - **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API with historical chart
@@ -145,7 +146,6 @@ A cutting-edge, real-time dashboard featuring live Google Sheets data synchroniz
 - **Advanced Data Visualizations** - Multiple chart types (line, doughnut, bar charts) using Chart.js
 - **Data Filtering & Export** - Filter data by status and export to CSV format
 - **Real-Time Performance Metrics** - Live tracking of load times, data points, and system status
-- **Biometric Lock Screen** - Theatrical security interface (aesthetic only, press Enter to bypass)
 - **EVE Voice AI Assistant** - Advanced AI with voice synthesis and natural language understanding
 - **Responsive Design** - Optimized for desktop, tablet, and mobile devices
 - **Dark Cosmic Theme** - Professional space aesthetic with neon accents
@@ -164,6 +164,20 @@ EVE is your always-on AI assistant featuring:
 - 🌐 **Serverless API** - Vercel-ready API endpoints with hidden keys
 
 EVE is designed specifically for **Twan** with full access to all CEC-WAM system data, no restrictions, and continuous learning capabilities.
+
+### 🔐 Biometric Authentication (NEW! 🆕)
+
+Real security using WebAuthn API for biometric login:
+- 🖐️ **Fingerprint Authentication** - Use your laptop/desktop fingerprint sensor
+- 📱 **Face ID Support** - iPhone/iPad Face ID authentication
+- 🔑 **Touch ID Support** - Mac Touch ID authentication  
+- 🪟 **Windows Hello** - Windows biometric authentication
+- ✅ **No Passwords Required** - Secure, phishing-resistant authentication
+- 🔒 **Privacy-Focused** - Biometric data never leaves your device
+- 💾 **Persistent Credentials** - Register once per device
+- 📊 **Console Commands** - Check status with `biometric` command
+
+**See [BIOMETRIC_AUTH.md](BIOMETRIC_AUTH.md) for complete setup and usage guide.**
 
 ### Technical Features
 - Data caching and error handling

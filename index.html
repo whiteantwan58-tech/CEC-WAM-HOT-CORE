@@ -36,27 +36,40 @@
     *{ box-sizing:border-box; margin:0; padding:0; font-family: var(--mono); }
     html, body { height:100%; background: var(--bg); color: var(--ink); overflow-x:hidden; }
 
-    /* Matrix canvas backdrop */
+    /* Enhanced Matrix canvas backdrop with holographic effect */
     #matrix {
       position: fixed;
       inset: 0;
       z-index: 0;
-      opacity: 0.28;
-      filter: contrast(110%) saturate(125%);
+      opacity: 0.35;
+      filter: contrast(120%) saturate(140%) hue-rotate(5deg);
+      animation: matrixGlow 10s ease-in-out infinite alternate;
+    }
+    
+    @keyframes matrixGlow {
+      0% { filter: contrast(120%) saturate(140%) hue-rotate(0deg) brightness(1); }
+      50% { filter: contrast(125%) saturate(150%) hue-rotate(5deg) brightness(1.1); }
+      100% { filter: contrast(120%) saturate(140%) hue-rotate(0deg) brightness(1); }
     }
 
-    /* Subtle star dust overlay */
+    /* Enhanced holographic star dust overlay with animation */
     .grain {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(circle at 20% 30%, rgba(40,240,255,.08), transparent 40%),
-        radial-gradient(circle at 80% 20%, rgba(188,19,254,.07), transparent 45%),
-        radial-gradient(circle at 60% 80%, rgba(44,255,154,.06), transparent 45%),
+        radial-gradient(circle at 20% 30%, rgba(40,240,255,.12), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(188,19,254,.10), transparent 45%),
+        radial-gradient(circle at 60% 80%, rgba(44,255,154,.09), transparent 45%),
         linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
       mix-blend-mode: screen;
+      animation: grainPulse 8s ease-in-out infinite;
+    }
+    
+    @keyframes grainPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     /* Scrollbar styling */
@@ -995,12 +1008,18 @@
             </div>
             
             <div id="scanStatus" class="scan-status">
-                <span class="scanning">● Scanning biometric data...</span>
+                <span class="scanning">● Initializing biometric authentication...</span>
             </div>
             
-            <button class="unlock-button" onclick="unlockDashboard()">OVERRIDE ACCESS</button>
+            <div id="biometricButtons" style="display: none; margin-top: 20px;">
+                <button class="unlock-button" onclick="authenticateBiometric()">🔓 AUTHENTICATE</button>
+            </div>
             
-            <p class="lock-hint">Press ENTER or click button to bypass</p>
+            <div id="setupButtons" style="display: none; margin-top: 20px;">
+                <button class="unlock-button" onclick="registerBiometric()">📱 REGISTER BIOMETRIC</button>
+            </div>
+            
+            <p id="lockHint" class="lock-hint">Checking biometric availability...</p>
         </div>
     </div>
     
@@ -1289,14 +1308,24 @@
     // ---------- Clock & Uptime ----------
     function tickClock(){
       const now = new Date();
-      $("clock").textContent = "SYSTEM TIME: " + now.toLocaleString();
-      $("hudHeartbeat").textContent = now.toLocaleTimeString();
+      const clockEl = $("clock");
+      const heartbeatEl = $("hudHeartbeat");
+      const uptimeEl = $("hudUptime");
       
-      const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
-      const h = Math.floor(uptimeSec / 3600);
-      const m = Math.floor((uptimeSec % 3600) / 60);
-      const s = uptimeSec % 60;
-      $("hudUptime").textContent = `${h}h ${m}m ${s}s`;
+      // Only update if elements exist (after dashboard unlock)
+      if (clockEl) {
+        clockEl.textContent = "SYSTEM TIME: " + now.toLocaleString();
+      }
+      if (heartbeatEl) {
+        heartbeatEl.textContent = now.toLocaleTimeString();
+      }
+      if (uptimeEl) {
+        const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
+        const h = Math.floor(uptimeSec / 3600);
+        const m = Math.floor((uptimeSec % 3600) / 60);
+        const s = uptimeSec % 60;
+        uptimeEl.textContent = `${h}h ${m}m ${s}s`;
+      }
     }
     setInterval(tickClock, 1000);
     tickClock();
@@ -1652,7 +1681,7 @@
     }
 
     function cmdHelp(){
-      eveSay("Commands: help, status, prices, data, vault, timeline, refresh, ping, clear");
+      eveSay("Commands: help, status, prices, data, vault, timeline, refresh, ping, clear, biometric");
     }
 
     function cmdData(){
@@ -1691,6 +1720,37 @@
       eveSay("🏓 PING OK: " + ms + "ms");
     }
 
+    function cmdBiometric(){
+      const credId = localStorage.getItem('biometric_credential_id');
+      const regDate = localStorage.getItem('biometric_registered_at');
+      const lastAuth = localStorage.getItem('last_auth_time');
+      
+      sysSay("🔐 BIOMETRIC AUTHENTICATION STATUS:");
+      if (credId) {
+        sysSay("  Status: ✓ REGISTERED");
+        sysSay("  Credential ID: " + credId.substring(0, 20) + "...");
+        if (regDate) {
+          sysSay("  Registered: " + new Date(regDate).toLocaleString());
+        }
+        if (lastAuth) {
+          sysSay("  Last Auth: " + new Date(lastAuth).toLocaleString());
+        }
+        sysSay("  Type: use 'biometric reset' to clear");
+      } else {
+        sysSay("  Status: ✗ NOT REGISTERED");
+        sysSay("  Type: Reload page to register biometrics");
+      }
+      eveSay("Biometric status retrieved.");
+    }
+
+    function cmdBiometricReset(){
+      localStorage.removeItem('biometric_credential_id');
+      localStorage.removeItem('biometric_registered_at');
+      localStorage.removeItem('last_auth_time');
+      sysSay("🔐 BIOMETRIC CREDENTIALS CLEARED");
+      eveSay("Reload the page to register new biometric credentials.");
+    }
+
     function handleCmd(raw){
       const s = raw.trim();
       if(!s) return;
@@ -1709,6 +1769,10 @@
       if(cmd === "timeline") return cmdTimeline();
       if(cmd === "refresh") return refreshAllData();
       if(cmd === "ping") return cmdPing();
+      if(cmd === "biometric") {
+        if(parts[1] && parts[1].toLowerCase() === "reset") return cmdBiometricReset();
+        return cmdBiometric();
+      }
 
       eveSay("Unknown command. Type: help");
     }
@@ -2169,28 +2233,350 @@ micBtn.onclick = () => {
         // - Improved error messages
         // =================================================================
         
-        // Lock Screen Functions
-        function unlockDashboard() {
-            const scanStatus = document.getElementById('scanStatus');
-            scanStatus.innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED</span>';
-            
-            setTimeout(() => {
-                const lockScreen = document.getElementById('lockScreen');
-                lockScreen.classList.add('hidden');
-                
-                setTimeout(() => {
-                    document.getElementById('mainContent').classList.add('visible');
-                    initDashboard();
-                }, 500);
-            }, 800);
+        // ============================================================
+        // WebAuthn Biometric Authentication System
+        // ============================================================
+        
+        // Configuration constants
+        const AUTO_AUTH_DELAY_MS = 2000; // Delay before auto-authentication
+        
+        // Helper function to generate random challenge
+        function generateRandomChallenge() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return array;
         }
         
-        // Allow Enter key to unlock
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && !document.getElementById('lockScreen').classList.contains('hidden')) {
-                unlockDashboard();
+        // Helper function to convert ArrayBuffer to Base64
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
+            return btoa(binary);
+        }
+        
+        // Helper function to convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+            return bytes.buffer;
+        }
+        
+        // Check if biometric credentials are registered
+        function hasRegisteredBiometric() {
+            return localStorage.getItem('biometric_credential_id') !== null;
+        }
+        
+        // Register new biometric credential
+        async function registerBiometric() {
+            const scanStatus = document.getElementById('scanStatus');
+            const setupButtons = document.getElementById('setupButtons');
+            
+            try {
+                scanStatus.innerHTML = '<span class="scanning">● Registering biometric credential...</span>';
+                setupButtons.style.display = 'none';
+                
+                // Check WebAuthn support
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn is not supported on this device/browser');
+                }
+                
+                const challenge = generateRandomChallenge();
+                const userId = new Uint8Array(16);
+                crypto.getRandomValues(userId);
+                
+                const publicKeyCredentialCreationOptions = {
+                    challenge: challenge,
+                    rp: {
+                        name: "CEC-WAM-HOT-CORE",
+                        id: window.location.hostname
+                    },
+                    user: {
+                        id: userId,
+                        name: "cec-wam-owner",
+                        displayName: "CEC-WAM System Owner"
+                    },
+                    pubKeyCredParams: [
+                        { alg: -7, type: "public-key" },  // ES256
+                        { alg: -257, type: "public-key" } // RS256
+                    ],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform", // Prefer built-in authenticators (Touch ID, Face ID, Windows Hello, Android fingerprint)
+                        requireResidentKey: false,
+                        userVerification: "required"
+                    },
+                    timeout: 60000,
+                    attestation: "none"
+                };
+                
+                // Create credential
+                const credential = await navigator.credentials.create({
+                    publicKey: publicKeyCredentialCreationOptions
+                });
+                
+                // Store credential ID for future authentication
+                const credentialId = arrayBufferToBase64(credential.rawId);
+                localStorage.setItem('biometric_credential_id', credentialId);
+                localStorage.setItem('biometric_registered_at', new Date().toISOString());
+                
+                scanStatus.innerHTML = '<span style="color: #00FF88;">✓ BIOMETRIC REGISTERED SUCCESSFULLY</span>';
+                
+                // Wait a moment then authenticate
+                setTimeout(() => {
+                    authenticateBiometric();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Biometric registration failed:', error);
+                
+                // Provide user-friendly error messages
+                let errorMsg = 'Registration failed';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'Biometric registration was cancelled or denied. Please try again and allow access to your biometric sensor.';
+                } else if (error.name === 'InvalidStateError') {
+                    errorMsg = 'A biometric credential may already exist. Try authenticating instead.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMsg = 'Biometric registration is not supported on this device or browser.';
+                } else if (error.name === 'AbortError') {
+                    errorMsg = 'Registration was aborted. Please try again.';
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                
+                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                setupButtons.style.display = 'block';
             }
-        });
+        }
+        
+        // Authenticate using biometric
+        async function authenticateBiometric() {
+            const scanStatus = document.getElementById('scanStatus');
+
+                // Fetch WebAuthn assertion (authentication) options from the server.
+                // The server must generate the challenge and allowed credentials based
+                // on the currently logged-in user.
+                const optionsResponse = await fetch('/webauthn/assertion-options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rpId: window.location.hostname
+                    })
+                });
+
+                if (!optionsResponse.ok) {
+                    throw new Error('Failed to obtain authentication options from server');
+                }
+
+                const options = await optionsResponse.json();
+
+                // Helper to convert base64/base64url to ArrayBuffer
+                function base64ToArrayBufferLocal(base64) {
+                    // Normalize base64url to standard base64
+                    base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+                    const pad = base64.length % 4;
+                    if (pad) {
+                        base64 += '='.repeat(4 - pad);
+                    }
+                    const binaryString = atob(base64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return bytes.buffer;
+                }
+
+                // Convert received options' binary fields from base64/base64url to ArrayBuffer
+                const publicKeyCredentialRequestOptions = {
+                    ...options,
+                    challenge: base64ToArrayBufferLocal(options.challenge),
+                    allowCredentials: Array.isArray(options.allowCredentials)
+                        ? options.allowCredentials.map(function (cred) {
+                            return {
+                                ...cred,
+                                id: base64ToArrayBufferLocal(cred.id)
+                            };
+                        })
+                        : undefined
+                };
+
+                // Authenticate with authenticator
+                const assertion = await navigator.credentials.get({
+                    publicKey: publicKeyCredentialRequestOptions
+                });
+
+                // Helper to convert ArrayBuffer to base64url string
+                function arrayBufferToBase64Url(buffer) {
+                    const bytes = new Uint8Array(buffer);
+                    let binary = '';
+                    for (let i = 0; i < bytes.byteLength; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    let base64 = btoa(binary);
+                    // Convert to base64url
+                    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+                    return base64;
+                }
+
+                // Serialize the assertion for server-side verification
+                const clientDataJSON = arrayBufferToBase64Url(assertion.response.clientDataJSON);
+                const authenticatorData = arrayBufferToBase64Url(assertion.response.authenticatorData);
+                const signature = arrayBufferToBase64Url(assertion.response.signature);
+                const userHandle = assertion.response.userHandle
+                    ? arrayBufferToBase64Url(assertion.response.userHandle)
+                    : null;
+
+                const verificationPayload = {
+                    id: assertion.id,
+                    type: assertion.type,
+                    rawId: arrayBufferToBase64Url(assertion.rawId),
+                    response: {
+                        clientDataJSON: clientDataJSON,
+                        authenticatorData: authenticatorData,
+                        signature: signature,
+                        userHandle: userHandle
+                    },
+                    clientExtensionResults: assertion.getClientExtensionResults
+                        ? assertion.getClientExtensionResults()
+                        : {}
+                };
+
+                // Send assertion to server for verification
+                const verifyResponse = await fetch('/webauthn/verify-assertion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(verificationPayload)
+                });
+
+                if (!verifyResponse.ok) {
+                    throw new Error('Server verification failed');
+                }
+
+                const verifyResult = await verifyResponse.json();
+                if (!verifyResult || !verifyResult.success) {
+                    throw new Error(verifyResult && verifyResult.error
+                        ? verifyResult.error
+                        : 'Authentication was not accepted by server');
+                }
+                
+                // Authentication successful (server-verified)
+                    userVerification: "required",
+                    rpId: window.location.hostname
+                };
+                
+                // Authenticate
+                const assertion = await navigator.credentials.get({
+                    publicKey: publicKeyCredentialRequestOptions
+                });
+                
+                // Authentication successful
+                scanStatus.innerHTML = '<span style="color: #00FF88;">✓ BIOMETRIC VERIFIED - ACCESS GRANTED</span>';
+                
+                // Store last authentication time
+                localStorage.setItem('last_auth_time', new Date().toISOString());
+                
+                // Unlock dashboard
+                setTimeout(() => {
+                    unlockDashboard();
+                }, 800);
+                
+            } catch (error) {
+                console.error('Biometric authentication failed:', error);
+                
+                // Provide user-friendly error messages
+                let errorMsg = 'Authentication failed';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'Biometric verification was cancelled or timed out. Please try again.';
+                } else if (error.name === 'InvalidStateError') {
+                    errorMsg = 'Biometric sensor is not available. Please ensure it\'s enabled.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMsg = 'Biometric authentication is not supported on this device.';
+                } else if (error.name === 'AbortError') {
+                    errorMsg = 'Authentication was aborted. Please try again.';
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                
+                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                biometricButtons.style.display = 'block';
+                
+                // Show hint
+                document.getElementById('lockHint').textContent = 
+                    'Use your fingerprint sensor or Face ID to authenticate. Make sure your sensor is clean and properly positioned.';
+            }
+        }
+        
+        // Unlock the dashboard after successful authentication
+        function unlockDashboard() {
+            const lockScreen = document.getElementById('lockScreen');
+            lockScreen.classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('mainContent').classList.add('visible');
+                initDashboard();
+            }, 500);
+        }
+        
+        // Initialize biometric authentication on page load
+        async function initBiometricAuth() {
+            const scanStatus = document.getElementById('scanStatus');
+            const biometricButtons = document.getElementById('biometricButtons');
+            const setupButtons = document.getElementById('setupButtons');
+            const lockHint = document.getElementById('lockHint');
+            
+            // Check if WebAuthn is supported
+            if (!window.PublicKeyCredential) {
+                scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Biometric authentication not available</span>';
+                lockHint.textContent = 'Your browser does not support biometric authentication. Please use a modern browser (Chrome, Firefox, Safari, Edge).';
+                return;
+            }
+            
+            // Check if biometric authenticators are available
+            try {
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                
+                if (!available) {
+                    scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ No biometric hardware detected</span>';
+                    lockHint.textContent = 'No fingerprint sensor or Face ID detected on this device.';
+                    return;
+                }
+                
+                // Check if user has registered biometric
+                if (hasRegisteredBiometric()) {
+                    scanStatus.innerHTML = '<span style="color: #00D9FF;">● Biometric credential found - ready to authenticate</span>';
+                    biometricButtons.style.display = 'block';
+                    lockHint.textContent = 'Click AUTHENTICATE to verify your identity using fingerprint or Face ID';
+                    
+                    // Auto-authenticate after configured delay
+                    setTimeout(() => {
+                        authenticateBiometric();
+                    }, AUTO_AUTH_DELAY_MS);
+                } else {
+                    scanStatus.innerHTML = '<span style="color: #00D9FF;">● No biometric registered - setup required</span>';
+                    setupButtons.style.display = 'block';
+                    lockHint.textContent = 'Register your fingerprint or Face ID to secure this dashboard';
+                }
+            } catch (error) {
+                console.error('Error checking biometric availability:', error);
+                scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Could not check biometric availability</span>';
+                lockHint.textContent = 'Error checking biometric support: ' + error.message;
+            }
+        }
+        
+        // Initialize biometric auth when page loads
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', () => {
+                initBiometricAuth();
+            });
+        } else {
+            // DOM already loaded, initialize immediately
+            initBiometricAuth();
+        }
         
         // Dashboard Functions
         // Configuration for multiple data sources
@@ -2203,6 +2589,9 @@ micBtn.onclick = () => {
             // 'sheet2': { name: 'Secondary Data', url: 'https://...' },
             // 'sheet3': { name: 'Analytics', url: 'https://...' }
         };
+        
+        // Configuration constants
+        const FETCH_TIMEOUT_MS = 15000; // 15 second timeout for API requests
         
         let currentDataSource = 'main';
         const GOOGLE_SHEETS_CSV_URL = DATA_SOURCES[currentDataSource].url;
@@ -2319,16 +2708,39 @@ micBtn.onclick = () => {
         async function fetchGoogleSheetsData() {
             const loadStart = Date.now();
             try {
-                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                // Add timeout for fetch request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+                
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
                 const csvText = await response.text();
+                
+                // Validate CSV data before processing
+                if (!csvText || csvText.trim().length === 0) {
+                    throw new Error('Received empty data from Google Sheets');
+                }
                 
                 // Simple CSV parsing (handles basic cases)
                 // Note: For production, consider using a CSV parsing library for complex data
                 const lines = csvText.trim().split('\n');
+                
+                if (lines.length < 2) {
+                    throw new Error('Invalid CSV format: insufficient data rows');
+                }
+                
                 const headers = lines[0].split(',').map(h => h.trim());
+                
+                if (headers.length === 0) {
+                    throw new Error('Invalid CSV format: no headers found');
+                }
                 
                 const data = [];
                 for (let i = 1; i < lines.length; i++) {
@@ -2340,14 +2752,19 @@ micBtn.onclick = () => {
                     data.push(row);
                 }
                 
-                dashboardData = data;
-                const loadTime = ((Date.now() - loadStart) / 1000).toFixed(2);
-                document.getElementById('loadTime').textContent = `${loadTime}s`;
-                document.getElementById('dataPoints').textContent = data.length;
-                
-                displayData(data, headers);
-                updateDataSummary(data);
-                updateStatusDistribution(data);
+                // Only update dashboardData if we have valid data
+                if (data.length > 0) {
+                    dashboardData = data;
+                    const loadTime = ((Date.now() - loadStart) / 1000).toFixed(2);
+                    document.getElementById('loadTime').textContent = `${loadTime}s`;
+                    document.getElementById('dataPoints').textContent = data.length;
+                    
+                    displayData(data, headers);
+                    updateDataSummary(data);
+                    updateStatusDistribution(data);
+                } else {
+                    throw new Error('No valid data rows found in CSV');
+                }
                 updateTrendsChart(data);
                 
             } catch (error) {
