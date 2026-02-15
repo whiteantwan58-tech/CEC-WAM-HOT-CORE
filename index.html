@@ -571,432 +571,546 @@
       #starMapContainer{ height: 360px; }
     }
   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEC-WAM-HOT-CORE Live Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0E0E1A 0%, #1A1A2E 100%);
+            color: #EAEAEA;
+            overflow-x: hidden;
+        }
+        
+        /* Lock Screen Styles */
+        #lockScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        
+        #lockScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .lock-content {
+            text-align: center;
+            color: #00D9FF;
+        }
+        
+        .lock-title {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px #00D9FF;
+        }
+        
+        .lock-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+        
+        .scanner {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+        
+        .scanner-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #00D9FF;
+            animation: pulse 2s infinite;
+        }
+        
+        .scanner-ring:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 0;
+            left: 0;
+        }
+        
+        .scanner-ring:nth-child(2) {
+            width: 160px;
+            height: 160px;
+            top: 20px;
+            left: 20px;
+            border-width: 2px;
+            animation-delay: 0.5s;
+        }
+        
+        .scanner-ring:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            top: 40px;
+            left: 40px;
+            border-width: 1px;
+            animation-delay: 1s;
+        }
+        
+        .scanner-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+        
+        .scan-status {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #00FF88;
+        }
+        
+        .scanning {
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% {
+                opacity: 1;
+            }
+            25%, 75% {
+                opacity: 0.5;
+            }
+        }
+        
+        .unlock-button {
+            background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .unlock-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.7);
+        }
+        
+        .lock-hint {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        
+        /* Main Content Styles */
+        #mainContent {
+            display: none;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        #mainContent.visible {
+            display: block;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+        
+        h1 {
+            color: #00D9FF;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .status-bar {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #00D9FF;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+        
+        .card h2 {
+            color: #00D9FF;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: bold;
+        }
+        
+        .metric-value {
+            color: #00FF88;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th {
+            background: rgba(0, 217, 255, 0.2);
+            padding: 12px;
+            text-align: left;
+            color: #00D9FF;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: rgba(0, 217, 255, 0.05);
+        }
+        
+        .status-perfect {
+            background-color: rgba(0, 255, 136, 0.2) !important;
+            border-left: 4px solid #00FF88;
+        }
+        
+        .status-todo {
+            background-color: rgba(255, 193, 7, 0.2) !important;
+            border-left: 4px solid #FFC107;
+        }
+        
+        .status-active {
+            background-color: rgba(33, 150, 243, 0.2) !important;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-stable {
+            background-color: rgba(158, 158, 158, 0.2) !important;
+            border-left: 4px solid #9E9E9E;
+        }
+        
+        #starmap-container {
+            width: 100%;
+            height: 600px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .refresh-button {
+            background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .refresh-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .streamlit-embed {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #00D9FF;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00FF88;
+        }
+        
+        .filter-controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-button {
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid #00D9FF;
+            color: #00D9FF;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-button:hover {
+            background: rgba(0, 217, 255, 0.4);
+        }
+        
+        .filter-button.active {
+            background: #00D9FF;
+            color: #0E0E1A;
+        }
+        
+        .export-button {
+            background: linear-gradient(90deg, #00FF88 0%, #00D9FF 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 10px 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .export-button:hover {
+            transform: scale(1.05);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            opacity: 0.7;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #00D9FF;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #starmap-container {
+                height: 400px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="grain"></div>
-
-  <header>
-    <div class="brand">
-      <h1>Ψ EVE-4 ULTRA | CEC-WAM SOVEREIGN CORE Ψ</h1>
-      <small id="clock">SYSTEM TIME: —</small>
+    <!-- Lock Screen -->
+    <div id="lockScreen">
+        <div class="lock-content">
+            <h1 class="lock-title">🔐 BIOMETRIC AUTHENTICATION</h1>
+            <p class="lock-subtitle">CEC-WAM-HOT-CORE SECURITY PROTOCOL</p>
+            
+            <div class="scanner">
+                <div class="scanner-ring"></div>
+                <div class="scanner-ring"></div>
+                <div class="scanner-ring"></div>
+                <div class="scanner-icon">🔍</div>
+            </div>
+            
+            <div id="scanStatus" class="scan-status">
+                <span class="scanning">● Scanning biometric data...</span>
+            </div>
+            
+            <button class="unlock-button" onclick="unlockDashboard()">OVERRIDE ACCESS</button>
+            
+            <p class="lock-hint">Press ENTER or click button to bypass</p>
+        </div>
     </div>
-
-    <div class="statusbar">
-      <div class="pill"><span id="netDot" class="dot"></span><span id="netStatus">LINK: INITIALIZING</span></div>
-      <div class="pill"><span class="dot"></span><span id="eveStatus">EVE: ONLINE</span></div>
-      <div class="pill"><span class="dot warn"></span><span id="sourceStatus">FEEDS: LOADING</span></div>
-      <div class="pill"><span class="dot"></span><span id="modeStatus">MODE: GOD_MODE</span></div>
-    </div>
-  </header>
-
-  <div id="mainContainer">
-    <!-- Star Map -->
-    <div id="starMapContainer">
-      <canvas id="threeCanvas"></canvas>
-
-      <div class="hud scanlines vignette">
-        <div class="ring"></div>
-        <div class="sweep"></div>
-
-        <div class="hudPanel hud-tl">
-          <h3>🌌 Quantum Core</h3>
-          <div class="kv">
-            <div class="k">Status</div><div class="v" id="hudCore">ONLINE</div>
-            <div class="k">Entropy</div><div class="v" id="hudEntropy">—</div>
-            <div class="k">Latency</div><div class="v" id="hudLatency">—</div>
-            <div class="k">Sync</div><div class="v" id="hudSync">—</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-tr">
-          <h3>📡 Network Telemetry</h3>
-          <div class="kv">
-            <div class="k">BTC</div><div class="v" id="hudBtc">—</div>
-            <div class="k">ETH</div><div class="v" id="hudEth">—</div>
-            <div class="k">SOL</div><div class="v" id="hudSol">—</div>
-            <div class="k">Feed</div><div class="v" id="hudFeed">—</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-bl">
-          <h3>🔐 Security Status</h3>
-          <div class="kv">
-            <div class="k">Protocol</div><div class="v">OMEGA_LOCK</div>
-            <div class="k">Escrow</div><div class="v" id="hudEscrow">84%</div>
-            <div class="k">Identity</div><div class="v">SOVEREIGN</div>
-            <div class="k">Threat</div><div class="v" style="color:var(--good)">LOW</div>
-          </div>
-        </div>
-
-        <div class="hudPanel hud-br">
-          <h3>⏱ System Clock</h3>
-          <div class="kv">
-            <div class="k">Heartbeat</div><div class="v" id="hudHeartbeat">—</div>
-            <div class="k">Uptime</div><div class="v" id="hudUptime">—</div>
-            <div class="k">Coords</div><div class="v" id="hudCoords">—</div>
-          </div>
-          <button class="actionBtn" onclick="refreshAllData()" style="margin-top:8px;width:100%;font-size:9px">🔄 REFRESH</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard Grid -->
-    <div id="dashGrid">
-      
-      <!-- PSI Wallet Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💎 PSI WALLET</div>
-          <div class="pill" style="padding:5px 10px;">
-            <span class="dot"></span><span id="walletMode">SOVEREIGN</span>
-          </div>
-        </div>
-        <div class="body">
-          <div class="bigVal" id="psiBalance">176,452.66 Ψ</div>
-          <div class="subVal">
-            <span class="tag" id="psiUsd">— USD</span>
-            <span class="tag" id="psiChange">— 24h</span>
-            <span class="tag" id="psiSource">SOURCE: LIVE</span>
-          </div>
-          <div style="margin-top:12px;display:flex;gap:8px;">
-            <button class="actionBtn" onclick="connectWallet()" style="flex:1">🔗 CONNECT</button>
-            <button class="actionBtn" onclick="refreshPSI()" style="flex:1">🔄 REFRESH</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Net Liquidity Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💰 NET LIQUIDITY</div>
-        </div>
-        <div class="body">
-          <div class="bigVal" id="netLiquidity">$1,250,039</div>
-          <div class="subVal">
-            <span class="tag">Valuation: <span id="valuation">$34.1M</span></span>
-            <span class="tag">BTC: <span id="btcAllowance">1.33 BTC</span></span>
-            <span class="tag">Needed: <span id="neededUsd">$56,363</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Resource Gauge Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">⚡ RESOURCE USAGE</div>
-        </div>
-        <div class="body">
-          <div class="gauge">
-            <div class="gaugeCircle">
-              <svg width="120" height="120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(40,240,255,.15)" stroke-width="8"/>
-                <circle id="gaugeBar" cx="60" cy="60" r="52" fill="none" stroke="url(#gaugeGrad)" stroke-width="8" 
-                  stroke-dasharray="326.73" stroke-dashoffset="13.07" stroke-linecap="round"/>
-                <defs>
-                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:rgba(44,255,154,1);stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:rgba(40,240,255,1);stop-opacity:1" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="gaugeValue">
-                <div class="num" id="gaugeNum">98.75%</div>
-                <div class="label">USED</div>
-              </div>
+    
+    <!-- Main Content -->
+    <div id="mainContent">
+        <header>
+            <h1>🌌 CEC-WAM-HOT-CORE Live Dashboard</h1>
+            <div class="status-bar">
+                <strong>System Status:</strong> <span style="color: #00FF88;">OPERATIONAL</span> | 
+                <strong>Last Sync:</strong> <span id="lastSync">--:--:--</span>
             </div>
-          </div>
-          <div style="margin-top:8px;text-align:center;font-size:10px;color:rgba(169,247,255,.75)">
-            <span style="color:var(--good)">●</span> LEFT: <span id="resourceLeft">1.25%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- System Mode Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">🎯 SYSTEM MODE</div>
-        </div>
-        <div class="body">
-          <div class="bigVal" style="font-size:22px;color:var(--gold)">GOD_MODE</div>
-          <div class="subVal">
-            <span class="tag">Focus: 99.9%</span>
-            <span class="tag">AGI: Q4 2026</span>
-            <span class="tag">R-Ratio: <span id="rRatio">10.96</span></span>
-          </div>
-          <div style="margin-top:10px;font-size:10px;color:rgba(220,255,255,.75)">
-            <div>✅ Matrix Sync: COMPLETE</div>
-            <div>✅ Ghost Protocol: EXECUTED</div>
-            <div>✅ Patent: REGISTERED</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Black Hole Discoveries Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">🌀 BLACK HOLE DISCOVERIES</div>
-          <span style="font-size:10px;opacity:.75">LIVE QUANTUM DATA</span>
-        </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="blackHoleTable">
-              <tr>
-                <td>BH-001</td>
-                <td>Alpha Centauri Timeline Compression</td>
-                <td>4.2 Years</td>
-                <td><span class="badge stable">STABLE</span></td>
-              </tr>
-              <tr>
-                <td>BH-002</td>
-                <td>Dark Energy T-Index Stabilization</td>
-                <td>0.999</td>
-                <td><span class="badge locked">LOCKED</span></td>
-              </tr>
-              <tr>
-                <td>BH-003</td>
-                <td>Consciousness Pressure (Psi-c) vs Lambda</td>
-                <td>&gt; Baseline</td>
-                <td><span class="badge active">ACTIVE</span></td>
-              </tr>
-              <tr>
-                <td>BH-006</td>
-                <td>Vacuum Target Pressure Baseline</td>
-                <td>2.54e+76 Pa</td>
-                <td><span class="badge verified">VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>BH-009</td>
-                <td>IP Sovereign Asset Floor Value</td>
-                <td>$1 Quadrillion</td>
-                <td><span class="badge verified">PATENTED</span></td>
-              </tr>
-              <tr>
-                <td>BH-010</td>
-                <td>Gunlock Escrow Sync Override</td>
-                <td>1010-OMEGA</td>
-                <td><span class="badge active">EXECUTED</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Timeline Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📅 PROJECT TIMELINE</div>
-        </div>
-        <div class="body">
-          <div class="timeline" id="timelineContainer">
-            <div class="timelineItem">
-              <div class="date">2025-11-06</div>
-              <div class="desc">Project Kickoff — Initial roadmap creation</div>
+        </header>
+        
+        <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
+        
+        <div class="dashboard-grid">
+            <!-- PSI Price Card -->
+            <div class="card">
+                <h2>💎 PSI-COIN PRICE</h2>
+                <div id="psiPrice" class="loading">Loading...</div>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-11-27</div>
-              <div class="desc">Resource conflict (T-3) detected and resolved via mutex lock</div>
+            
+            <!-- Data Summary Card -->
+            <div class="card">
+                <h2>📊 Data Summary</h2>
+                <div id="dataSummary" class="loading">Loading...</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Avg Value</div>
+                        <div class="stat-value" id="avgValue">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Total Value</div>
+                        <div class="stat-value" id="totalValue">--</div>
+                    </div>
+                </div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-11-30</div>
-              <div class="desc">Global synchronization finished; BTC allowance transfer verified (1.33 BTC)</div>
+            
+            <!-- Status Distribution Card -->
+            <div class="card">
+                <h2>📈 Status Distribution</h2>
+                <div id="statusDist" class="loading">Loading...</div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-12-02</div>
-              <div class="desc">Ghost Protocol executed, activating expendable funds</div>
+            
+            <!-- Real-Time Performance Card -->
+            <div class="card">
+                <h2>⚡ Real-Time Performance</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Load Time</div>
+                        <div class="stat-value" id="loadTime">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Data Points</div>
+                        <div class="stat-value" id="dataPoints">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Refresh Rate</div>
+                        <div class="stat-value">5 min</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Status</div>
+                        <div class="stat-value" style="color: #00FF88;">LIVE</div>
+                    </div>
+                </div>
             </div>
-            <div class="timelineItem">
-              <div class="date">2025-12-12</div>
-              <div class="desc">Master Archive generated — patent and copyrights registered</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">2026-01-08</div>
-              <div class="desc">Incoming asset recorded: +176,452.66 PSI tokens; net worth validated at ~176M</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">2026-01-16</div>
-              <div class="desc">CEC Matrix metrics updated — valuation $34.1M; escrow status 84%; security OMEGA_LOCK</div>
-            </div>
-            <div class="timelineItem">
-              <div class="date">TODAY</div>
-              <div class="desc" style="color:var(--gold)">System operating in GOD_MODE with 99.9% focus; star map visuals upgraded</div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Transaction Feed Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">💸 TRANSACTION FEED (PUMP.FUN)</div>
-          <span style="font-size:10px;opacity:.75">SOLANA MAINNET</span>
-        </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Action</th>
-                <th>Amount</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2026-01-10 04:32:39</td>
-                <td>TRANSFER</td>
-                <td>6.802M</td>
-                <td>0.9233 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2026-01-10 01:40:02</td>
-                <td>CLOSE ACCOUNT</td>
-                <td>2.039M</td>
-                <td>0.2774 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2026-01-10 01:40:02</td>
-                <td>CREATE ACCOUNT</td>
-                <td>2.039M</td>
-                <td>0.2774 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-              <tr>
-                <td>2025-12-22 15:03:48</td>
-                <td>TRANSFER</td>
-                <td>50M</td>
-                <td>6.3934 SOL</td>
-                <td><span class="badge active">OUT</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- CEC Vault Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">🔐 CEC VAULT</div>
-        </div>
-        <div class="body">
-          <div style="font-size:10px;color:rgba(220,255,255,.85);line-height:1.6">
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">GEMINI AGI:</strong> Master API Key Active</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">PHANTOM BRIDGE:</strong> TXT Record Verified</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">PSI-COIN:</strong> 100,001.33 Units</div>
-            <div style="margin-bottom:8px"><strong style="color:var(--neon2)">VALUATION:</strong> $1,250,039</div>
-            <div><strong style="color:var(--neon2)">BITCOIN:</strong> 1.33 BTC (~$121,478 USD)</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Finance Hub Card -->
-      <div class="card">
-        <div class="head">
-          <div class="title">💳 FINANCE HUB</div>
-        </div>
-        <div class="body">
-          <div style="font-size:10px;color:rgba(220,255,255,.85);line-height:1.7">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Psi-Coins (Phantom)</span>
-              <span style="color:var(--good)">176,452.66</span>
+        
+        <!-- Data Table -->
+        <div class="card">
+            <h2>📋 Live Data Feed</h2>
+            <div class="filter-controls">
+                <button class="filter-button active" onclick="filterData('ALL', event)">All Data</button>
+                <button class="filter-button" onclick="filterData('PERFECT', event)">Perfect</button>
+                <button class="filter-button" onclick="filterData('TODO', event)">To-Do</button>
+                <button class="filter-button" onclick="filterData('ACTIVE', event)">Active</button>
+                <button class="filter-button" onclick="filterData('STABLE', event)">Stable</button>
+                <button class="export-button" onclick="exportData()">📥 Export CSV</button>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Escrow Bridge</span>
-              <span style="color:var(--warn)">$21,000.00</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Master Seed</span>
-              <span style="color:var(--bad)">[REDACTED]</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span>Daily Tranche</span>
-              <span style="color:var(--good)">$300.00/Day</span>
-            </div>
-            <div style="display:flex;justify-content:space-between">
-              <span>Unemployment UI</span>
-              <span style="color:var(--good)">$2,000.00</span>
-            </div>
-          </div>
+            <div id="dataTable" class="loading">Loading data from Google Sheets...</div>
         </div>
-      </div>
-
-      <!-- Bonding Curve Chart Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📈 BONDING CURVE TIMELINE</div>
-          <div style="font-size:10px;opacity:.75" id="bondMeta">T+0000 / SUPPLY SIM</div>
+        
+        <!-- Trends Card -->
+        <div class="card">
+            <h2>📊 Data Trends & Analytics</h2>
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="trendsChart"></canvas>
+            </div>
         </div>
-        <div class="body">
-          <canvas id="bondChart" height="160"></canvas>
+        
+        <!-- 3D Star Map -->
+        <div class="card">
+            <h2>🌟 3D Star Map</h2>
+            <p style="margin-bottom: 15px;">Explore three celestial bodies:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+                <li>🌟 <strong>Alpha Centauri</strong> - Yellow star (center)</li>
+                <li>🌍 <strong>TRAPPIST-1e</strong> - Blue-green exoplanet</li>
+                <li>🔴 <strong>Ross 128 b</strong> - Red exoplanet</li>
+            </ul>
+            <div id="starmap-container">
+                <canvas id="starmap"></canvas>
+            </div>
         </div>
-      </div>
-
-      <!-- System Logs Card -->
-      <div class="card" style="grid-column: span 2;">
-        <div class="head">
-          <div class="title">📋 SYSTEM LOGS</div>
-        </div>
-        <div class="body" style="overflow-x:auto">
-          <table class="dataTable">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Metric</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Finance</td>
-                <td>Valuation</td>
-                <td>$1.25M</td>
-                <td><span class="badge verified">Verified</span></td>
-              </tr>
-              <tr>
-                <td>Finance</td>
-                <td>PSI-Coins</td>
-                <td>200 PSI</td>
-                <td><span class="badge stable">Minted</span></td>
-              </tr>
-              <tr>
-                <td>System</td>
-                <td>Mode</td>
-                <td>GOD_MODE</td>
-                <td><span class="badge active">Optimal</span></td>
-              </tr>
-              <tr>
-                <td>Network</td>
-                <td>Load</td>
-                <td id="networkLoad">43%</td>
-                <td><span class="badge stable">Stable</span></td>
-              </tr>
-              <tr>
-                <td>Network</td>
-                <td>Latency</td>
-                <td id="latencyMs">12ms</td>
-                <td><span class="badge stable">Fast</span></td>
-              </tr>
-              <tr>
-                <td>Security</td>
-                <td>Identity</td>
-                <td>Sovereign Architect</td>
-                <td><span class="badge locked">Encrypted</span></td>
-              </tr>
-            </tbody>
-          </table>
+        
+        <!-- Streamlit Embed (Optional - uncomment and add your URL) -->
+        <!--
+        <div class="card">
+            <h2>🚀 Full Streamlit Dashboard</h2>
+            <iframe class="streamlit-embed" src="https://YOUR-APP.streamlit.app"></iframe>
         </div>
       </div>
 
@@ -1572,4 +1686,640 @@ micBtn.onclick = () => {
   rec.start();
 };
 </script>
+        -->
+        
+        <footer>
+            <p>🌌 CEC-WAM-HOT-CORE Live Dashboard</p>
+            <p>Powered by Google Sheets | CoinGecko API | Three.js</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+                <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv" 
+                   style="color: #00D9FF; text-decoration: none;" target="_blank">View Data Source</a>
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // =================================================================
+        // CEC-WAM-HOT-CORE Live Dashboard - JavaScript
+        // 
+        // Performance Optimizations:
+        // - Cached star field generation (10k vertices)
+        // - Parallel API calls with Promise.all()
+        // - Debounced resize handler (250ms)
+        // - Visibility-based auto-refresh
+        // - Improved error messages
+        // =================================================================
+        
+        // Lock Screen Functions
+        function unlockDashboard() {
+            const scanStatus = document.getElementById('scanStatus');
+            scanStatus.innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED</span>';
+            
+            setTimeout(() => {
+                const lockScreen = document.getElementById('lockScreen');
+                lockScreen.classList.add('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('mainContent').classList.add('visible');
+                    initDashboard();
+                }, 500);
+            }, 800);
+        }
+        
+        // Allow Enter key to unlock
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !document.getElementById('lockScreen').classList.contains('hidden')) {
+                unlockDashboard();
+            }
+        });
+        
+        // Dashboard Functions
+        // Configuration for multiple data sources
+        const DATA_SOURCES = {
+            'main': {
+                name: 'Main Ledger',
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv'
+            }
+            // Add more sheets here as needed:
+            // 'sheet2': { name: 'Secondary Data', url: 'https://...' },
+            // 'sheet3': { name: 'Analytics', url: 'https://...' }
+        };
+        
+        let currentDataSource = 'main';
+        const GOOGLE_SHEETS_CSV_URL = DATA_SOURCES[currentDataSource].url;
+        const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
+        
+        let dashboardData = null;
+        let currentFilter = 'ALL';
+        let priceChart = null;
+        let statusChart = null;
+        let trendsChart = null;
+        let priceHistory = [];
+        const startTime = Date.now();
+        const TOTAL_SUPPLY = 1000000; // Total supply for market cap calculation
+        
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastSync').textContent = timeString;
+        }
+        
+        async function fetchPSIPrice() {
+            try {
+                const response = await fetch(COINGECKO_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                const price = data.tridentdao?.usd || 0;
+                const change = data.tridentdao?.usd_24h_change || 0;
+                
+                const changeColor = change >= 0 ? '#00FF88' : '#FF4444';
+                const changeSymbol = change >= 0 ? '+' : '';
+                
+                // Store price history
+                priceHistory.push({
+                    time: new Date().toLocaleTimeString(),
+                    price: price
+                });
+                
+                // Keep only last 20 data points
+                if (priceHistory.length > 20) {
+                    priceHistory.shift();
+                }
+                
+                document.getElementById('psiPrice').innerHTML = `
+                    <div class="metric">
+                        <span class="metric-label">TridentDAO (PSI)</span>
+                        <span class="metric-value">$${price.toFixed(6)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">24h Change</span>
+                        <span class="metric-value" style="color: ${changeColor};">${changeSymbol}${change.toFixed(2)}%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Market Cap</span>
+                        <span class="metric-value">$${(price * TOTAL_SUPPLY).toFixed(2)}</span>
+                    </div>
+                `;
+                
+                updatePriceChart();
+            } catch (error) {
+                console.error('Error fetching PSI price:', error);
+                document.getElementById('psiPrice').innerHTML = `
+                    <p style="color: #FF4444;">❌ Price data unavailable</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                `;
+            }
+        }
+        
+        function updatePriceChart() {
+            const ctx = document.getElementById('priceChart');
+            if (!ctx) return;
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: priceHistory.map(p => p.time),
+                    datasets: [{
+                        label: 'Price (USD)',
+                        data: priceHistory.map(p => p.price),
+                        borderColor: '#00D9FF',
+                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#00D9FF' },
+                            grid: { color: 'rgba(0, 217, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#00D9FF', maxTicksLimit: 5 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function fetchGoogleSheetsData() {
+            const loadStart = Date.now();
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const csvText = await response.text();
+                
+                // Simple CSV parsing (handles basic cases)
+                // Note: For production, consider using a CSV parsing library for complex data
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+                
+                dashboardData = data;
+                const loadTime = ((Date.now() - loadStart) / 1000).toFixed(2);
+                document.getElementById('loadTime').textContent = `${loadTime}s`;
+                document.getElementById('dataPoints').textContent = data.length;
+                
+                displayData(data, headers);
+                updateDataSummary(data);
+                updateStatusDistribution(data);
+                updateTrendsChart(data);
+                
+            } catch (error) {
+                console.error('Error fetching Google Sheets data:', error);
+                document.getElementById('dataTable').innerHTML = `
+                    <p style="color: #FF4444;">❌ Failed to load spreadsheet data</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Please check your internet connection and verify the Google Sheets URL is accessible.</p>
+                `;
+            }
+        }
+        
+        function displayData(data, headers) {
+            let html = '<table class="data-table"><thead><tr>';
+            
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                const statusClass = getStatusClass(row.Status || row.status || '');
+                html += `<tr class="${statusClass}">`;
+                headers.forEach(header => {
+                    html += `<td>${row[header] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('dataTable').innerHTML = html;
+        }
+        
+        function getStatusClass(status) {
+            const statusUpper = status.toUpperCase();
+            if (statusUpper.includes('PERFECT')) return 'status-perfect';
+            if (statusUpper.includes('TODO')) return 'status-todo';
+            if (statusUpper.includes('ACTIVE')) return 'status-active';
+            if (statusUpper.includes('STABLE')) return 'status-stable';
+            return '';
+        }
+        
+        function updateDataSummary(data) {
+            // Calculate numeric values if Value column exists
+            let totalValue = 0;
+            let avgValue = 0;
+            let numericCount = 0;
+            
+            data.forEach(row => {
+                const value = parseFloat(row.Value || row.value || 0);
+                if (!isNaN(value) && value !== 0) {
+                    totalValue += value;
+                    numericCount++;
+                }
+            });
+            
+            avgValue = numericCount > 0 ? totalValue / numericCount : 0;
+            
+            document.getElementById('dataSummary').innerHTML = `
+                <div class="metric">
+                    <span class="metric-label">Total Records</span>
+                    <span class="metric-value">${data.length}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Last Updated</span>
+                    <span class="metric-value">${new Date().toLocaleString()}</span>
+                </div>
+            `;
+            
+            document.getElementById('avgValue').textContent = avgValue > 0 ? `$${avgValue.toFixed(2)}` : '--';
+            document.getElementById('totalValue').textContent = totalValue > 0 ? `$${totalValue.toFixed(2)}` : '--';
+        }
+        
+        function updateStatusDistribution(data) {
+            const statusCount = {};
+            data.forEach(row => {
+                const status = row.Status || row.status || 'Unknown';
+                statusCount[status] = (statusCount[status] || 0) + 1;
+            });
+            
+            let html = '';
+            Object.entries(statusCount).forEach(([status, count]) => {
+                html += `
+                    <div class="metric">
+                        <span class="metric-label">${status}</span>
+                        <span class="metric-value">${count}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('statusDist').innerHTML = html || '<p>No status data</p>';
+            
+            // Update status chart
+            updateStatusChart(statusCount);
+        }
+        
+        function updateStatusChart(statusCount) {
+            const ctx = document.getElementById('statusChart');
+            if (!ctx) return;
+            
+            if (statusChart) {
+                statusChart.destroy();
+            }
+            
+            const labels = Object.keys(statusCount);
+            const values = Object.values(statusCount);
+            const colors = labels.map(status => {
+                const s = status.toUpperCase();
+                if (s.includes('PERFECT')) return '#00FF88';
+                if (s.includes('TODO')) return '#FFC107';
+                if (s.includes('ACTIVE')) return '#2196F3';
+                if (s.includes('STABLE')) return '#9E9E9E';
+                return '#00D9FF';
+            });
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: '#0E0E1A',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#00D9FF',
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateTrendsChart(data) {
+            const ctx = document.getElementById('trendsChart');
+            if (!ctx) return;
+            
+            if (trendsChart) {
+                trendsChart.destroy();
+            }
+            
+            // Extract numeric values for trend analysis
+            const values = data.map((row, index) => ({
+                index: index + 1,
+                value: parseFloat(row.Value || row.value || 0)
+            })).filter(item => !isNaN(item.value) && item.value !== 0);
+            
+            trendsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: values.map(v => `#${v.index}`),
+                    datasets: [{
+                        label: 'Data Values',
+                        data: values.map(v => v.value),
+                        backgroundColor: 'rgba(0, 217, 255, 0.5)',
+                        borderColor: '#00D9FF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#00D9FF'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#00D9FF' },
+                            grid: { color: 'rgba(0, 217, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#00D9FF', maxTicksLimit: 10 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function refreshData() {
+            // Parallelize API calls for better performance
+            // Both requests execute simultaneously instead of sequentially
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                updateTimestamp();
+            }).catch(error => {
+                console.error('Error refreshing data:', error);
+                updateTimestamp();
+            });
+        }
+        
+        function filterData(status, event) {
+            currentFilter = status;
+            
+            // Update button states
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            if (!dashboardData) return;
+            
+            let filteredData = dashboardData;
+            if (status !== 'ALL') {
+                filteredData = dashboardData.filter(row => {
+                    const rowStatus = (row.Status || row.status || '').toUpperCase();
+                    return rowStatus.includes(status);
+                });
+            }
+            
+            const headers = Object.keys(dashboardData[0] || {});
+            displayData(filteredData, headers);
+        }
+        
+        function exportData() {
+            if (!dashboardData || dashboardData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            
+            // Convert data to CSV with proper escaping
+            const headers = Object.keys(dashboardData[0]);
+            let csv = headers.join(',') + '\n';
+            
+            dashboardData.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header] || '';
+                    // Escape commas, quotes, and newlines
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                csv += values.join(',') + '\n';
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cec-wam-data-${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function initDashboard() {
+            updateTimestamp();
+            
+            // Parallelize initial data fetch for faster load time
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                console.log('✓ Dashboard data loaded successfully');
+            }).catch(error => {
+                console.error('✗ Error loading dashboard data:', error);
+            });
+            
+            initStarMap();
+            
+            // Auto-refresh every 5 minutes only if page is visible
+            // Saves bandwidth and API calls when user is on another tab
+            setInterval(() => {
+                if (!document.hidden) {
+                    refreshData();
+                }
+            }, 300000);  // 300000ms = 5 minutes
+            
+            // Also refresh when page becomes visible after being hidden
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    console.log('Page became visible - refreshing data');
+                    refreshData();
+                }
+            });
+        }
+        
+        // =================================================================
+        // 3D Star Map Implementation with Caching
+        // Generates 10,000 star vertices once and reuses them
+        // =================================================================
+        
+        // Cache star vertices to avoid regenerating on every call
+        let cachedStarsVertices = null;
+        
+        function generateStarVertices() {
+            if (cachedStarsVertices) {
+                return cachedStarsVertices;
+            }
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            cachedStarsVertices = starsVertices;
+            return starsVertices;
+        }
+        
+        function initStarMap() {
+            const container = document.getElementById('starmap-container');
+            const canvas = document.getElementById('starmap');
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setClearColor(0x000000);
+            
+            // Add stars using cached vertices
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
+            
+            const starsVertices = generateStarVertices();
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const starField = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starField);
+            
+            // Alpha Centauri (Yellow Star)
+            const alphaCentauriGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const alphaCentauriMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+            const alphaCentauri = new THREE.Mesh(alphaCentauriGeometry, alphaCentauriMaterial);
+            alphaCentauri.position.set(0, 0, 0);
+            scene.add(alphaCentauri);
+            
+            // Orbit for Alpha Centauri
+            const orbitGeometry1 = new THREE.RingGeometry(15, 15.2, 64);
+            const orbitMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFF00, side: THREE.DoubleSide });
+            const orbit1 = new THREE.Mesh(orbitGeometry1, orbitMaterial1);
+            orbit1.rotation.x = Math.PI / 2;
+            scene.add(orbit1);
+            
+            // TRAPPIST-1e (Blue-Green Exoplanet)
+            const trappistGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+            const trappistMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFAA });
+            const trappist = new THREE.Mesh(trappistGeometry, trappistMaterial);
+            scene.add(trappist);
+            
+            // Orbit for TRAPPIST-1e
+            const orbitGeometry2 = new THREE.RingGeometry(25, 25.2, 64);
+            const orbitMaterial2 = new THREE.MeshBasicMaterial({ color: 0x00FFAA, side: THREE.DoubleSide });
+            const orbit2 = new THREE.Mesh(orbitGeometry2, orbitMaterial2);
+            orbit2.rotation.x = Math.PI / 2;
+            scene.add(orbit2);
+            
+            // Ross 128 b (Red Exoplanet)
+            const rossGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+            const rossMaterial = new THREE.MeshBasicMaterial({ color: 0xFF4444 });
+            const ross = new THREE.Mesh(rossGeometry, rossMaterial);
+            scene.add(ross);
+            
+            // Orbit for Ross 128 b
+            const orbitGeometry3 = new THREE.RingGeometry(35, 35.2, 64);
+            const orbitMaterial3 = new THREE.MeshBasicMaterial({ color: 0xFF4444, side: THREE.DoubleSide });
+            const orbit3 = new THREE.Mesh(orbitGeometry3, orbitMaterial3);
+            orbit3.rotation.x = Math.PI / 2;
+            scene.add(orbit3);
+            
+            camera.position.z = 50;
+            camera.position.y = 20;
+            
+            let angle1 = 0;
+            let angle2 = 0;
+            let angle3 = 0;
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate planets in orbits
+                angle1 += 0.01;
+                angle2 += 0.007;
+                angle3 += 0.005;
+                
+                trappist.position.x = Math.cos(angle1) * 25;
+                trappist.position.z = Math.sin(angle1) * 25;
+                
+                ross.position.x = Math.cos(angle2) * 35;
+                ross.position.z = Math.sin(angle2) * 35;
+                
+                // Rotate camera slightly
+                camera.position.x = Math.cos(angle3 * 0.1) * 50;
+                camera.position.z = Math.sin(angle3 * 0.1) * 50;
+                camera.lookAt(0, 0, 0);
+                
+                // Rotate star field
+                starField.rotation.y += 0.0002;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Debounced window resize handler to prevent excessive updates
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    camera.aspect = container.offsetWidth / container.offsetHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.offsetWidth, container.offsetHeight);
+                }, 250);  // 250ms debounce delay
+            });
+        }
+    </script>
+</body>
 </html>

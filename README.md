@@ -1,8 +1,94 @@
-# CEC-WAM EVE 1010_WAKE - Live Blockchain Dashboard
+# 🌌 CEC-WAM-HOT-CORE Live Dashboard
 
-A production-ready, autonomous live data dashboard that displays real-time blockchain data from Solana with comprehensive error handling and clear status indicators.
+A cutting-edge, real-time dashboard featuring live Google Sheets data synchronization, interactive 3D star maps, cryptocurrency pricing, a theatrical biometric lock screen interface, and **EVE - an advanced AI voice assistant**.
 
-## 🌟 Features
+## ✨ Features
+
+### Core Functionality
+- **Live Google Sheets Integration** - Auto-fetches CSV data from Google Sheets with 5-minute auto-refresh
+- **Color-Coded Status System** - Visual status indicators (PERFECT=Green, TODO=Yellow, ACTIVE=Blue, STABLE=Gray)
+- **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API with historical chart
+- **Interactive 3D Star Map** - Three.js-powered visualization of celestial bodies
+- **Advanced Data Visualizations** - Multiple chart types (line, doughnut, bar charts) using Chart.js
+- **Data Filtering & Export** - Filter data by status and export to CSV format
+- **Real-Time Performance Metrics** - Live tracking of load times, data points, and system status
+- **Biometric Lock Screen** - Theatrical security interface (aesthetic only, press Enter to bypass)
+- **EVE Voice AI Assistant** - Advanced AI with voice synthesis and natural language understanding
+- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **Dark Cosmic Theme** - Professional space aesthetic with neon accents
+
+### EVE Voice AI Assistant (NEW! 🎙️)
+**System Code:** `CEC_WAM_HEI_EVE_7A2F-9C4B`
+
+EVE is your always-on AI assistant featuring:
+- 🎙️ **Voice Synthesis** - Natural voice output via ElevenLabs
+- 🤖 **Advanced AI** - Powered by OpenAI GPT-4
+- 🧠 **Learning Capability** - Learns from interactions and improves over time
+- 📊 **CEC WAM Integration** - Full access to system data and analytics
+- 🔢 **Math & Finance** - Performs calculations and financial analysis
+- 🔒 **Voice Recognition** - Biometric voice verification for owner (Twan)
+- ⚡ **24/7 Availability** - Always-on, never sleeps, auto-updating
+- 🌐 **Serverless API** - Vercel-ready API endpoints with hidden keys
+
+EVE is designed specifically for **Twan** with full access to all CEC-WAM system data, no restrictions, and continuous learning capabilities.
+
+### Technical Features
+- Data caching and error handling
+- Optional Google Sheets logging (requires service account)
+- Downloadable data exports (CSV format)
+- Status distribution analytics with doughnut charts
+- Numeric value analysis and trend charting
+- Real-time price history tracking with line charts
+- Interactive data filtering by status
+- Performance monitoring (load times, data points)
+- Voice-enabled chat interface
+- API endpoints for serverless deployment
+
+### New Dashboard Features (Latest Update 🆕)
+- **📊 Multiple Interactive Charts**:
+  - Price history line chart for PSI-COIN
+  - Status distribution doughnut chart
+  - Data trends bar chart
+- **🎛️ Advanced Controls**:
+  - Filter buttons (All, Perfect, To-Do, Active, Stable)
+  - Export to CSV functionality
+  - Real-time metrics dashboard
+- **⚡ Performance Monitoring**:
+  - Load time tracking
+  - Data points counter
+  - Live status indicator
+  - Auto-refresh rate display
+- **💎 Enhanced Data Cards**:
+  - Average and total value calculations
+  - Market cap visualization
+  - Multi-metric displays
+
+## 🚀 Live Demo
+
+### Screenshot
+![Enhanced Dashboard](https://github.com/user-attachments/assets/4cc709d9-60cb-470d-8ba1-462d847e173e)
+
+*The enhanced dashboard features multiple data visualization cards, real-time performance metrics, interactive filtering, and data export capabilities.*
+
+### Deployments
+- **Streamlit Cloud**: [Deploy to Streamlit](https://streamlit.io/)
+- **GitHub Pages**: View the standalone HTML version at your GitHub Pages URL
+- **Vercel**: Alternative deployment option for Streamlit apps
+
+## 📦 Installation & Setup
+
+### Prerequisites
+- Python 3.8+
+- pip (Python package manager)
+- Git
+
+### Local Development
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
+cd CEC-WAM-HOT-CORE
+```
 
 ### Core Features
 - **Real-time Blockchain Data**: Live integration with Solana blockchain via RPC
@@ -45,233 +131,308 @@ A production-ready, autonomous live data dashboard that displays real-time block
   - Export history tracking
 
 ## 🚀 Quick Start
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
-   cd CEC-WAM-HOT-CORE
-   ```
-
 2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure environment variables (optional)**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your API keys if needed
-   ```
-
-4. **Run the application**
-   ```bash
-   streamlit run app.py
-   ```
-
-5. **Access the dashboard**
-   - Open your browser to `http://localhost:8501`
-
-### Testing Locally
-
-To test locally with a simple server:
 ```bash
-python -m http.server 8000
-# Then browse to http://localhost:8000
+pip install -r requirements.txt
 ```
 
-## ☁️ Streamlit Cloud Deployment
+3. **Set up environment variables (optional)**
+```bash
+cp .env.example .env
+# Edit .env with your Google Sheets credentials if using logging feature
+```
 
-### Step 1: Prepare Your Repository
+4. **Run the application**
+```bash
+streamlit run app.py
+```
 
-1. Ensure all files are committed:
-   ```bash
-   git add .
-   git commit -m "Prepare for Streamlit Cloud deployment"
-   git push origin main
-   ```
+5. **Open in browser**
+```
+http://localhost:8501
+```
 
-2. Verify these files exist in your repo:
-   - ✅ `app.py` (main application)
-   - ✅ `requirements.txt` (Python dependencies)
-   - ✅ `.streamlit/config.toml` (Streamlit configuration)
-   - ✅ `pump.fun.csv` (backup data)
-   - ✅ `.gitignore` (excludes sensitive files)
+## 🌐 Deployment Guide
 
-### Step 2: Deploy to Streamlit Cloud
+### Deploy to Streamlit Cloud
 
-1. **Go to [share.streamlit.io](https://share.streamlit.io)**
+1. **Push your code to GitHub**
+```bash
+git add .
+git commit -m "Deploy to Streamlit"
+git push origin main
+```
 
-2. **Sign in** with your GitHub account
+2. **Go to [Streamlit Cloud](https://streamlit.io/cloud)**
 
-3. **Click "New app"**
+3. **Connect your GitHub repository**
+   - Click "New app"
+   - Select your repository: `whiteantwan58-tech/CEC-WAM-HOT-CORE`
+   - Set main file: `app.py`
+   - Click "Deploy"
 
-4. **Configure your app:**
-   - Repository: `whiteantwan58-tech/CEC-WAM-HOT-CORE`
-   - Branch: `main`
-   - Main file path: `app.py`
-
-5. **Advanced settings** (optional):
-   - Python version: 3.9+ (recommended: 3.12)
-
-6. **Click "Deploy"**
-
-### Step 3: Configure Environment Variables (Optional)
-
-If you need to add API keys:
-
-1. In Streamlit Cloud, go to your app settings
-2. Click on "Secrets" in the left sidebar
-3. Add your secrets in TOML format:
+4. **Configure Secrets (optional, for Google Sheets logging)**
+   - In Streamlit Cloud dashboard, go to app settings
+   - Add secrets in TOML format:
    ```toml
-   GROQ_API_KEY = "your-api-key-here"
+   GOOGLE_SHEETS_CREDS = '{"type": "service_account", "project_id": "...", ...}'
+   LOG_SHEET_ID = "your-sheet-id"
    ```
 
-### Step 4: Verify Deployment
+### Deploy to Vercel
 
-1. **Check the sidebar status panel:**
-   - 🟢 Solana RPC: Should show "Connected"
-   - 🟢 Solscan API: Should show "Active"
-   - 🟢 Data Source: Should show "LIVE"
+1. **Install Vercel CLI**
+```bash
+npm install -g vercel
+```
 
-2. **Test functionality:**
-   - Verify PSI-Coin price updates
-   - Check wallet balance displays correctly
-   - Test the "Refresh Live Data" button
-   - Verify auto-refresh works
+2. **Deploy**
+```bash
+vercel
+```
 
-## 🔐 Environment Variables
+3. **Follow prompts** to link your GitHub repository
 
-The application uses the following environment variables:
+### Deploy to GitHub Pages
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | No | API key for Groq AI features (optional) |
+1. **Enable GitHub Pages**
+   - Go to repository Settings > Pages
+   - Source: Deploy from a branch
+   - Branch: `main` or `copilot/...`
+   - Folder: `/` (root)
 
-### Setting Up Environment Variables
+2. **Access your site**
+   - URL: `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
+   - The `index.html` file will be served automatically
 
-**For Local Development:**
-1. Copy `.env.example` to `.env`
-2. Fill in your API keys
-3. Never commit `.env` to version control
+## 🎙️ EVE Voice AI Assistant Configuration
 
-**For Streamlit Cloud:**
-1. Go to app settings → Secrets
-2. Add variables in TOML format
-3. Restart the app to apply changes
+### Overview
+EVE (Evolved Virtual Entity) is an advanced AI assistant with voice capabilities, designed specifically for **Twan** with the system code `CEC_WAM_HEI_EVE_7A2F-9C4B`.
 
-## 📊 Data Flow
+### Required API Keys
 
-1. **Primary Data Source**: Live Solana blockchain via RPC
-2. **Secondary Data Source**: Solscan public API for token metadata
-3. **Fallback**: `pump.fun.csv` local CSV data when APIs are unavailable
+#### 1. ElevenLabs API (Voice Synthesis)
+1. **Sign up at [ElevenLabs](https://elevenlabs.io/)**
+2. Navigate to your profile and get your API key
+3. Browse the voice library and select a voice (default: Rachel - `21m00Tcm4TlvDq8ikWAM`)
+4. Add to your `.env` file:
+   ```bash
+   ELEVENLABS_API_KEY=your-elevenlabs-api-key
+   ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+   ```
 
-## 🏥 System Health Checks
+#### 2. OpenAI API (AI Chat)
+1. **Sign up at [OpenAI Platform](https://platform.openai.com/)**
+2. Create an API key in your account settings
+3. Choose your model (recommended: `gpt-4` or `gpt-3.5-turbo`)
+4. Add to your `.env` file:
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key
+   OPENAI_MODEL=gpt-4
+   ```
 
-The dashboard includes comprehensive health monitoring:
+### EVE Configuration
 
-- **Solana RPC Connectivity**: Verifies blockchain connection
-- **Solscan API Availability**: Checks token data API status
-- **CSV Data Integrity**: Validates backup data structure
-- **Token Address Validation**: Ensures token addresses are valid
+Edit your `.env` file with EVE-specific settings:
 
-View the health check in the sidebar under "System Health Check".
+```bash
+# EVE System Configuration
+EVE_SYSTEM_CODE=CEC_WAM_HEI_EVE_7A2F-9C4B
+EVE_OWNER_NAME=Twan
+EVE_PERSONALITY=professional,helpful,intelligent,learning
+```
 
-## 🛠️ Troubleshooting
+### For Streamlit Cloud Deployment
 
-### Common Issues and Solutions
+Add EVE secrets in TOML format in your Streamlit Cloud app settings:
 
-#### 1. "Solana RPC: Disconnected"
-- **Cause**: Cannot connect to Solana blockchain
-- **Solution**: Check internet connection, verify RPC endpoint is accessible
-- **Fallback**: App will use CSV backup data
+```toml
+ELEVENLABS_API_KEY = "your-elevenlabs-api-key"
+ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
+OPENAI_API_KEY = "your-openai-api-key"
+OPENAI_MODEL = "gpt-4"
+EVE_SYSTEM_CODE = "CEC_WAM_HEI_EVE_7A2F-9C4B"
+EVE_OWNER_NAME = "Twan"
+EVE_PERSONALITY = "professional,helpful,intelligent,learning"
+```
 
-#### 2. "Solscan API: Failed"
-- **Cause**: API rate limit or service unavailable
-- **Solution**: Wait a few minutes and refresh, or check Solscan status
-- **Fallback**: App will use cached data and CSV backup
+### For Vercel Deployment
 
-#### 3. "Data Source: CSV Backup"
-- **Cause**: Live APIs are unavailable
-- **Solution**: This is normal fallback behavior, data is still functional
-- **Note**: Price data may be outdated
+1. **Add environment variables in Vercel dashboard:**
+   - Go to your project settings
+   - Navigate to "Environment Variables"
+   - Add all EVE-related variables:
+     - `ELEVENLABS_API_KEY`
+     - `ELEVENLABS_VOICE_ID`
+     - `OPENAI_API_KEY`
+     - `OPENAI_MODEL`
+     - `EVE_SYSTEM_CODE`
+     - `EVE_OWNER_NAME`
+     - `EVE_PERSONALITY`
 
-#### 4. CSV Parsing Errors
-- **Symptom**: Warnings about missing columns
-- **Solution**: Verify `pump.fun.csv` has required columns:
-  - Token Address, Flow, Amount, Decimals, Value
-- **Fix**: Re-export CSV with correct structure
+2. **Redeploy** to apply the new environment variables
 
-#### 5. Missing Dependencies
-- **Error**: `ModuleNotFoundError`
-- **Solution**: Run `pip install -r requirements.txt`
-- **Note**: Ensure Python 3.9+ is installed
+### EVE Features
 
-### Live Data Verification Checklist
+Once configured, EVE provides:
 
-- [ ] Sidebar shows "Solana RPC: Connected"
-- [ ] Sidebar shows "Solscan API: Active"
-- [ ] Data Source indicates "LIVE"
-- [ ] Last Update timestamp is recent
-- [ ] PSI-Coin price shows as "Live Price"
-- [ ] Wallet balance displays correctly
-- [ ] Auto-refresh working (check timestamp updates)
-- [ ] Manual refresh button works
-- [ ] Error messages are clear and helpful
+- **Voice Chat**: Talk to EVE and get voice responses
+- **Text Chat**: Type messages and get AI-powered responses
+- **Calculations**: Ask EVE to perform math and financial calculations
+- **CEC WAM Data Access**: EVE has full access to all system data
+- **Learning**: EVE learns from each interaction to improve responses
+- **Always Available**: 24/7 operation with no downtime
+- **Personality**: Consistent, professional, and helpful personality locked in
+- **Voice Recognition**: Designed to recognize and respond only to Twan's voice (owner)
 
-## 🔒 Security Best Practices
+### Security Notes
 
-### What We've Implemented
+- **API Keys**: Never commit API keys to version control
+- **Environment Variables**: Always use `.env` files (local) or secrets (cloud)
+- **Voice Biometric**: EVE includes voice recognition capabilities (requires additional setup)
+- **Owner Access**: EVE is configured to recognize Twan as the primary owner
+- **No Restrictions**: EVE has full access to all CEC-WAM system data for Twan
 
-✅ **No Hardcoded Secrets**: All sensitive data uses environment variables  
-✅ **`.env` in `.gitignore`**: Environment files never committed  
-✅ **`.env.example`**: Template provided for configuration  
-✅ **HTTPS APIs**: All external calls use secure connections  
-✅ **Input Validation**: CSV data validated before processing  
-✅ **Error Handling**: Graceful degradation without exposing internals  
+### Troubleshooting EVE
 
-### Security Guidelines
+**EVE not responding:**
+- Check that all API keys are configured correctly
+- Verify API keys are valid and have available quota
+- Check the EVE status panel in the dashboard
 
-1. **Never commit secrets** to version control
-2. **Use environment variables** for all API keys and sensitive data
-3. **Rotate API keys** regularly if exposed
-4. **Monitor access logs** on Streamlit Cloud
-5. **Review dependencies** regularly for vulnerabilities
-6. **Use HTTPS** for all deployments
+**Voice synthesis not working:**
+- Ensure `ELEVENLABS_API_KEY` is set
+- Check ElevenLabs account quota/credits
+- Try a different voice ID if needed
+
+**AI responses are generic:**
+- Ensure `EVE_SYSTEM_CODE` and `EVE_OWNER_NAME` are set
+- Clear conversation history and start fresh
+- Check OpenAI API quota/credits
+
+## 🔐 Google Sheets API Setup (Optional Logging)
+
+### Create Service Account
+
+1. **Go to [Google Cloud Console](https://console.cloud.google.com/)**
+
+2. **Create a new project** (or use existing)
+
+3. **Enable Google Sheets API**
+   - Navigate to "APIs & Services" > "Library"
+   - Search for "Google Sheets API"
+   - Click "Enable"
+
+4. **Create Service Account**
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "Service Account"
+   - Fill in details and create
+
+5. **Download JSON Key**
+   - Click on the service account
+   - Go to "Keys" tab
+   - Click "Add Key" > "Create new key"
+   - Choose JSON format
+   - Save the file
+
+6. **Share Google Sheet with Service Account**
+   - Open your Google Sheet
+   - Click "Share"
+   - Add service account email (from JSON file)
+   - Give "Editor" permissions
+
+### Configure Credentials
+
+#### For Local Development
+Edit `.env` file:
+```bash
+GOOGLE_SHEETS_CREDS='{"type": "service_account", "project_id": "...", ...}'
+LOG_SHEET_ID=your-sheet-id-here
+```
+
+#### For Streamlit Cloud
+Add to app secrets in TOML format:
+```toml
+GOOGLE_SHEETS_CREDS = '{"type": "service_account", ...}'
+LOG_SHEET_ID = "your-sheet-id"
+```
+
+## 📊 Data Source Configuration
+
+### Google Sheets CSV URL
+The dashboard fetches data from this public Google Sheets URL:
+```
+https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv
+```
+
+### Expected CSV Structure
+The dashboard expects these columns (will adapt to actual structure):
+- `Field` - Item/metric name
+- `Value` - Numeric or text value
+- `Status` - Status indicator (PERFECT/TODO/ACTIVE/STABLE)
+- `Notes` - Additional information (optional)
+
+### To Use Your Own Sheet
+
+1. **Publish your Google Sheet as CSV**
+   - File > Share > Publish to web
+   - Choose "Comma-separated values (.csv)"
+   - Copy the URL
+
+2. **Update the URL in `app.py`**
+   ```python
+   GOOGLE_SHEETS_CSV_URL = "your-csv-url-here"
+   ```
+
+3. **Update the URL in `index.html`**
+   ```javascript
+   const GOOGLE_SHEETS_CSV_URL = 'your-csv-url-here';
+   ```
 
 ## 🎨 Customization
 
-### Theme Configuration
-
-Edit `.streamlit/config.toml` to customize appearance:
-
+### Theme Colors
+Edit `.streamlit/config.toml`:
 ```toml
 [theme]
-primaryColor = "#FF4B4B"      # Main accent color
-backgroundColor = "#0E1117"    # App background
-secondaryBackgroundColor = "#262730"  # Sidebar/widgets
-textColor = "#FAFAFA"          # Text color
-font = "sans serif"            # Font family
+primaryColor = "#00D9FF"          # Accent color
+backgroundColor = "#0E0E1A"       # Main background
+secondaryBackgroundColor = "#1A1A2E"  # Card background
+textColor = "#EAEAEA"             # Text color
 ```
 
-### Adding New Data Sources
+### Status Colors
+Edit color mappings in `app.py` and `index.html`:
+- PERFECT: Green (`#00FF88`)
+- TODO: Yellow (`#FFC107`)
+- ACTIVE: Blue (`#2196F3`)
+- STABLE: Gray (`#9E9E9E`)
 
-To add new blockchain or API data:
+### Auto-Refresh Interval
+Change cache TTL in `app.py`:
+```python
+@st.cache_data(ttl=300)  # 300 seconds = 5 minutes
+```
 
-1. Create a new function in the "LIVE DATA FETCHING FUNCTIONS" section
-2. Add retry logic and error handling (see existing functions as templates)
-3. Update `SystemStatus` class if needed
-4. Add health check for the new source
-5. Display the data in the metrics section
+## 🛠️ Troubleshooting
 
-## 📱 PWA Version
+### Common Issues
 
-This repository also includes a PWA (Progressive Web App) frontend:
+**CSV Data Not Loading**
+- Check internet connection
+- Verify Google Sheets URL is public and published as CSV
+- Check browser console for CORS errors
 
-- **Files**: `index.html`, `manifest.json`, `service-worker.js`
-- **Features**: Offline support, voice input, local storage
-- **Usage**: See original README section for PWA setup
+**PSI Price Not Displaying**
+- CoinGecko API may be rate-limited (free tier)
+- Check if `tridentdao` token ID is correct
+- Try again after a few minutes
+
+**Lock Screen Won't Dismiss**
+- Press Enter key
+- Click "OVERRIDE ACCESS" button
+- Refresh page if stuck
 
 ## 🎯 Real-time Modules Usage
 
@@ -322,54 +483,105 @@ Click the 📤 floating button to access export features:
 - View export history
 
 ## 🧪 Testing
+**Google Sheets Logging Fails**
+- Verify service account credentials are correct
+- Check if sheet is shared with service account email
+- Ensure `gspread` and `oauth2client` are installed
+- Logging is optional - dashboard will continue without it
 
-### Manual Testing Procedures
+**Three.js Star Map Not Rendering**
+- Check if Three.js CDN is accessible
+- Verify browser supports WebGL
+- Try a different browser (Chrome/Firefox recommended)
 
-**Test Live Data Connectivity:**
-1. Open the app and check sidebar status indicators
-2. Verify all systems show green (connected)
-3. Check "Last Update" timestamp is current
-4. Click "Refresh Live Data" and verify update
+### Debug Mode
 
-**Test CSV Fallback:**
-1. Disconnect from internet
-2. Restart the app
-3. Verify "Data Source" shows "CSV Backup"
-4. Confirm data still displays (from CSV)
+Run Streamlit in debug mode:
+```bash
+streamlit run app.py --logger.level=debug
+```
 
-**Test Error Handling:**
-1. Modify CSV to remove required columns
-2. Restart app and check for validation warnings
-3. Verify app doesn't crash
-4. Restore CSV and verify recovery
+Check browser console (F12) for JavaScript errors.
 
-**Test Token Calculations:**
-1. Compare PSI-Coin holdings with CSV data
-2. Verify live price updates when API active
-3. Check Total Spendable calculation
-4. Export data and verify accuracy
+## 📁 Project Structure
 
-## 📄 License
+```
+CEC-WAM-HOT-CORE/
+├── app.py                    # Main Streamlit application
+├── index.html                # Standalone HTML dashboard
+├── requirements.txt          # Python dependencies
+├── vercel.json              # Vercel deployment config
+├── .env.example             # Environment variables template
+├── .gitignore               # Git ignore rules
+├── .streamlit/
+│   └── config.toml          # Streamlit theme configuration
+└── README.md                # This file
+```
 
-This project is part of the CEC-WAM system.
+## 📚 API Documentation
+
+### Google Sheets CSV
+- **URL Format**: `https://docs.google.com/spreadsheets/d/e/{SHEET_ID}/pub?output=csv`
+- **Method**: GET
+- **Response**: CSV text
+- **Rate Limit**: None (public sheets)
+
+### CoinGecko API
+- **Endpoint**: `https://api.coingecko.com/api/v3/simple/price`
+- **Parameters**: `ids=tridentdao&vs_currencies=usd&include_24hr_change=true`
+- **Method**: GET
+- **Response**: JSON
+- **Rate Limit**: 10-50 calls/minute (free tier)
+
+## 🔒 Security Notes
+
+- **Lock Screen**: Theatrical UI only, not real security
+- **Environment Variables**: Never commit `.env` file
+- **Service Account**: Keep JSON credentials secret
+- **HTTPS**: Always use HTTPS in production
+- **CORS**: Ensure proper CORS headers for API calls
 
 ## 🤝 Contributing
 
+Contributions are welcome! Please follow these guidelines:
+
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+## 🙏 Acknowledgments
+
+- **Streamlit** - Web app framework
+- **Three.js** - 3D graphics library
+- **CoinGecko** - Cryptocurrency data API
+- **Google Sheets** - Data storage and sync
+- **Vercel** - Deployment platform
 
 ## 📞 Support
 
-For issues or questions:
-- Open an issue on GitHub
-- Check the troubleshooting section above
-- Review Streamlit Cloud logs for deployment issues
+For issues, questions, or suggestions:
+- Open an [Issue](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/issues)
+- Contact: [GitHub Profile](https://github.com/whiteantwan58-tech)
+
+## 🗺️ Roadmap
+
+- [ ] Add more celestial bodies to star map
+- [ ] Implement real-time WebSocket updates
+- [ ] Add user authentication system
+- [ ] Create mobile app version
+- [ ] Integrate more cryptocurrency exchanges
+- [ ] Add data visualization charts
+- [ ] Implement export to PDF feature
+- [ ] Add multi-language support
 
 ---
 
-**Status**: Production Ready ✅  
-**Last Updated**: 2026-02-11  
-**Version**: 2.0.0
+**Built with ❤️ by the CEC-WAM Team**
+
+🌌 *Exploring the cosmos, one datapoint at a time* 🌌
