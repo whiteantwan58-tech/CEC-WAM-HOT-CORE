@@ -125,17 +125,17 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const issues = [];
-            
+
             // Check if title is descriptive
             if (pr.title.length < 10) {
               issues.push('- PR title should be at least 10 characters');
             }
-            
+
             // Check if description exists
             if (!pr.body || pr.body.length < 20) {
               issues.push('- PR description should be at least 20 characters');
             }
-            
+
             if (issues.length > 0) {
               const comment = `## ⚠️ PR Validation Issues\n\n${issues.join('\n')}\n\nPlease update your PR to follow best practices.`;
               await github.rest.issues.createComment({
@@ -159,16 +159,16 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-            
+
             // Skip if PR author is a bot
             if (pr.user.type === 'Bot') {
               console.log('Skipping reviewer assignment for bot PRs');
               return;
             }
-            
+
             // Get repository owner as potential reviewer
             const owner = context.repo.owner;
-            
+
             // Only assign if author is not the owner
             if (pr.user.login !== owner) {
               try {
@@ -201,15 +201,15 @@ jobs:
             const additions = pr.additions;
             const deletions = pr.deletions;
             const totalChanges = additions + deletions;
-            
+
             let sizeLabel = '';
             const labels = [];
-            
+
             // Remove old size labels
             const existingLabels = pr.labels.map(label => label.name);
             const sizeLabels = ['size/XS', 'size/S', 'size/M', 'size/L', 'size/XL'];
             const labelsToRemove = sizeLabels.filter(label => existingLabels.includes(label));
-            
+
             for (const label of labelsToRemove) {
               try {
                 await github.rest.issues.removeLabel({
@@ -222,7 +222,7 @@ jobs:
                 // Label doesn't exist, ignore
               }
             }
-            
+
             // Determine size
             if (totalChanges < 10) {
               sizeLabel = 'size/XS';
@@ -235,7 +235,7 @@ jobs:
             } else {
               sizeLabel = 'size/XL';
             }
-            
+
             // Add new size label
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -243,5 +243,5 @@ jobs:
               issue_number: context.issue.number,
               labels: [sizeLabel]
             });
-            
+
             console.log(`✅ Added label: ${sizeLabel} (${totalChanges} lines changed)`);

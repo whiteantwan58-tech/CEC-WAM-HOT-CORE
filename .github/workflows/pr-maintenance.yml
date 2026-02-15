@@ -24,20 +24,20 @@ jobs:
           stale-pr-message: |
             👋 This PR has been automatically marked as stale because it has not had recent activity.
             It will be closed in 7 days if no further activity occurs.
-            
+
             If you believe this PR should remain open, please:
             - Add a comment explaining why
             - Update the PR with new changes
             - Request a review
-            
+
             Thank you for your contributions! 🙏
           close-pr-message: |
             🔒 This PR has been automatically closed due to inactivity.
-            
+
             If you'd like to continue working on this, please:
             - Rebase your branch on the latest main
             - Open a new PR
-            
+
             Thank you for your contributions! 🙏
           days-before-stale: 30
           days-before-close: 7
@@ -60,14 +60,14 @@ jobs:
               state: 'open',
               per_page: 100
             });
-            
+
             const draftPRs = pullRequests.filter(pr => pr.draft);
             const now = new Date();
-            
+
             for (const pr of draftPRs) {
               const createdAt = new Date(pr.created_at);
               const daysSinceCreation = (now - createdAt) / (1000 * 60 * 60 * 24);
-              
+
               // Notify on draft PRs older than 14 days
               if (daysSinceCreation > 14) {
                 await github.rest.issues.createComment({
@@ -76,7 +76,7 @@ jobs:
                   issue_number: pr.number,
                   body: `👋 Hi @${pr.user.login}! This draft PR has been open for ${Math.floor(daysSinceCreation)} days.\n\nIf you're ready to move forward:\n- Mark it as "Ready for review"\n- Request reviewers\n\nIf you're no longer working on this, consider closing it.\n\nThanks! 🙏`
                 });
-                
+
                 console.log(`Notified PR #${pr.number} about draft status`);
               }
             }
@@ -96,18 +96,18 @@ jobs:
               state: 'open',
               per_page: 100
             });
-            
+
             for (const pr of pullRequests) {
               if (!pr.body) continue;
-              
+
               // Count checklist items
               const totalItems = (pr.body.match(/- \[[ x]\]/g) || []).length;
               const completedItems = (pr.body.match(/- \[x\]/g) || []).length;
-              
+
               if (totalItems > 0) {
                 const progress = Math.round((completedItems / totalItems) * 100);
                 console.log(`PR #${pr.number}: ${completedItems}/${totalItems} tasks complete (${progress}%)`);
-                
+
                 // Add progress label
                 let progressLabel = '';
                 if (progress === 100) {
@@ -119,7 +119,7 @@ jobs:
                 } else {
                   progressLabel = 'just-started';
                 }
-                
+
                 // Add the label
                 try {
                   await github.rest.issues.addLabels({
@@ -149,22 +149,22 @@ jobs:
               state: 'open',
               per_page: 100
             });
-            
+
             for (const pr of pullRequests) {
               // Skip draft PRs
               if (pr.draft) continue;
-              
+
               // Get PR details
               const { data: prDetails } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pr.number
               });
-              
+
               // Check if PR is ready to merge
               const isApproved = prDetails.mergeable && prDetails.mergeable_state === 'clean';
               const hasConflicts = prDetails.mergeable === false;
-              
+
               if (hasConflicts) {
                 // Check if conflict label exists
                 const hasConflictLabel = pr.labels.some(label => label.name === 'conflict');
