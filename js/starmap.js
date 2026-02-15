@@ -69,7 +69,9 @@ class StarMapVisualization {
   }
 
   createStarField() {
-    const starCount = 10000; // Increased for HD effect
+    // HD star count: 10,000 stars for enhanced visual quality
+    // Note: Adjust STAR_COUNT if performance issues on lower-end devices
+    const starCount = 10000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);

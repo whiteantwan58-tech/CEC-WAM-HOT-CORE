@@ -2506,6 +2506,9 @@ micBtn.onclick = () => {
             // 'sheet3': { name: 'Analytics', url: 'https://...' }
         };
         
+        // Configuration constants
+        const FETCH_TIMEOUT_MS = 15000; // 15 second timeout for API requests
+        
         let currentDataSource = 'main';
         const GOOGLE_SHEETS_CSV_URL = DATA_SOURCES[currentDataSource].url;
         const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
@@ -2623,7 +2626,7 @@ micBtn.onclick = () => {
             try {
                 // Add timeout for fetch request
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
                 
                 const response = await fetch(GOOGLE_SHEETS_CSV_URL, {
                     signal: controller.signal
