@@ -504,11 +504,11 @@
         <div class="card">
             <h2>📋 Live Data Feed</h2>
             <div class="filter-controls">
-                <button class="filter-button active" onclick="filterData('ALL')">All Data</button>
-                <button class="filter-button" onclick="filterData('PERFECT')">Perfect</button>
-                <button class="filter-button" onclick="filterData('TODO')">To-Do</button>
-                <button class="filter-button" onclick="filterData('ACTIVE')">Active</button>
-                <button class="filter-button" onclick="filterData('STABLE')">Stable</button>
+                <button class="filter-button active" onclick="filterData('ALL', event)">All Data</button>
+                <button class="filter-button" onclick="filterData('PERFECT', event)">Perfect</button>
+                <button class="filter-button" onclick="filterData('TODO', event)">To-Do</button>
+                <button class="filter-button" onclick="filterData('ACTIVE', event)">Active</button>
+                <button class="filter-button" onclick="filterData('STABLE', event)">Stable</button>
                 <button class="export-button" onclick="exportData()">📥 Export CSV</button>
             </div>
             <div id="dataTable" class="loading">Loading data from Google Sheets...</div>
@@ -601,6 +601,7 @@
         let trendsChart = null;
         let priceHistory = [];
         const startTime = Date.now();
+        const TOTAL_SUPPLY = 1000000; // Total supply for market cap calculation
         
         function updateTimestamp() {
             const now = new Date();
@@ -641,7 +642,7 @@
                     </div>
                     <div class="metric">
                         <span class="metric-label">Market Cap</span>
-                        <span class="metric-value">$${(price * 1000000).toFixed(2)}</span>
+                        <span class="metric-value">$${(price * TOTAL_SUPPLY).toFixed(2)}</span>
                     </div>
                 `;
                 
@@ -921,14 +922,16 @@
             updateTimestamp();
         }
         
-        function filterData(status) {
+        function filterData(status, event) {
             currentFilter = status;
             
             // Update button states
             document.querySelectorAll('.filter-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             if (!dashboardData) return;
             
@@ -950,15 +953,18 @@
                 return;
             }
             
-            // Convert data to CSV
+            // Convert data to CSV with proper escaping
             const headers = Object.keys(dashboardData[0]);
             let csv = headers.join(',') + '\n';
             
             dashboardData.forEach(row => {
                 const values = headers.map(header => {
                     const value = row[header] || '';
-                    // Escape commas and quotes
-                    return value.includes(',') ? `"${value}"` : value;
+                    // Escape commas, quotes, and newlines
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
                 });
                 csv += values.join(',') + '\n';
             });
