@@ -1,0 +1,59 @@
+name: Auto-Upgrade Dependencies
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  upgrade-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Upgrade Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-upgrader
+          if [ -f requirements.txt ]; then
+            # Backup original requirements
+            cp requirements.txt requirements.txt.bak
+            # Upgrade all packages
+            pip-upgrade --skip-package-installation requirements.txt || true
+            # If pip-upgrade fails, try pip-compile approach
+            pip install pip-tools
+            pip-compile --upgrade requirements.txt || true
+          fi
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Auto-upgrade: Update dependencies'
+          title: 'Auto-upgrade: Update all dependencies'
+          body: |
+            ## Auto-generated dependency upgrade
+            
+            This PR automatically upgrades all dependencies to their latest versions.
+            
+            - Dependencies have been upgraded
+            - Changes are ready for auto-approval
+            - Will be auto-merged after approval
+          branch: auto-upgrade-dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            auto-merge
+            auto-approved

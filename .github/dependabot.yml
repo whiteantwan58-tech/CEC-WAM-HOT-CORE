@@ -1,0 +1,35 @@
+version: 2
+updates:
+  # Enable version updates for Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "auto-merge"
+      - "auto-approved"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    reviewers:
+      - "whiteantwan58-tech"
+    assignees:
+      - "whiteantwan58-tech"
+    allow:
+      - dependency-type: "all"
+    
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "auto-merge"
+      - "auto-approved"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
