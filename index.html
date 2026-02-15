@@ -2433,9 +2433,14 @@ micBtn.onclick = () => {
         }
         
         // Initialize biometric auth when page loads
-        window.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', () => {
+                initBiometricAuth();
+            });
+        } else {
+            // DOM already loaded, initialize immediately
             initBiometricAuth();
-        });
+        }
         
         // Dashboard Functions
         // Configuration for multiple data sources
