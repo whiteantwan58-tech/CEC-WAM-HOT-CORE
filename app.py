@@ -1,3 +1,17 @@
+"""
+CEC-WAM-HOT-CORE Streamlit Dashboard
+
+This dashboard provides real-time visualization and monitoring of the CEC-WAM system.
+
+Performance Optimizations:
+- Seeded random data: Uses hour-based seeds to prevent chart flickering
+- Cached API responses: NASA (1hr TTL), Google Sheets (1min TTL)
+- Removed infinite rerun loop: Manual refresh instead of continuous auto-refresh
+- Efficient data structures: Bounded collections prevent memory bloat
+
+For detailed performance guidelines, see PERFORMANCE_OPTIMIZATION.md
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -147,26 +161,31 @@ if 'last_data_refresh' not in st.session_state:
     st.session_state.last_data_refresh = datetime.now()
 if 'cached_random_seed' not in st.session_state:
     # Use current hour to seed random data - changes every hour
+    # This prevents chart flickering while still providing "live" updates
     st.session_state.cached_random_seed = datetime.now().hour
 
 # Fetch NASA Image
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600)  # Cache for 1 hour - NASA APOD updates daily
 def fetch_nasa_apod():
+    """Fetch NASA Astronomy Picture of the Day with error handling"""
     try:
         response = requests.get(NASA_APOD_URL, timeout=10)
         if response.status_code == 200:
             return response.json()
-    except:
+    except Exception as e:
+        # Silently fail and return None - UI will handle gracefully
         pass
     return None
 
 # Fetch Google Sheets Data
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60)  # Cache for 1 minute - allows frequent updates
 def fetch_sheets_data():
+    """Fetch live data from Google Sheets with error handling"""
     try:
         df = pd.read_csv(GOOGLE_SHEETS_URL)
         return df
-    except:
+    except Exception as e:
+        # Silently fail and return None - UI will show warning
         return None
 
 # Main Tabs

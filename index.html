@@ -430,6 +430,17 @@
     </div>
     
     <script>
+        // =================================================================
+        // CEC-WAM-HOT-CORE Live Dashboard - JavaScript
+        // 
+        // Performance Optimizations:
+        // - Cached star field generation (10k vertices)
+        // - Parallel API calls with Promise.all()
+        // - Debounced resize handler (250ms)
+        // - Visibility-based auto-refresh
+        // - Improved error messages
+        // =================================================================
+        
         // Lock Screen Functions
         function unlockDashboard() {
             const scanStatus = document.getElementById('scanStatus');
@@ -454,6 +465,7 @@
         });
         
         // Dashboard Functions
+        // API endpoints for live data
         const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv';
         const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
         
@@ -601,6 +613,7 @@
         
         function refreshData() {
             // Parallelize API calls for better performance
+            // Both requests execute simultaneously instead of sequentially
             Promise.all([
                 fetchPSIPrice(),
                 fetchGoogleSheetsData()
@@ -620,29 +633,35 @@
                 fetchPSIPrice(),
                 fetchGoogleSheetsData()
             ]).then(() => {
-                console.log('Dashboard data loaded successfully');
+                console.log('✓ Dashboard data loaded successfully');
             }).catch(error => {
-                console.error('Error loading dashboard data:', error);
+                console.error('✗ Error loading dashboard data:', error);
             });
             
             initStarMap();
             
             // Auto-refresh every 5 minutes only if page is visible
+            // Saves bandwidth and API calls when user is on another tab
             setInterval(() => {
                 if (!document.hidden) {
                     refreshData();
                 }
-            }, 300000);
+            }, 300000);  // 300000ms = 5 minutes
             
-            // Also refresh when page becomes visible
+            // Also refresh when page becomes visible after being hidden
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
+                    console.log('Page became visible - refreshing data');
                     refreshData();
                 }
             });
         }
         
-        // 3D Star Map Implementation
+        // =================================================================
+        // 3D Star Map Implementation with Caching
+        // Generates 10,000 star vertices once and reuses them
+        // =================================================================
+        
         // Cache star vertices to avoid regenerating on every call
         let cachedStarsVertices = null;
         
