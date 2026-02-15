@@ -1310,14 +1310,24 @@
     // ---------- Clock & Uptime ----------
     function tickClock(){
       const now = new Date();
-      $("clock").textContent = "SYSTEM TIME: " + now.toLocaleString();
-      $("hudHeartbeat").textContent = now.toLocaleTimeString();
+      const clockEl = $("clock");
+      const heartbeatEl = $("hudHeartbeat");
+      const uptimeEl = $("hudUptime");
       
-      const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
-      const h = Math.floor(uptimeSec / 3600);
-      const m = Math.floor((uptimeSec % 3600) / 60);
-      const s = uptimeSec % 60;
-      $("hudUptime").textContent = `${h}h ${m}m ${s}s`;
+      // Only update if elements exist (after dashboard unlock)
+      if (clockEl) {
+        clockEl.textContent = "SYSTEM TIME: " + now.toLocaleString();
+      }
+      if (heartbeatEl) {
+        heartbeatEl.textContent = now.toLocaleTimeString();
+      }
+      if (uptimeEl) {
+        const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
+        const h = Math.floor(uptimeSec / 3600);
+        const m = Math.floor((uptimeSec % 3600) / 60);
+        const s = uptimeSec % 60;
+        uptimeEl.textContent = `${h}h ${m}m ${s}s`;
+      }
     }
     setInterval(tickClock, 1000);
     tickClock();
@@ -2506,7 +2516,7 @@ micBtn.onclick = () => {
         let statusChart = null;
         let trendsChart = null;
         let priceHistory = [];
-        const startTime = Date.now();
+        const dashboardStartTime = Date.now();
         const TOTAL_SUPPLY = 1000000; // Total supply for market cap calculation
         
         function updateTimestamp() {

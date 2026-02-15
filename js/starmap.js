@@ -69,7 +69,7 @@ class StarMapVisualization {
   }
 
   createStarField() {
-    const starCount = 8000;
+    const starCount = 10000; // Increased for HD effect
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
@@ -87,17 +87,17 @@ class StarMapVisualization {
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i3 + 2] = radius * Math.cos(phi);
       
-      // Varied star colors (white, blue, yellow)
+      // Enhanced varied star colors for HD look (white, blue, yellow, cyan)
       const colorVariant = Math.random();
-      if (colorVariant < 0.6) {
-        // White stars
-        colors[i3] = 0.9 + Math.random() * 0.1;
-        colors[i3 + 1] = 0.9 + Math.random() * 0.1;
+      if (colorVariant < 0.5) {
+        // Bright white stars
+        colors[i3] = 0.95 + Math.random() * 0.05;
+        colors[i3 + 1] = 0.95 + Math.random() * 0.05;
         colors[i3 + 2] = 1.0;
-      } else if (colorVariant < 0.8) {
-        // Blue stars
-        colors[i3] = 0.6 + Math.random() * 0.2;
-        colors[i3 + 1] = 0.8 + Math.random() * 0.2;
+      } else if (colorVariant < 0.7) {
+        // Cyan-blue stars
+        colors[i3] = 0.5 + Math.random() * 0.3;
+        colors[i3 + 1] = 0.9 + Math.random() * 0.1;
         colors[i3 + 2] = 1.0;
       } else {
         // Yellow stars
