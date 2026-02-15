@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   
+  <link rel="stylesheet" href="js/modules.css" />
   <style>
     :root{
       --bg:#04060a;
@@ -24,6 +25,7 @@
       --gold:#ffd700;
 
       --panel: rgba(2, 8, 14, 0.82);
+      --panel-bg: rgba(2, 8, 14, 0.82);
       --panel2: rgba(4, 12, 22, 0.65);
       --stroke: rgba(40, 240, 255, 0.72);
       --stroke2: rgba(44, 255, 154, 0.55);
@@ -578,6 +580,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEC-WAM-HOT-CORE Live Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -880,6 +883,75 @@
             margin-top: 30px;
         }
         
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00FF88;
+        }
+        
+        .filter-controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-button {
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid #00D9FF;
+            color: #00D9FF;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-button:hover {
+            background: rgba(0, 217, 255, 0.4);
+        }
+        
+        .filter-button.active {
+            background: #00D9FF;
+            color: #0E0E1A;
+        }
+        
+        .export-button {
+            background: linear-gradient(90deg, #00FF88 0%, #00D9FF 100%);
+            border: none;
+            color: #0E0E1A;
+            padding: 10px 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .export-button:hover {
+            transform: scale(1.05);
+        }
+        
         footer {
             text-align: center;
             padding: 30px 20px;
@@ -949,25 +1021,80 @@
             <div class="card">
                 <h2>💎 PSI-COIN PRICE</h2>
                 <div id="psiPrice" class="loading">Loading...</div>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
             </div>
             
             <!-- Data Summary Card -->
             <div class="card">
                 <h2>📊 Data Summary</h2>
                 <div id="dataSummary" class="loading">Loading...</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Avg Value</div>
+                        <div class="stat-value" id="avgValue">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Total Value</div>
+                        <div class="stat-value" id="totalValue">--</div>
+                    </div>
+                </div>
             </div>
             
             <!-- Status Distribution Card -->
             <div class="card">
                 <h2>📈 Status Distribution</h2>
                 <div id="statusDist" class="loading">Loading...</div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Real-Time Performance Card -->
+            <div class="card">
+                <h2>⚡ Real-Time Performance</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Load Time</div>
+                        <div class="stat-value" id="loadTime">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Data Points</div>
+                        <div class="stat-value" id="dataPoints">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Refresh Rate</div>
+                        <div class="stat-value">5 min</div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Status</div>
+                        <div class="stat-value" style="color: #00FF88;">LIVE</div>
+                    </div>
+                </div>
             </div>
         </div>
         
         <!-- Data Table -->
         <div class="card">
             <h2>📋 Live Data Feed</h2>
+            <div class="filter-controls">
+                <button class="filter-button active" onclick="filterData('ALL', event)">All Data</button>
+                <button class="filter-button" onclick="filterData('PERFECT', event)">Perfect</button>
+                <button class="filter-button" onclick="filterData('TODO', event)">To-Do</button>
+                <button class="filter-button" onclick="filterData('ACTIVE', event)">Active</button>
+                <button class="filter-button" onclick="filterData('STABLE', event)">Stable</button>
+                <button class="export-button" onclick="exportData()">📥 Export CSV</button>
+            </div>
             <div id="dataTable" class="loading">Loading data from Google Sheets...</div>
+        </div>
+        
+        <!-- Trends Card -->
+        <div class="card">
+            <h2>📊 Data Trends & Analytics</h2>
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="trendsChart"></canvas>
+            </div>
         </div>
         
         <!-- 3D Star Map -->
@@ -1077,6 +1204,31 @@
       </div>
 
     </div>
+
+    <!-- New Real-time Modules Section -->
+    <div style="margin-top: 20px;">
+      <!-- Live Federal Way Feed Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">📹 FEDERAL WAY LIVE FEED</div>
+          <span style="font-size:10px;opacity:.75">HD CAMERA STREAM</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="federalWayFeed"></div>
+        </div>
+      </div>
+
+      <!-- Crime Alert System Card -->
+      <div class="card" style="grid-column: span 2; margin-bottom: 12px;">
+        <div class="head">
+          <div class="title">🚨 CRIME ALERT FEED</div>
+          <span style="font-size:10px;opacity:.75">FEDERAL WAY POLICE SCANNER</span>
+        </div>
+        <div class="body" style="padding: 0;">
+          <div id="crimeAlertSystem"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <section id="terminal">
@@ -1104,6 +1256,8 @@
     // <script>window.OPENWEATHER_API_KEY = 'your-api-key-here';</script>
     // Or the weather feature will use demo/fallback data.
     
+
+  <script>
     // Embedded data from repository
     const DATA = {
       net_liquidity: 1250039,
@@ -1929,6 +2083,31 @@
     });
 
     // ========== END MAP, CAMERA, WEATHER, TRAFFIC INTEGRATION ==========
+    // Initialize new real-time modules
+    let starMapViz = null;
+    let federalWayFeed = null;
+    let crimeAlertSystem = null;
+
+    // Wait for DOM to be fully loaded before initializing modules
+    setTimeout(() => {
+      // Initialize Star Map (already exists in the page)
+      if (typeof StarMapVisualization !== 'undefined') {
+        starMapViz = new StarMapVisualization('threeCanvas');
+        console.log('Star Map initialized');
+      }
+
+      // Initialize Federal Way Feed
+      if (typeof FederalWayLiveFeed !== 'undefined') {
+        federalWayFeed = new FederalWayLiveFeed('federalWayFeed');
+        console.log('Federal Way Feed initialized');
+      }
+
+      // Initialize Crime Alert System
+      if (typeof CrimeAlertSystem !== 'undefined') {
+        crimeAlertSystem = new CrimeAlertSystem('crimeAlertSystem');
+        console.log('Crime Alert System initialized');
+      }
+    }, 500);
 
     // Boot sequence
     sysSay("🚀 Booting EVE-4 ULTRA HUD…");
@@ -1945,6 +2124,15 @@
       eveSay("🗺️ Map & Camera system: INITIALIZING");
     }, 1200);
   </script>
+    }, 1200);
+  </script>
+
+  <!-- Real-time functionality modules -->
+  <script src="js/starmap.js"></script>
+  <script src="js/federal-way-feed.js"></script>
+  <script src="js/crime-alerts.js"></script>
+  <script src="js/google-drive-export.js"></script>
+
 </body><button id="eve-mic" style="background:#0f0;color:#000;padding:10px;border:none;cursor:pointer;">Talk to Eve</button>
 <script>
 const micBtn = document.getElementById('eve-mic');
@@ -1972,6 +2160,17 @@ micBtn.onclick = () => {
     </div>
     
     <script>
+        // =================================================================
+        // CEC-WAM-HOT-CORE Live Dashboard - JavaScript
+        // 
+        // Performance Optimizations:
+        // - Cached star field generation (10k vertices)
+        // - Parallel API calls with Promise.all()
+        // - Debounced resize handler (250ms)
+        // - Visibility-based auto-refresh
+        // - Improved error messages
+        // =================================================================
+        
         // Lock Screen Functions
         function unlockDashboard() {
             const scanStatus = document.getElementById('scanStatus');
@@ -1996,10 +2195,29 @@ micBtn.onclick = () => {
         });
         
         // Dashboard Functions
-        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv';
+        // Configuration for multiple data sources
+        const DATA_SOURCES = {
+            'main': {
+                name: 'Main Ledger',
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv'
+            }
+            // Add more sheets here as needed:
+            // 'sheet2': { name: 'Secondary Data', url: 'https://...' },
+            // 'sheet3': { name: 'Analytics', url: 'https://...' }
+        };
+        
+        let currentDataSource = 'main';
+        const GOOGLE_SHEETS_CSV_URL = DATA_SOURCES[currentDataSource].url;
         const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24hr_change=true';
         
         let dashboardData = null;
+        let currentFilter = 'ALL';
+        let priceChart = null;
+        let statusChart = null;
+        let trendsChart = null;
+        let priceHistory = [];
+        const startTime = Date.now();
+        const TOTAL_SUPPLY = 1000000; // Total supply for market cap calculation
         
         function updateTimestamp() {
             const now = new Date();
@@ -2010,6 +2228,9 @@ micBtn.onclick = () => {
         async function fetchPSIPrice() {
             try {
                 const response = await fetch(COINGECKO_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
                 
                 const price = data.tridentdao?.usd || 0;
@@ -2017,6 +2238,17 @@ micBtn.onclick = () => {
                 
                 const changeColor = change >= 0 ? '#00FF88' : '#FF4444';
                 const changeSymbol = change >= 0 ? '+' : '';
+                
+                // Store price history
+                priceHistory.push({
+                    time: new Date().toLocaleTimeString(),
+                    price: price
+                });
+                
+                // Keep only last 20 data points
+                if (priceHistory.length > 20) {
+                    priceHistory.shift();
+                }
                 
                 document.getElementById('psiPrice').innerHTML = `
                     <div class="metric">
@@ -2027,18 +2259,76 @@ micBtn.onclick = () => {
                         <span class="metric-label">24h Change</span>
                         <span class="metric-value" style="color: ${changeColor};">${changeSymbol}${change.toFixed(2)}%</span>
                     </div>
+                    <div class="metric">
+                        <span class="metric-label">Market Cap</span>
+                        <span class="metric-value">$${(price * TOTAL_SUPPLY).toFixed(2)}</span>
+                    </div>
                 `;
+                
+                updatePriceChart();
             } catch (error) {
-                document.getElementById('psiPrice').innerHTML = '<p style="color: #FF4444;">Price unavailable</p>';
+                console.error('Error fetching PSI price:', error);
+                document.getElementById('psiPrice').innerHTML = `
+                    <p style="color: #FF4444;">❌ Price data unavailable</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                `;
             }
         }
         
+        function updatePriceChart() {
+            const ctx = document.getElementById('priceChart');
+            if (!ctx) return;
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: priceHistory.map(p => p.time),
+                    datasets: [{
+                        label: 'Price (USD)',
+                        data: priceHistory.map(p => p.price),
+                        borderColor: '#00D9FF',
+                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#00D9FF' },
+                            grid: { color: 'rgba(0, 217, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#00D9FF', maxTicksLimit: 5 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
         async function fetchGoogleSheetsData() {
+            const loadStart = Date.now();
             try {
                 const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const csvText = await response.text();
                 
-                // Parse CSV
+                // Simple CSV parsing (handles basic cases)
+                // Note: For production, consider using a CSV parsing library for complex data
                 const lines = csvText.trim().split('\n');
                 const headers = lines[0].split(',').map(h => h.trim());
                 
@@ -2053,14 +2343,21 @@ micBtn.onclick = () => {
                 }
                 
                 dashboardData = data;
+                const loadTime = ((Date.now() - loadStart) / 1000).toFixed(2);
+                document.getElementById('loadTime').textContent = `${loadTime}s`;
+                document.getElementById('dataPoints').textContent = data.length;
+                
                 displayData(data, headers);
                 updateDataSummary(data);
                 updateStatusDistribution(data);
+                updateTrendsChart(data);
                 
             } catch (error) {
+                console.error('Error fetching Google Sheets data:', error);
                 document.getElementById('dataTable').innerHTML = `
-                    <p style="color: #FF4444;">❌ Failed to load data: ${error.message}</p>
-                    <p>Please check your internet connection or verify the Google Sheets URL.</p>
+                    <p style="color: #FF4444;">❌ Failed to load spreadsheet data</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">${error.message}</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Please check your internet connection and verify the Google Sheets URL is accessible.</p>
                 `;
             }
         }
@@ -2096,6 +2393,21 @@ micBtn.onclick = () => {
         }
         
         function updateDataSummary(data) {
+            // Calculate numeric values if Value column exists
+            let totalValue = 0;
+            let avgValue = 0;
+            let numericCount = 0;
+            
+            data.forEach(row => {
+                const value = parseFloat(row.Value || row.value || 0);
+                if (!isNaN(value) && value !== 0) {
+                    totalValue += value;
+                    numericCount++;
+                }
+            });
+            
+            avgValue = numericCount > 0 ? totalValue / numericCount : 0;
+            
             document.getElementById('dataSummary').innerHTML = `
                 <div class="metric">
                     <span class="metric-label">Total Records</span>
@@ -2106,6 +2418,9 @@ micBtn.onclick = () => {
                     <span class="metric-value">${new Date().toLocaleString()}</span>
                 </div>
             `;
+            
+            document.getElementById('avgValue').textContent = avgValue > 0 ? `$${avgValue.toFixed(2)}` : '--';
+            document.getElementById('totalValue').textContent = totalValue > 0 ? `$${totalValue.toFixed(2)}` : '--';
         }
         
         function updateStatusDistribution(data) {
@@ -2126,27 +2441,239 @@ micBtn.onclick = () => {
             });
             
             document.getElementById('statusDist').innerHTML = html || '<p>No status data</p>';
+            
+            // Update status chart
+            updateStatusChart(statusCount);
+        }
+        
+        function updateStatusChart(statusCount) {
+            const ctx = document.getElementById('statusChart');
+            if (!ctx) return;
+            
+            if (statusChart) {
+                statusChart.destroy();
+            }
+            
+            const labels = Object.keys(statusCount);
+            const values = Object.values(statusCount);
+            const colors = labels.map(status => {
+                const s = status.toUpperCase();
+                if (s.includes('PERFECT')) return '#00FF88';
+                if (s.includes('TODO')) return '#FFC107';
+                if (s.includes('ACTIVE')) return '#2196F3';
+                if (s.includes('STABLE')) return '#9E9E9E';
+                return '#00D9FF';
+            });
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: '#0E0E1A',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#00D9FF',
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateTrendsChart(data) {
+            const ctx = document.getElementById('trendsChart');
+            if (!ctx) return;
+            
+            if (trendsChart) {
+                trendsChart.destroy();
+            }
+            
+            // Extract numeric values for trend analysis
+            const values = data.map((row, index) => ({
+                index: index + 1,
+                value: parseFloat(row.Value || row.value || 0)
+            })).filter(item => !isNaN(item.value) && item.value !== 0);
+            
+            trendsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: values.map(v => `#${v.index}`),
+                    datasets: [{
+                        label: 'Data Values',
+                        data: values.map(v => v.value),
+                        backgroundColor: 'rgba(0, 217, 255, 0.5)',
+                        borderColor: '#00D9FF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#00D9FF'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#00D9FF' },
+                            grid: { color: 'rgba(0, 217, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#00D9FF', maxTicksLimit: 10 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         }
         
         function refreshData() {
-            fetchPSIPrice();
-            fetchGoogleSheetsData();
-            updateTimestamp();
+            // Parallelize API calls for better performance
+            // Both requests execute simultaneously instead of sequentially
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                updateTimestamp();
+            }).catch(error => {
+                console.error('Error refreshing data:', error);
+                updateTimestamp();
+            });
+        }
+        
+        function filterData(status, event) {
+            currentFilter = status;
+            
+            // Update button states
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            if (!dashboardData) return;
+            
+            let filteredData = dashboardData;
+            if (status !== 'ALL') {
+                filteredData = dashboardData.filter(row => {
+                    const rowStatus = (row.Status || row.status || '').toUpperCase();
+                    return rowStatus.includes(status);
+                });
+            }
+            
+            const headers = Object.keys(dashboardData[0] || {});
+            displayData(filteredData, headers);
+        }
+        
+        function exportData() {
+            if (!dashboardData || dashboardData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            
+            // Convert data to CSV with proper escaping
+            const headers = Object.keys(dashboardData[0]);
+            let csv = headers.join(',') + '\n';
+            
+            dashboardData.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header] || '';
+                    // Escape commas, quotes, and newlines
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                csv += values.join(',') + '\n';
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cec-wam-data-${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         }
         
         function initDashboard() {
             updateTimestamp();
-            fetchPSIPrice();
-            fetchGoogleSheetsData();
+            
+            // Parallelize initial data fetch for faster load time
+            Promise.all([
+                fetchPSIPrice(),
+                fetchGoogleSheetsData()
+            ]).then(() => {
+                console.log('✓ Dashboard data loaded successfully');
+            }).catch(error => {
+                console.error('✗ Error loading dashboard data:', error);
+            });
+            
             initStarMap();
             
-            // Auto-refresh every 5 minutes
+            // Auto-refresh every 5 minutes only if page is visible
+            // Saves bandwidth and API calls when user is on another tab
             setInterval(() => {
-                refreshData();
-            }, 300000);
+                if (!document.hidden) {
+                    refreshData();
+                }
+            }, 300000);  // 300000ms = 5 minutes
+            
+            // Also refresh when page becomes visible after being hidden
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    console.log('Page became visible - refreshing data');
+                    refreshData();
+                }
+            });
         }
         
-        // 3D Star Map Implementation
+        // =================================================================
+        // 3D Star Map Implementation with Caching
+        // Generates 10,000 star vertices once and reuses them
+        // =================================================================
+        
+        // Cache star vertices to avoid regenerating on every call
+        let cachedStarsVertices = null;
+        
+        function generateStarVertices() {
+            if (cachedStarsVertices) {
+                return cachedStarsVertices;
+            }
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            cachedStarsVertices = starsVertices;
+            return starsVertices;
+        }
+        
         function initStarMap() {
             const container = document.getElementById('starmap-container');
             const canvas = document.getElementById('starmap');
@@ -2158,17 +2685,11 @@ micBtn.onclick = () => {
             renderer.setSize(container.offsetWidth, container.offsetHeight);
             renderer.setClearColor(0x000000);
             
-            // Add stars
+            // Add stars using cached vertices
             const starsGeometry = new THREE.BufferGeometry();
             const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.7 });
             
-            const starsVertices = [];
-            for (let i = 0; i < 10000; i++) {
-                const x = (Math.random() - 0.5) * 2000;
-                const y = (Math.random() - 0.5) * 2000;
-                const z = (Math.random() - 0.5) * 2000;
-                starsVertices.push(x, y, z);
-            }
+            const starsVertices = generateStarVertices();
             
             starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
             const starField = new THREE.Points(starsGeometry, starsMaterial);
@@ -2249,11 +2770,15 @@ micBtn.onclick = () => {
             
             animate();
             
-            // Handle window resize
+            // Debounced window resize handler to prevent excessive updates
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                camera.aspect = container.offsetWidth / container.offsetHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.offsetWidth, container.offsetHeight);
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    camera.aspect = container.offsetWidth / container.offsetHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.offsetWidth, container.offsetHeight);
+                }, 250);  // 250ms debounce delay
             });
         }
     </script>

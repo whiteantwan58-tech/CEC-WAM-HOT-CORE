@@ -7,8 +7,11 @@ A cutting-edge, real-time dashboard featuring live Google Sheets data synchroniz
 ### Core Functionality
 - **Live Google Sheets Integration** - Auto-fetches CSV data from Google Sheets with 5-minute auto-refresh
 - **Color-Coded Status System** - Visual status indicators (PERFECT=Green, TODO=Yellow, ACTIVE=Blue, STABLE=Gray)
-- **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API
+- **Real-Time PSI-Coin Pricing** - Live cryptocurrency prices from CoinGecko API with historical chart
 - **Interactive 3D Star Map** - Three.js-powered visualization of celestial bodies
+- **Advanced Data Visualizations** - Multiple chart types (line, doughnut, bar charts) using Chart.js
+- **Data Filtering & Export** - Filter data by status and export to CSV format
+- **Real-Time Performance Metrics** - Live tracking of load times, data points, and system status
 - **Biometric Lock Screen** - Theatrical security interface (aesthetic only, press Enter to bypass)
 - **EVE Voice AI Assistant** - Advanced AI with voice synthesis and natural language understanding
 - **Responsive Design** - Optimized for desktop, tablet, and mobile devices
@@ -32,13 +35,40 @@ EVE is designed specifically for **Twan** with full access to all CEC-WAM system
 ### Technical Features
 - Data caching and error handling
 - Optional Google Sheets logging (requires service account)
-- Downloadable data exports (CSV)
-- Status distribution analytics
-- Numeric value analysis and charting
+- Downloadable data exports (CSV format)
+- Status distribution analytics with doughnut charts
+- Numeric value analysis and trend charting
+- Real-time price history tracking with line charts
+- Interactive data filtering by status
+- Performance monitoring (load times, data points)
 - Voice-enabled chat interface
 - API endpoints for serverless deployment
 
+### New Dashboard Features (Latest Update 🆕)
+- **📊 Multiple Interactive Charts**:
+  - Price history line chart for PSI-COIN
+  - Status distribution doughnut chart
+  - Data trends bar chart
+- **🎛️ Advanced Controls**:
+  - Filter buttons (All, Perfect, To-Do, Active, Stable)
+  - Export to CSV functionality
+  - Real-time metrics dashboard
+- **⚡ Performance Monitoring**:
+  - Load time tracking
+  - Data points counter
+  - Live status indicator
+  - Auto-refresh rate display
+- **💎 Enhanced Data Cards**:
+  - Average and total value calculations
+  - Market cap visualization
+  - Multi-metric displays
+
 ## 🚀 Live Demo
+
+### Screenshot
+![Enhanced Dashboard](https://github.com/user-attachments/assets/4cc709d9-60cb-470d-8ba1-462d847e173e)
+
+*The enhanced dashboard features multiple data visualization cards, real-time performance metrics, interactive filtering, and data export capabilities.*
 
 ### Deployments
 - **Streamlit Cloud**: [Deploy to Streamlit](https://streamlit.io/)
@@ -89,6 +119,47 @@ cd CEC-WAM-HOT-CORE
 - **Traffic Insights**: Monitor incidents and vehicle speeds near camera points
 
 ## 🚀 Quick Start
+### 🆕 Real-time Enhancements (NEW)
+- **Star Map Visualization**: Animated 3D star field with HD visuals and constellation transitions
+  - Real-time celestial body tracking
+  - Smooth constellation animations (Orion, Ursa Major, Cassiopeia)
+  - Interactive 3D scene with 8,000+ stars
+  
+- **Federal Way Live Feed**: HD camera feed integration framework
+  - Multiple camera location support (Main St, City Hall, Transit Center)
+  - Auto-cycling between feeds every 15 seconds
+  - Screenshot capture functionality
+  - Animated placeholder with scan-line effects
+  
+- **Crime Alert System**: Real-time crime alerts and police scanner integration
+  - Live Federal Way police scanner feed simulation
+  - Severity-based alerts (Critical, High, Medium, Low)
+  - Alert categorization (Theft, Assault, Traffic, Suspicious Activity)
+  - Real-time notifications with timestamps and locations
+  - Filtering by severity and type
+  - Audio alert toggle
+  - Export alerts to CSV
+  
+- **Export & Backup System**: Data export and cloud integration
+  - Screenshot capture from live feeds
+  - Crime data export to CSV/JSON
+  - Star map data export
+  - Google Drive integration framework
+  - AppSheet sync capability
+  - Auto-export settings with customizable intervals
+  - Export history tracking
+
+## 🚀 Quick Start
+2. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+3. **Set up environment variables (optional)**
+```bash
+cp .env.example .env
+# Edit .env with your Google Sheets credentials if using logging feature
+```
 
 4. **Run the application**
 ```bash
@@ -328,6 +399,55 @@ Change cache TTL in `app.py`:
 - Click "OVERRIDE ACCESS" button
 - Refresh page if stuck
 
+## 🎯 Real-time Modules Usage
+
+### Star Map Visualization
+The star map is automatically initialized and displays:
+- 8,000+ animated stars with varied colors (white, blue, yellow)
+- Three major constellations that auto-cycle every 8 seconds
+- Smooth camera movements and constellation transitions
+- Interactive 3D rendering using Three.js
+
+### Federal Way Live Feed
+Access the live camera feed module:
+1. Use the ◀ ▶ buttons to switch between camera locations
+2. Click 📷 to capture screenshots
+3. Feeds auto-cycle every 15 seconds
+4. Screenshots are automatically timestamped
+
+**Available Camera Locations:**
+- Federal Way Main St & Pacific Highway
+- City Hall Campus
+- Transit Center Plaza
+
+### Crime Alert System
+Monitor real-time crime alerts:
+1. View active alerts with severity indicators
+2. Filter alerts by severity (Critical, High, Medium, Low) or type
+3. Toggle audio alerts with 🔇/🔊 button
+4. Click 🔄 to manually refresh alerts
+5. Export data with 💾 button
+
+**Alert Information Includes:**
+- Location and timestamp
+- Number of responding units
+- Alert severity and type
+- Real-time status updates
+
+### Export & Backup
+Click the 📤 floating button to access export features:
+1. **Capture Screenshot**: Take screenshots from live feeds
+2. **Export Crime Data**: Download alerts as CSV
+3. **Export Star Map Data**: Save celestial data as JSON
+4. **Export All Data**: Complete system data export
+
+**Integration Options:**
+- Connect to Google Drive for cloud storage
+- Sync with AppSheet for mobile access
+- Configure auto-export intervals
+- View export history
+
+## 🧪 Testing
 **Google Sheets Logging Fails**
 - Verify service account credentials are correct
 - Check if sheet is shared with service account email
