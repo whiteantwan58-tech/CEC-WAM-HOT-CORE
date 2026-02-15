@@ -144,6 +144,8 @@ The CSP policy allows:
 - **API Connections**: CoinGecko, Google Sheets, OpenWeatherMap, WSDOT
 - **Frames**: Self, NASA Eyes iframe
 
+**Note on `unsafe-inline`**: The CSP includes `unsafe-inline` for scripts and styles because this is a static site with embedded configuration data (the DATA object) and inline styling. This is an acceptable trade-off for static dashboard deployments. All external scripts are from trusted CDNs only. The dashboard uses safe DOM manipulation (createElement, textContent) throughout to prevent XSS attacks despite the inline policy.
+
 ## 🧪 Testing Your Deployment
 
 After deployment, verify all features:
