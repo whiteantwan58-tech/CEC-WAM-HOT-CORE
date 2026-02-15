@@ -2216,6 +2216,9 @@ micBtn.onclick = () => {
         // WebAuthn Biometric Authentication System
         // ============================================================
         
+        // Configuration constants
+        const AUTO_AUTH_DELAY_MS = 2000; // Delay before auto-authentication
+        
         // Helper function to generate random challenge
         function generateRandomChallenge() {
             const array = new Uint8Array(32);
@@ -2226,20 +2229,14 @@ micBtn.onclick = () => {
         // Helper function to convert ArrayBuffer to Base64
         function arrayBufferToBase64(buffer) {
             const bytes = new Uint8Array(buffer);
-            let binary = '';
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
+            const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
             return btoa(binary);
         }
         
         // Helper function to convert Base64 to ArrayBuffer
         function base64ToArrayBuffer(base64) {
             const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
+            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
             return bytes.buffer;
         }
         
@@ -2282,7 +2279,7 @@ micBtn.onclick = () => {
                         { alg: -257, type: "public-key" } // RS256
                     ],
                     authenticatorSelection: {
-                        authenticatorAttachment: "platform", // Prefer built-in authenticators (Touch ID, Face ID, Windows Hello)
+                        authenticatorAttachment: "platform", // Prefer built-in authenticators (Touch ID, Face ID, Windows Hello, Android fingerprint)
                         requireResidentKey: false,
                         userVerification: "required"
                     },
@@ -2416,10 +2413,10 @@ micBtn.onclick = () => {
                     biometricButtons.style.display = 'block';
                     lockHint.textContent = 'Click AUTHENTICATE to verify your identity using fingerprint or Face ID';
                     
-                    // Auto-authenticate after 2 seconds
+                    // Auto-authenticate after configured delay
                     setTimeout(() => {
                         authenticateBiometric();
-                    }, 2000);
+                    }, AUTO_AUTH_DELAY_MS);
                 } else {
                     scanStatus.innerHTML = '<span style="color: #00D9FF;">● No biometric registered - setup required</span>';
                     setupButtons.style.display = 'block';
