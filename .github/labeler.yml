@@ -1,0 +1,58 @@
+# Configuration for auto-labeling PRs based on changed files
+
+# Documentation changes
+documentation:
+  - '**/*.md'
+  - 'docs/**/*'
+
+# Workflow changes
+workflows:
+  - '.github/workflows/**/*'
+  - '.github/labeler.yml'
+
+# Frontend/UI changes
+frontend:
+  - '*.html'
+  - 'js/**/*'
+  - '**/*.css'
+  - '**/*.scss'
+
+# Python/Backend changes
+backend:
+  - '**/*.py'
+  - 'api/**/*'
+  - 'requirements.txt'
+
+# Data files
+data:
+  - 'data/**/*'
+  - '**/*.csv'
+  - '**/*.xlsx'
+  - '**/*.json'
+
+# Configuration files
+config:
+  - '.env.example'
+  - '**/*.config.js'
+  - '**/*.config.json'
+  - '.streamlit/**/*'
+  - 'vercel.json'
+  - '.devcontainer/**/*'
+
+# Testing
+tests:
+  - 'test_*.py'
+  - '**/*test*.py'
+  - '**/*.test.js'
+  - '**/*.spec.js'
+
+# Security
+security:
+  - 'SECURITY_SUMMARY.md'
+  - '.github/workflows/security*.yml'
+
+# Dependencies
+dependencies:
+  - 'requirements.txt'
+  - 'package.json'
+  - 'package-lock.json'
