@@ -1,7 +1,7 @@
 name: Auto-Approve Dependabot
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
@@ -11,7 +11,11 @@ permissions:
 jobs:
   dependabot-approve:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    # Verify it's actually Dependabot and from the same repository
+    if: |
+      github.actor == 'dependabot[bot]' && 
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Dependabot metadata
         id: metadata

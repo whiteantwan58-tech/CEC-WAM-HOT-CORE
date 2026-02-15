@@ -35,10 +35,11 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           
       - name: Run Python tests
-        continue-on-error: true
         run: |
-          if [ -f test_eve.py ]; then python test_eve.py || true; fi
-          if [ -f test_elevenlabs_config.py ]; then python test_elevenlabs_config.py || true; fi
+          # Run tests - failures will stop the workflow
+          if [ -f test_eve.py ]; then python test_eve.py; fi
+          if [ -f test_elevenlabs_config.py ]; then python test_elevenlabs_config.py; fi
+          echo "All tests passed successfully"
           
       - name: Mark as successful
         run: echo "Tests completed (errors allowed for auto-approval)"
@@ -86,7 +87,16 @@ jobs:
                 commit_title: `Auto-merge: ${context.payload.pull_request.title}`,
                 commit_message: 'Automatically merged after approval'
               })
-              console.log('PR auto-merged successfully')
+              console.log('✅ PR auto-merged successfully')
             } catch (error) {
-              console.log('Auto-merge not possible yet, will retry:', error.message)
+              if (error.status === 405) {
+                console.log('⏳ Merge not allowed yet (checks pending)')
+                core.warning('Auto-merge skipped: ' + error.message)
+              } else if (error.status === 409) {
+                console.log('⚠️ Merge conflict detected')
+                core.setFailed('Merge conflict: ' + error.message)
+              } else {
+                console.log('❌ Merge failed: ' + error.message)
+                core.setFailed('Merge failed: ' + error.message)
+              }
             }
