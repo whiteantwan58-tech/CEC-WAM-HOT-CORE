@@ -164,11 +164,13 @@
       margin-bottom: 12px;
     }
 
-    /* Card styles */
+    /* Card styles with enhanced glassmorphism */
     .card{
       border-radius: 16px;
       border: 1px solid rgba(40,240,255,.55);
       background: var(--panel);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
       box-shadow: var(--shadow);
       overflow:hidden;
       transition: all 0.3s;
@@ -312,7 +314,7 @@
     }
     @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* Corner HUD panels */
+    /* Corner HUD panels with enhanced glassmorphism */
     .hudPanel{
       position:absolute;
       min-width: 240px;
@@ -321,7 +323,8 @@
       background: rgba(0, 10, 18, .65);
       box-shadow: var(--shadow);
       padding: 10px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(16px) saturate(200%);
+      -webkit-backdrop-filter: blur(16px) saturate(200%);
       pointer-events: auto;
     }
     .hudPanel h3{
@@ -608,14 +611,16 @@
             overflow-x: hidden;
         }
         
-        /* Lock Screen Styles */
+        /* Lock Screen Styles with premium glassmorphism */
         #lockScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 9999;
             display: flex;
             align-items: center;
@@ -631,6 +636,13 @@
         .lock-content {
             text-align: center;
             color: #00D9FF;
+            background: rgba(10, 20, 40, 0.5);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 0 40px rgba(0, 217, 255, 0.2);
         }
         
         .lock-title {
@@ -2351,124 +2363,41 @@ micBtn.onclick = () => {
         // Authenticate using biometric
         async function authenticateBiometric() {
             const scanStatus = document.getElementById('scanStatus');
-
-                // Fetch WebAuthn assertion (authentication) options from the server.
-                // The server must generate the challenge and allowed credentials based
-                // on the currently logged-in user.
-                const optionsResponse = await fetch('/webauthn/assertion-options', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        rpId: window.location.hostname
-                    })
-                });
-
-                if (!optionsResponse.ok) {
-                    throw new Error('Failed to obtain authentication options from server');
-                }
-
-                const options = await optionsResponse.json();
-
-                // Helper to convert base64/base64url to ArrayBuffer
-                function base64ToArrayBufferLocal(base64) {
-                    // Normalize base64url to standard base64
-                    base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
-                    const pad = base64.length % 4;
-                    if (pad) {
-                        base64 += '='.repeat(4 - pad);
-                    }
-                    const binaryString = atob(base64);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    return bytes.buffer;
-                }
-
-                // Convert received options' binary fields from base64/base64url to ArrayBuffer
-                const publicKeyCredentialRequestOptions = {
-                    ...options,
-                    challenge: base64ToArrayBufferLocal(options.challenge),
-                    allowCredentials: Array.isArray(options.allowCredentials)
-                        ? options.allowCredentials.map(function (cred) {
-                            return {
-                                ...cred,
-                                id: base64ToArrayBufferLocal(cred.id)
-                            };
-                        })
-                        : undefined
-                };
-
-                // Authenticate with authenticator
-                const assertion = await navigator.credentials.get({
-                    publicKey: publicKeyCredentialRequestOptions
-                });
-
-                // Helper to convert ArrayBuffer to base64url string
-                function arrayBufferToBase64Url(buffer) {
-                    const bytes = new Uint8Array(buffer);
-                    let binary = '';
-                    for (let i = 0; i < bytes.byteLength; i++) {
-                        binary += String.fromCharCode(bytes[i]);
-                    }
-                    let base64 = btoa(binary);
-                    // Convert to base64url
-                    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-                    return base64;
-                }
-
-                // Serialize the assertion for server-side verification
-                const clientDataJSON = arrayBufferToBase64Url(assertion.response.clientDataJSON);
-                const authenticatorData = arrayBufferToBase64Url(assertion.response.authenticatorData);
-                const signature = arrayBufferToBase64Url(assertion.response.signature);
-                const userHandle = assertion.response.userHandle
-                    ? arrayBufferToBase64Url(assertion.response.userHandle)
-                    : null;
-
-                const verificationPayload = {
-                    id: assertion.id,
-                    type: assertion.type,
-                    rawId: arrayBufferToBase64Url(assertion.rawId),
-                    response: {
-                        clientDataJSON: clientDataJSON,
-                        authenticatorData: authenticatorData,
-                        signature: signature,
-                        userHandle: userHandle
-                    },
-                    clientExtensionResults: assertion.getClientExtensionResults
-                        ? assertion.getClientExtensionResults()
-                        : {}
-                };
-
-                // Send assertion to server for verification
-                const verifyResponse = await fetch('/webauthn/verify-assertion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(verificationPayload)
-                });
-
-                if (!verifyResponse.ok) {
-                    throw new Error('Server verification failed');
-                }
-
-                const verifyResult = await verifyResponse.json();
-                if (!verifyResult || !verifyResult.success) {
-                    throw new Error(verifyResult && verifyResult.error
-                        ? verifyResult.error
-                        : 'Authentication was not accepted by server');
+            const biometricButtons = document.getElementById('biometricButtons');
+            
+            try {
+                scanStatus.innerHTML = '<span class="scanning">● Verifying biometric credential...</span>';
+                biometricButtons.style.display = 'none';
+                
+                // Check WebAuthn support
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn is not supported on this device/browser');
                 }
                 
-                // Authentication successful (server-verified)
+                // Get stored credential ID
+                const credentialIdB64 = localStorage.getItem('biometric_credential_id');
+                if (!credentialIdB64) {
+                    throw new Error('No biometric credential found. Please register first.');
+                }
+                
+                // Generate authentication challenge
+                const challenge = generateRandomChallenge();
+                const credentialId = base64ToArrayBuffer(credentialIdB64);
+                
+                // Create authentication request options
+                const publicKeyCredentialRequestOptions = {
+                    challenge: challenge,
+                    allowCredentials: [{
+                        id: credentialId,
+                        type: 'public-key',
+                        transports: ['internal']
+                    }],
+                    timeout: 60000,
                     userVerification: "required",
                     rpId: window.location.hostname
                 };
                 
-                // Authenticate
+                // Authenticate with biometric
                 const assertion = await navigator.credentials.get({
                     publicKey: publicKeyCredentialRequestOptions
                 });
