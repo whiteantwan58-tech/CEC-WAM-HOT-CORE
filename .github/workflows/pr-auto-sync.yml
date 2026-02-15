@@ -1,0 +1,247 @@
+name: PR Auto Sync and Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+  schedule:
+    # Run every 6 hours to keep PRs up to date
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Auto-update PR branches when base branch changes
+  auto-update-prs:
+    name: Auto Update PR Branches
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto update all open PRs
+        uses: tibdex/auto-update@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          merge_method: merge
+
+  # Auto-label PRs based on changed files
+  auto-label-pr:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Label based on changed files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+  # Check for merge conflicts
+  check-conflicts:
+    name: Check for Merge Conflicts
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for conflicts
+        id: conflict-check
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          if git merge-tree $(git merge-base HEAD origin/${{ github.base_ref }}) HEAD origin/${{ github.base_ref }} | grep -q '<<<<<'; then
+            echo "has_conflict=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Merge conflict detected"
+          else
+            echo "has_conflict=false" >> $GITHUB_OUTPUT
+            echo "✅ No merge conflicts"
+          fi
+
+      - name: Comment on PR if conflicts found
+        if: steps.conflict-check.outputs.has_conflict == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Merge Conflict Detected**\n\nThis PR has merge conflicts with the base branch. Please resolve the conflicts to proceed with merging.'
+            })
+
+      - name: Add conflict label
+        if: steps.conflict-check.outputs.has_conflict == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['conflict']
+            })
+
+      - name: Remove conflict label if resolved
+        if: steps.conflict-check.outputs.has_conflict == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'conflict'
+              })
+            } catch (error) {
+              // Label doesn't exist, ignore
+            }
+
+  # Validate PR metadata
+  validate-pr:
+    name: Validate PR Metadata
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check PR title and description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const issues = [];
+            
+            // Check if title is descriptive
+            if (pr.title.length < 10) {
+              issues.push('- PR title should be at least 10 characters');
+            }
+            
+            // Check if description exists
+            if (!pr.body || pr.body.length < 20) {
+              issues.push('- PR description should be at least 20 characters');
+            }
+            
+            if (issues.length > 0) {
+              const comment = `## ⚠️ PR Validation Issues\n\n${issues.join('\n')}\n\nPlease update your PR to follow best practices.`;
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              console.log('✅ PR metadata validation passed');
+            }
+
+  # Auto-assign reviewers
+  auto-assign-reviewers:
+    name: Auto Assign Reviewers
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:
+      - name: Auto assign reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            // Skip if PR author is a bot
+            if (pr.user.type === 'Bot') {
+              console.log('Skipping reviewer assignment for bot PRs');
+              return;
+            }
+            
+            // Get repository owner as potential reviewer
+            const owner = context.repo.owner;
+            
+            // Only assign if author is not the owner
+            if (pr.user.login !== owner) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  reviewers: [owner]
+                });
+                console.log(`✅ Assigned ${owner} as reviewer`);
+              } catch (error) {
+                console.log('Could not assign reviewer:', error.message);
+              }
+            }
+
+  # Check PR size
+  check-pr-size:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check PR size and add label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const totalChanges = additions + deletions;
+            
+            let sizeLabel = '';
+            const labels = [];
+            
+            // Remove old size labels
+            const existingLabels = pr.labels.map(label => label.name);
+            const sizeLabels = ['size/XS', 'size/S', 'size/M', 'size/L', 'size/XL'];
+            const labelsToRemove = sizeLabels.filter(label => existingLabels.includes(label));
+            
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label
+                });
+              } catch (error) {
+                // Label doesn't exist, ignore
+              }
+            }
+            
+            // Determine size
+            if (totalChanges < 10) {
+              sizeLabel = 'size/XS';
+            } else if (totalChanges < 50) {
+              sizeLabel = 'size/S';
+            } else if (totalChanges < 200) {
+              sizeLabel = 'size/M';
+            } else if (totalChanges < 500) {
+              sizeLabel = 'size/L';
+            } else {
+              sizeLabel = 'size/XL';
+            }
+            
+            // Add new size label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [sizeLabel]
+            });
+            
+            console.log(`✅ Added label: ${sizeLabel} (${totalChanges} lines changed)`);
