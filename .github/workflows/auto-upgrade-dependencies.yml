@@ -24,20 +24,49 @@ jobs:
           python-version: '3.x'
           
       - name: Upgrade Python dependencies
+        id: upgrade
         run: |
           python -m pip install --upgrade pip
-          pip install pip-upgrader
+          pip install pip-upgrader pip-tools
+          
           if [ -f requirements.txt ]; then
             # Backup original requirements
             cp requirements.txt requirements.txt.bak
-            # Upgrade all packages
-            pip-upgrade --skip-package-installation requirements.txt || true
-            # If pip-upgrade fails, try pip-compile approach
-            pip install pip-tools
-            pip-compile --upgrade requirements.txt || true
+            
+            # Try pip-upgrade first
+            echo "Attempting pip-upgrade..."
+            if pip-upgrade --skip-package-installation requirements.txt; then
+              echo "upgrade_success=true" >> $GITHUB_OUTPUT
+              echo "✅ pip-upgrade succeeded"
+            else
+              echo "⚠️ pip-upgrade failed, trying pip-compile..."
+              # Restore backup and try pip-compile
+              cp requirements.txt.bak requirements.txt
+              if pip-compile --upgrade requirements.txt; then
+                echo "upgrade_success=true" >> $GITHUB_OUTPUT
+                echo "✅ pip-compile succeeded"
+              else
+                echo "upgrade_success=false" >> $GITHUB_OUTPUT
+                echo "❌ Both upgrade methods failed"
+              fi
+            fi
+            
+            # Check if any changes were made
+            if diff -q requirements.txt requirements.txt.bak > /dev/null; then
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+              echo "ℹ️ No dependency updates available"
+            else
+              echo "has_changes=true" >> $GITHUB_OUTPUT
+              echo "✅ Dependencies updated"
+            fi
+          else
+            echo "upgrade_success=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "❌ No requirements.txt found"
           fi
           
       - name: Create Pull Request
+        if: steps.upgrade.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,3 +86,9 @@ jobs:
             dependencies
             auto-merge
             auto-approved
+            
+      - name: No updates available
+        if: steps.upgrade.outputs.has_changes == 'false'
+        run: |
+          echo "ℹ️ No dependency updates available at this time"
+          echo "All dependencies are up to date"

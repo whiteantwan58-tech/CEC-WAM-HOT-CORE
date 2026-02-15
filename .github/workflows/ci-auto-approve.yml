@@ -36,13 +36,13 @@ jobs:
           
       - name: Run Python tests
         run: |
-          # Run tests - failures will stop the workflow
+          # Run tests - failures will stop the workflow and prevent auto-approval
           if [ -f test_eve.py ]; then python test_eve.py; fi
           if [ -f test_elevenlabs_config.py ]; then python test_elevenlabs_config.py; fi
           echo "All tests passed successfully"
           
       - name: Mark as successful
-        run: echo "Tests completed (errors allowed for auto-approval)"
+        run: echo "Tests completed successfully - ready for auto-approval"
 
   # Auto-approve all changes
   auto-approve-all:
