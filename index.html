@@ -914,10 +914,15 @@
             id="nasaEyesFrame"
             src="https://eyes.nasa.gov/apps/solar-system/#/home" 
             style="width:100%;height:100%;border:none;border-radius:0 0 16px 16px;"
-            title="NASA Eyes Solar System Visualization"
-            sandbox="allow-scripts allow-same-origin"
+            title="Interactive NASA Eyes live solar system visualization (embedded content)"
+            sandbox="allow-scripts"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             loading="lazy">
+            <p style="padding:12px;font-size:12px;color:rgba(220,255,255,.85);background-color:#04060a;">
+              This section contains an embedded interactive NASA Eyes live solar system visualization. If you cannot view embedded content, 
+              you can access the visualization directly at 
+              <a href="https://eyes.nasa.gov/apps/solar-system/#/home" target="_blank" rel="noopener noreferrer">eyes.nasa.gov/apps/solar-system</a>.
+            </p>
           </iframe>
         </div>
       </div>
@@ -963,8 +968,9 @@
             <div style="margin-bottom:10px">
               <strong style="color:var(--neon2);font-size:9px;letter-spacing:0.1em">DOMAIN CHECK</strong>
               <div style="margin-top:6px;display:flex;gap:6px;">
-                <input id="domainInput" type="text" placeholder="example.com" style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid rgba(40,240,255,.35);background:rgba(4,10,18,.75);color:rgba(255,255,255,.95);font-size:9px;outline:none;" />
-                <button onclick="checkDomain()" class="actionBtn" style="padding:6px 10px;font-size:8px;">CHECK</button>
+                <label for="domainInput" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">Domain name to check</label>
+                <input id="domainInput" type="text" placeholder="example.com" aria-label="Domain name to check" style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid rgba(40,240,255,.35);background:rgba(4,10,18,.75);color:rgba(255,255,255,.95);font-size:9px;outline:none;" />
+                <button onclick="checkDomain()" class="actionBtn" style="padding:6px 10px;font-size:8px;" aria-label="Check domain status">CHECK</button>
               </div>
               <div id="domainResult" style="margin-top:6px;font-size:9px;opacity:0.85;"></div>
             </div>
@@ -1135,16 +1141,23 @@
         }
         
         this.processing = true;
-        const task = this.queue.shift();
-        
         try {
-          await this.execute(task);
-        } catch (e) {
-          console.error("Silent Command Bus Error:", e);
+          while (this.queue.length > 0) {
+            const task = this.queue.shift();
+
+            try {
+              await this.execute(task);
+            } catch (e) {
+              console.error("Silent Command Bus Error:", e);
+            }
+
+            // Delay between tasks to avoid tight looping
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        } finally {
+          // Ensure processing flag is always reset, even if an unexpected error occurs
+          this.processing = false;
         }
-        
-        // Continue processing
-        setTimeout(() => this.processQueue(), 100);
       },
       
       // Execute command
@@ -1180,27 +1193,46 @@
       // Auto-save functionality
       autoSave() {
         try {
+          // Check localStorage availability and quota
+          if (typeof localStorage === "undefined") {
+            return;
+          }
+          
           const state = {
             timestamp: Date.now(),
             psiBalance: CFG.psiBalance,
             netLiquidity: DATA.net_liquidity,
-            uptime: $("hudUptime").textContent,
+            uptime: $("hudUptime") ? $("hudUptime").textContent : "",
             lastPrices: {
-              btc: $("hudBtc").textContent,
-              eth: $("hudEth").textContent,
-              sol: $("hudSol").textContent,
-              psi: $("hudPsi").textContent
+              btc: $("hudBtc") ? $("hudBtc").textContent : "",
+              eth: $("hudEth") ? $("hudEth").textContent : "",
+              sol: $("hudSol") ? $("hudSol").textContent : "",
+              psi: $("hudPsi") ? $("hudPsi").textContent : ""
             }
           };
           localStorage.setItem("CEC_WAM_STATE", JSON.stringify(state));
         } catch(e) {
-          console.error("Auto-save failed:", e);
+          // Handle quota exceeded or disabled localStorage
+          if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            console.warn("localStorage quota exceeded. Auto-save disabled.");
+            // Clear old saves to free space
+            try {
+              localStorage.removeItem("CEC_WAM_STATE");
+            } catch(clearError) {
+              console.error("Failed to clear localStorage:", clearError);
+            }
+          } else {
+            console.error("Auto-save failed:", e);
+          }
         }
       },
       
       // Load saved state
       loadState() {
         try {
+          if (typeof localStorage === "undefined") {
+            return null;
+          }
           const saved = localStorage.getItem("CEC_WAM_STATE");
           if (saved) {
             return JSON.parse(saved);
@@ -1211,6 +1243,44 @@
         return null;
       }
     };
+    
+    // Restore saved state (if any) on initialization
+    (function restoreSavedState() {
+      const savedState = CommandBus.loadState();
+      if (!savedState) {
+        return;
+      }
+
+      // Restore configuration/state objects if available
+      if (typeof CFG !== "undefined" && typeof savedState.psiBalance === "number") {
+        CFG.psiBalance = savedState.psiBalance;
+      }
+      if (typeof DATA !== "undefined" && typeof savedState.netLiquidity === "number") {
+        DATA.net_liquidity = savedState.netLiquidity;
+      }
+
+      // Restore HUD elements if helper and elements are available
+      if (typeof $ === "function") {
+        if (savedState.uptime && $("hudUptime")) {
+          $("hudUptime").textContent = savedState.uptime;
+        }
+        if (savedState.lastPrices) {
+          const prices = savedState.lastPrices;
+          if (prices.btc && $("hudBtc")) {
+            $("hudBtc").textContent = prices.btc;
+          }
+          if (prices.eth && $("hudEth")) {
+            $("hudEth").textContent = prices.eth;
+          }
+          if (prices.sol && $("hudSol")) {
+            $("hudSol").textContent = prices.sol;
+          }
+          if (prices.psi && $("hudPsi")) {
+            $("hudPsi").textContent = prices.psi;
+          }
+        }
+      }
+    })();
     
     // Schedule periodic auto-save
     setInterval(() => {
@@ -1312,14 +1382,13 @@
         const response = await fetch("BlackHoles.csv");
         const csvText = await response.text();
         const lines = csvText.trim().split("\n");
-        const headers = lines[0].split(",");
         
         const blackHoleTable = $("blackHoleTable");
         blackHoleTable.innerHTML = "";
         
         for(let i = 1; i < lines.length; i++){
           const values = lines[i].split(",");
-          if(values.length < 4) continue;
+          if(values.length < 5) continue;
           
           const id = values[1] || "—";
           const desc = values[2] || "—";
@@ -1339,19 +1408,49 @@
             "PATENTED": "LOW",
             "EXECUTED": "CRITICAL"
           };
-          const severity = severityMap[status] || "UNKNOWN";
+          const severity = severityMap[status.trim()] || "UNKNOWN";
           
-          const statusClass = status.toLowerCase().replace(/[^a-z]/g, "");
+          const statusClass = status.trim().toLowerCase().replace(/[^a-z]/g, "");
           
+          // Create row with safe DOM manipulation to prevent XSS
           const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${id}</td>
-            <td>${desc}</td>
-            <td>${value}</td>
-            <td><span class="badge ${statusClass}">${status}</span></td>
-            <td style="font-size:9px;opacity:0.8">${distance}</td>
-            <td style="font-size:9px;opacity:0.8;color:${severity === "CRITICAL" ? "var(--bad)" : severity === "HIGH" ? "var(--warn)" : "var(--good)"}">${severity}</td>
-          `;
+          
+          const idCell = document.createElement("td");
+          idCell.textContent = id;
+          row.appendChild(idCell);
+
+          const descCell = document.createElement("td");
+          descCell.textContent = desc;
+          row.appendChild(descCell);
+
+          const valueCell = document.createElement("td");
+          valueCell.textContent = value;
+          row.appendChild(valueCell);
+
+          const statusCell = document.createElement("td");
+          const statusBadge = document.createElement("span");
+          statusBadge.className = "badge " + statusClass;
+          statusBadge.textContent = status;
+          statusCell.appendChild(statusBadge);
+          row.appendChild(statusCell);
+
+          const distanceCell = document.createElement("td");
+          distanceCell.style.fontSize = "9px";
+          distanceCell.style.opacity = "0.8";
+          distanceCell.textContent = distance;
+          row.appendChild(distanceCell);
+
+          const severityCell = document.createElement("td");
+          severityCell.style.fontSize = "9px";
+          severityCell.style.opacity = "0.8";
+          severityCell.style.color = severity === "CRITICAL"
+            ? "var(--bad)"
+            : severity === "HIGH"
+              ? "var(--warn)"
+              : "var(--good)";
+          severityCell.textContent = severity;
+          row.appendChild(severityCell);
+          
           blackHoleTable.appendChild(row);
         }
         
@@ -1359,6 +1458,27 @@
       } catch(e){
         console.error("Failed to load BlackHoles.csv:", e);
         eveSay("⚠️ Failed to load Black Hole data, using fallback");
+        
+        // Provide a clear in-table message so the user understands what happened
+        const blackHoleTable = $("blackHoleTable");
+        if (blackHoleTable){
+          const tableEl = blackHoleTable.closest("table");
+          const headerRow = tableEl ? tableEl.querySelector("thead tr") : null;
+          let colSpan = 6; // Default to known column count
+          if (headerRow && headerRow.children.length > 0){
+            colSpan = headerRow.children.length;
+          }
+          
+          blackHoleTable.innerHTML = "";
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = colSpan;
+          cell.textContent = "Unable to load Black Hole data at this time.";
+          cell.style.textAlign = "center";
+          cell.style.opacity = "0.8";
+          row.appendChild(cell);
+          blackHoleTable.appendChild(row);
+        }
       }
     }
 
@@ -1408,6 +1528,15 @@
         netDot.className = "dot";
         
         // Reset error counter on success
+        if (!window.feedErrorCount) {
+          window.feedErrorCount = 0;
+        }
+        // Reset after some time of successful operation
+        if (window.feedErrorCount > 0) {
+          window.feedErrorResetTimer = setTimeout(() => {
+            window.feedErrorCount = 0;
+          }, 60000); // Reset after 1 minute of successful operation
+        }
         window.feedErrorCount = 0;
       } catch (e){
         $("sourceStatus").textContent = "FEEDS: DEGRADED";
@@ -1418,12 +1547,17 @@
         // Auto-fix: Retry with exponential backoff
         // Base delay: 5000ms, Growth factor: 2x, Max delay: 30000ms
         window.feedErrorCount = (window.feedErrorCount || 0) + 1;
-        if (window.feedErrorCount < 3) {
-          const retryDelay = Math.min(5000 * Math.pow(2, window.feedErrorCount), 30000);
-          setTimeout(() => {
-            CommandBus.enqueue("refresh_prices");
-          }, retryDelay);
+        
+        // Clear any pending reset timer
+        if (window.feedErrorResetTimer) {
+          clearTimeout(window.feedErrorResetTimer);
         }
+        
+        // Keep retrying with capped backoff instead of giving up
+        const retryDelay = Math.min(5000 * Math.pow(2, Math.min(window.feedErrorCount, 3)), 30000);
+        setTimeout(() => {
+          CommandBus.enqueue("refresh_prices");
+        }, retryDelay);
       }
     }
 
@@ -1691,6 +1825,25 @@
       const timestamp = new Date().toISOString();
       const filename = `CEC_WAM_Logs_${Date.now()}.csv`;
       
+      // Helper function to escape CSV values and prevent injection
+      function escapeCsvValue(value) {
+        if (value === null || value === undefined) {
+          return "";
+        }
+        let stringValue = String(value);
+        
+        // Prevent CSV injection by prefixing formula characters with a single quote
+        if (/^[=+\-@]/.test(stringValue)) {
+          stringValue = "'" + stringValue;
+        }
+        
+        // Escape quotes and wrap in quotes if value contains special characters
+        if (/[",\n\r]/.test(stringValue)) {
+          return '"' + stringValue.replace(/"/g, '""') + '"';
+        }
+        return stringValue;
+      }
+      
       const logs = [
         ["Timestamp", "Category", "Metric", "Value", "Status"],
         [timestamp, "Finance", "Valuation", "$1.25M", "Verified"],
@@ -1709,7 +1862,9 @@
         [timestamp, "System", "Resource Usage", $("gaugeNum").textContent, "Monitored"]
       ];
       
-      const csvContent = logs.map(row => row.join(",")).join("\n");
+      const csvContent = logs
+        .map(row => row.map(escapeCsvValue).join(","))
+        .join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -1720,6 +1875,7 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url); // Clean up memory
       
       eveSay("✅ Logs exported successfully!");
       sysSay("📄 File: " + filename);
@@ -1727,32 +1883,54 @@
 
     // ---------- Domain Delegation Check ----------
     async function checkDomain(){
-      const domain = $("domainInput").value.trim();
+      const rawDomain = $("domainInput").value.trim();
       const resultDiv = $("domainResult");
       
-      if(!domain){
+      if(!rawDomain){
         resultDiv.innerHTML = '<span style="color:var(--warn)">⚠️ Please enter a domain</span>';
         return;
       }
       
+      // Sanitize domain input - only allow alphanumeric, dots, and hyphens
+      const domain = rawDomain.replace(/[^a-zA-Z0-9.-]/g, '');
+      if (domain !== rawDomain) {
+        resultDiv.innerHTML = '<span style="color:var(--bad)">❌ Invalid domain format</span>';
+        return;
+      }
+      
       resultDiv.innerHTML = '<span style="color:var(--neon)">🔍 Checking...</span>';
-      eveSay("🌐 Checking domain: " + domain);
+      
+      // Create safe text node to prevent XSS
+      const domainTextNode = document.createTextNode(domain);
+      const tempSpan = document.createElement("span");
+      tempSpan.appendChild(domainTextNode);
+      const safeDomain = tempSpan.textContent;
+      
+      eveSay("🌐 Checking domain: " + safeDomain);
       
       // NOTE: This is a simulated DNS check for demonstration purposes
       // In production, this should call a backend API that performs actual DNS lookups
       setTimeout(() => {
-        const isValid = Math.random() > 0.3;
-        const isDelegated = Math.random() > 0.4;
+        // Deterministic simulation based on domain name so repeated checks are consistent
+        let hash = 0;
+        for (let i = 0; i < domain.length; i++) {
+          hash = ((hash << 5) - hash) + domain.charCodeAt(i);
+          hash |= 0; // Convert to 32-bit integer
+        }
+        const normalized = Math.abs(hash);
+        // Approximate original probabilities (valid ~70%, delegated ~60%) in a deterministic way
+        const isValid = (normalized % 100) >= 30;
+        const isDelegated = (Math.floor(normalized / 100) % 100) >= 40;
         
         if(isValid && isDelegated){
           resultDiv.innerHTML = '<span style="color:var(--good)">✅ ACTIVE | Delegation: OK</span>';
-          eveSay("✅ Domain " + domain + " is active and properly delegated");
+          eveSay("✅ Domain " + safeDomain + " is active and properly delegated");
         } else if(isValid){
           resultDiv.innerHTML = '<span style="color:var(--warn)">⚠️ ACTIVE | Delegation: PENDING</span>';
-          eveSay("⚠️ Domain " + domain + " is active but delegation is pending");
+          eveSay("⚠️ Domain " + safeDomain + " is active but delegation is pending");
         } else {
           resultDiv.innerHTML = '<span style="color:var(--bad)">❌ INACTIVE or UNREACHABLE</span>';
-          eveSay("❌ Domain " + domain + " is inactive or unreachable");
+          eveSay("❌ Domain " + safeDomain + " is inactive or unreachable");
         }
       }, 1500);
     }
