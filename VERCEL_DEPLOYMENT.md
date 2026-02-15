@@ -100,13 +100,15 @@ GROQ_API_KEY=your-groq-key-here
 │   ├── federal-way-feed.js # Live camera feed module
 │   ├── crime-alerts.js    # Crime alert system
 │   ├── google-drive-export.js # Export and backup module
-│   └── modules.css        # Add-on styling
+│   └── modules.css        # Add-on styling (located with modules for cohesion)
 ├── data/
 │   ├── CEC_Matrix_System_Operational_Metrics_and_Assets.csv
 │   ├── EVE_UNFINISHED_TASKS.csv
 │   └── CEC_WAM_MASTER_LEDGER_LIVE.xlsx
 └── README.md
 ```
+
+**Note:** The `modules.css` file is intentionally located in the `js/` directory alongside its related JavaScript modules for better organization and cohesion.
 
 ## 🌐 Custom Domain
 
@@ -129,10 +131,18 @@ The `vercel.json` configuration includes:
 ## 🔒 Security Headers
 
 Automatically configured security headers:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: SAMEORIGIN`
-- `X-XSS-Protection: 1; mode=block`
-- `Cache-Control` - Optimized for static assets
+- `Content-Security-Policy` - Restricts resource loading to trusted CDNs and APIs
+- `X-Content-Type-Options: nosniff` - Prevents MIME-type sniffing
+- `X-Frame-Options: SAMEORIGIN` - Prevents clickjacking attacks
+- `X-XSS-Protection: 1; mode=block` - Enables browser XSS protection
+- `Cache-Control` - Optimized for static assets and API data
+
+The CSP policy allows:
+- **Scripts**: Self, CDNs (cdnjs, jsdelivr, unpkg) with inline scripts for embedded data
+- **Styles**: Self, CDNs with inline styles for dynamic theming
+- **Images**: Self, data URIs, HTTPS sources, blob URIs
+- **API Connections**: CoinGecko, Google Sheets, OpenWeatherMap, WSDOT
+- **Frames**: Self, NASA Eyes iframe
 
 ## 🧪 Testing Your Deployment
 
