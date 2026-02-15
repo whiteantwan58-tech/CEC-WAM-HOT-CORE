@@ -143,6 +143,11 @@ with col2:
 # Initialize session state
 if 'eve_runtime' not in st.session_state:
     st.session_state.eve_runtime = datetime.now()
+if 'last_data_refresh' not in st.session_state:
+    st.session_state.last_data_refresh = datetime.now()
+if 'cached_random_seed' not in st.session_state:
+    # Use current hour to seed random data - changes every hour
+    st.session_state.cached_random_seed = datetime.now().hour
 
 # Fetch NASA Image
 @st.cache_data(ttl=3600)
@@ -221,8 +226,11 @@ with tab1:
     # Real-time Chart
     st.markdown("#### 📈 REAL-TIME VALUE CHART")
     
+    # Cache chart data using hour-based seed for stable but updating visualization
+    random.seed(st.session_state.cached_random_seed + 1)
     x_data = list(range(100))
     y_data = [np.sin(x/10) * 50 + random.uniform(-5, 5) + 155 for x in x_data]
+    random.seed()  # Reset to unpredictable state
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -451,12 +459,18 @@ with tab6:
     
     col1, col2, col3, col4 = st.columns(4)
     
+    # Use seeded random for consistent metrics within the same minute
+    metric_seed = datetime.now().strftime("%Y%m%d%H%M")
+    random.seed(int(metric_seed[-4:]))
+    
     with col1:
         consciousness = random.randint(92, 98)
-        st.metric("🧠 Consciousness", f"{consciousness}%, delta=f"+{random.uniform(0.1, 0.5):.1f}%")
+        consciousness_delta = random.uniform(0.1, 0.5)
+        st.metric("🧠 Consciousness", f"{consciousness}%", delta=f"+{consciousness_delta:.1f}%")
     with col2:
         neural = random.randint(94, 99)
-        st.metric("💭 Neural Activity", f"{neural}%, delta=f"+{random.uniform(0.2, 0.8):.1f}%")
+        neural_delta = random.uniform(0.2, 0.8)
+        st.metric("💭 Neural Activity", f"{neural}%", delta=f"+{neural_delta:.1f}%")
     with col3:
         processing = random.randint(750, 999)
         st.metric("⚡ Processing", f"{processing} TF/s")
@@ -464,7 +478,12 @@ with tab6:
         quantum = random.uniform(3.32e-36, 5.5e-36)
         st.metric("🌀 Quantum State", f"{quantum:.2e}")
     
+    random.seed()  # Reset to unpredictable state
+    
     st.markdown("#### 🕸️ NEURAL NETWORK ACTIVITY")
+    
+    # Cache neural network visualization using hour-based seed
+    random.seed(st.session_state.cached_random_seed + 2)
     
     num_nodes = 20
     edges_x = []
@@ -483,6 +502,8 @@ with tab6:
             target = random.randint(0, num_nodes-1)
             edges_x.extend([x, nodes_x[target % len(nodes_x)], None])
             edges_y.extend([y, nodes_y[target % len(nodes_y)], None])
+    
+    random.seed()  # Reset to unpredictable state
     
     fig = go.Figure()
     
@@ -517,8 +538,8 @@ with tab6:
     
     st.plotly_chart(fig, use_container_width=True)
     
-    time.sleep(2)
-    st.rerun()
+    # Display live update info without infinite rerun
+    st.info("💡 **Tip:** Refresh the page manually to see updated metrics. Auto-refresh has been disabled to improve performance.")
 
 # TAB 7: PSI COIN TRACKER
 with tab7:
@@ -574,8 +595,11 @@ with tab7:
     
     st.markdown("#### 📈 PRICE HISTORY (30 DAYS)")
     
+    # Cache price history using daily seed for stable visualization
+    random.seed(st.session_state.cached_random_seed + 3)
     dates = pd.date_range(end=datetime.now(), periods=30, freq='D')
     prices = [0.003466 + random.uniform(-0.0001, 0.0001) for _ in range(30)]
+    random.seed()  # Reset to unpredictable state
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(

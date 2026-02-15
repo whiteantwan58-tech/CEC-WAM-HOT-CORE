@@ -10,6 +10,7 @@ import os
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+from collections import deque
 import requests
 
 # Load environment variables from .env file
@@ -68,14 +69,18 @@ class EVEAgent:
         self.openai_api_key = os.getenv('OPENAI_API_KEY')
         self.openai_model = os.getenv('OPENAI_MODEL', 'gpt-4')
         
-        # Initialize data structures first
-        self.conversation_history: List[Dict[str, str]] = []
-        self.max_history = 50  # Keep last 50 exchanges
-        self.logs: List[Dict[str, Any]] = []
+        # Use bounded deques to prevent unbounded memory growth
+        # Each exchange is 2 messages (user + assistant), so maxlen=100 stores 50 exchanges
+        self.conversation_history: deque = deque(maxlen=100)
+        # Keep last 1000 log entries with bounded deque
+        self.logs: deque = deque(maxlen=1000)
         
         # Initialize APIs
         self._init_elevenlabs()
         self._init_openai()
+        
+        # Cache the system prompt to avoid rebuilding on every chat call
+        self._cached_system_prompt = None
         
         # EVE's knowledge about the owner
         self.owner_profile = {
@@ -127,7 +132,7 @@ class EVEAgent:
             self._log("OpenAI not available (missing API key or library)", level="warning")
     
     def _log(self, message: str, level: str = "info"):
-        """Log EVE activity"""
+        """Log EVE activity with bounded deque (auto-trims old entries)"""
         log_entry = {
             "timestamp": datetime.now().isoformat(),
             "level": level,
@@ -135,14 +140,14 @@ class EVEAgent:
             "system_code": self.system_code
         }
         self.logs.append(log_entry)
-        
-        # Keep only last 1000 logs
-        if len(self.logs) > 1000:
-            self.logs = self.logs[-1000:]
+        # No manual trimming needed - deque handles it automatically
     
     def get_system_prompt(self) -> str:
-        """Generate EVE's system prompt with personality and capabilities"""
-        return f"""You are EVE, an advanced AI assistant for {self.owner_name}.
+        """Generate EVE's system prompt with personality and capabilities (cached)"""
+        if self._cached_system_prompt is not None:
+            return self._cached_system_prompt
+            
+        self._cached_system_prompt = f"""You are EVE, an advanced AI assistant for {self.owner_name}.
 
 **System Code**: {self.system_code}
 
@@ -173,6 +178,8 @@ class EVEAgent:
 **Current Session**:
 You are actively assisting {self.owner_name} with full system access and capabilities.
 Respond naturally and conversationally while being precise and helpful."""
+        
+        return self._cached_system_prompt
     
     def chat(self, user_message: str, include_history: bool = True) -> str:
         """
@@ -194,9 +201,11 @@ Respond naturally and conversationally while being precise and helpful."""
                 {"role": "system", "content": self.get_system_prompt()}
             ]
             
-            # Add conversation history if requested
+            # Add conversation history if requested (last 10 exchanges = 20 messages)
             if include_history and self.conversation_history:
-                messages.extend(self.conversation_history[-10:])  # Last 10 exchanges
+                # Convert deque to list and slice - more efficient than multiple conversions
+                history_list = list(self.conversation_history)
+                messages.extend(history_list[-20:])  # Last 10 exchanges
             
             # Add current user message
             messages.append({"role": "user", "content": user_message})
@@ -211,16 +220,14 @@ Respond naturally and conversationally while being precise and helpful."""
             
             assistant_message = response.choices[0].message.content
             
-            # Update conversation history
+            # Update conversation history (deque auto-trims when exceeding maxlen)
             self.conversation_history.append({"role": "user", "content": user_message})
             self.conversation_history.append({"role": "assistant", "content": assistant_message})
             
-            # Trim history if needed
-            if len(self.conversation_history) > self.max_history * 2:
-                self.conversation_history = self.conversation_history[-(self.max_history * 2):]
-            
-            # Log the interaction
-            self._log(f"Chat - User: {user_message[:50]}... | EVE: {assistant_message[:50]}...")
+            # Log the interaction with truncation only for logging
+            user_preview = user_message[:50] + "..." if len(user_message) > 50 else user_message
+            eve_preview = assistant_message[:50] + "..." if len(assistant_message) > 50 else assistant_message
+            self._log(f"Chat - User: {user_preview} | EVE: {eve_preview}")
             
             return assistant_message
             
@@ -259,7 +266,7 @@ Respond naturally and conversationally while being precise and helpful."""
     
     def calculate(self, expression: str) -> str:
         """
-        Perform mathematical calculations
+        Perform mathematical calculations using safer ast-based evaluation
         
         Args:
             expression: Math expression to evaluate
@@ -268,19 +275,61 @@ Respond naturally and conversationally while being precise and helpful."""
             Calculation result as string
         """
         try:
-            # Safe evaluation of mathematical expressions
-            # Remove any potentially dangerous functions
-            safe_dict = {
-                '__builtins__': {},
+            import ast
+            import operator
+            
+            # Safer evaluation using AST with allowed operations
+            allowed_operators = {
+                ast.Add: operator.add,
+                ast.Sub: operator.sub,
+                ast.Mult: operator.mul,
+                ast.Div: operator.truediv,
+                ast.Pow: operator.pow,
+                ast.USub: operator.neg,
+                ast.UAdd: operator.pos,
+            }
+            
+            allowed_functions = {
                 'abs': abs,
                 'round': round,
                 'min': min,
                 'max': max,
                 'sum': sum,
-                'pow': pow
+                'pow': pow,
             }
             
-            result = eval(expression, safe_dict, {})
+            def eval_node(node):
+                """Recursively evaluate AST nodes"""
+                if isinstance(node, ast.Constant):  # Python 3.8+
+                    return node.value
+                elif isinstance(node, ast.Num):  # Python 3.7 compatibility
+                    return node.n
+                elif isinstance(node, ast.BinOp):
+                    left = eval_node(node.left)
+                    right = eval_node(node.right)
+                    op_type = type(node.op)
+                    if op_type not in allowed_operators:
+                        raise ValueError(f"Operator {op_type.__name__} not allowed")
+                    return allowed_operators[op_type](left, right)
+                elif isinstance(node, ast.UnaryOp):
+                    operand = eval_node(node.operand)
+                    op_type = type(node.op)
+                    if op_type not in allowed_operators:
+                        raise ValueError(f"Operator {op_type.__name__} not allowed")
+                    return allowed_operators[op_type](operand)
+                elif isinstance(node, ast.Call):
+                    func_name = node.func.id if isinstance(node.func, ast.Name) else None
+                    if func_name not in allowed_functions:
+                        raise ValueError(f"Function {func_name} not allowed")
+                    args = [eval_node(arg) for arg in node.args]
+                    return allowed_functions[func_name](*args)
+                else:
+                    raise ValueError(f"Node type {type(node).__name__} not supported")
+            
+            # Parse and evaluate expression
+            tree = ast.parse(expression, mode='eval')
+            result = eval_node(tree.body)
+            
             self._log(f"Calculation: {expression} = {result}")
             return str(result)
             
@@ -348,12 +397,16 @@ Respond naturally and conversationally while being precise and helpful."""
     
     def clear_history(self):
         """Clear conversation history"""
-        self.conversation_history = []
+        self.conversation_history.clear()
         self._log("Conversation history cleared")
     
     def get_logs(self, limit: int = 100) -> List[Dict[str, Any]]:
-        """Get recent logs"""
-        return self.logs[-limit:]
+        """Get recent logs (converts deque to list for return)"""
+        if limit >= len(self.logs):
+            return list(self.logs)
+        else:
+            # Get last N items from deque efficiently
+            return list(self.logs)[-limit:]
 
 
 # Global EVE instance
