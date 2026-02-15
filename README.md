@@ -1,5 +1,23 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
+## 🚀 Quick Deploy to Vercel (Recommended)
+
+This repository is fully configured for one-click deployment to Vercel as a static web application with the complete interface and all add-ons.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE)
+
+**Features included in Vercel deployment:**
+- ✅ Full dashboard interface with all add-ons (index.html)
+- ✅ 3D Star Map, Live Camera Feeds, Crime Alerts
+- ✅ Interactive Maps, Weather, Traffic Monitoring
+- ✅ Google Sheets & CoinGecko API integration
+- ✅ EVE Command Terminal
+- ✅ Zero configuration - just click deploy!
+
+📖 **Detailed deployment guide:** See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)
+
+---
+
 ## 🌌 CEC Matrix Dashboard (Streamlit)
 
 A complete operational dashboard system for the Conscious Energy Continuum (CEC) Matrix. This dashboard provides real-time monitoring, data visualization, and export capabilities for all CEC system metrics.
