@@ -121,7 +121,7 @@ After deployment, verify:
 
 ### Caching Strategy
 - **NASA Data**: Cached for 1 hour (updates daily anyway)
-- **Google Sheets**: Cached for 60 seconds (real-time feel)
+- **Google Sheets**: Cached for 60 seconds (real-time updates)
 - **Random Data**: Seeded by hour (prevents flicker)
 
 ### Resource Usage

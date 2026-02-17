@@ -49,7 +49,8 @@ Four status cards showing system health:
 ### Google Sheets Integration
 - **Dual Data Sources**: 
   - Primary Sheet: Live, editable data
-  - Frozen Sheet: Locked, secure historical data
+  - Frozen Sheet: Locked, secure historical data (ID: `14nNp33Dk2YoYcVcQI0lUEp208m-VvZboi_Te8jt_flg2NkNm8WieN0sX`)
+  - *Note: This Sheet ID is longer than typical (58 chars vs 44) - verify this is the correct full ID for your deployment*
 - **Auto-Refresh**: Data cached for 60 seconds, auto-updates
 - **Column Validation**: Ensures expected columns exist
 - **Error Handling**: Beautiful error messages with troubleshooting tips

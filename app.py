@@ -348,7 +348,7 @@ with col1:
             OMEGA_LOCK | φ=1.618 | QUANTUM ENTANGLED | 5D HOLOGRAPHIC INTERFACE
         </p>
         <p style="font-size: 14px; color: #00FF88; margin-top: 10px;">
-            🌐 LIVE 24/7 | ∞ NEVER-ENDING | 🔄 AUTO-REFRESH: 30s
+            🌐 LIVE 24/7 | ∞ NEVER-ENDING | 🔄 AUTO-REFRESH: 60s
         </p>
     </div>
     <style>
@@ -1123,7 +1123,7 @@ st.markdown("""
         </div>
         <div style='padding: 8px 16px; background: rgba(0, 255, 255, 0.15); 
                     border: 1px solid #00FFFF; border-radius: 20px;'>
-            🔄 AUTO-REFRESH: 30s
+            🔄 AUTO-REFRESH: 60s
         </div>
         <div style='padding: 8px 16px; background: rgba(157, 0, 255, 0.15); 
                     border: 1px solid #9D00FF; border-radius: 20px;'>
