@@ -479,25 +479,25 @@ with tab1:
         """, unsafe_allow_html=True)
     with col_status2:
         st.markdown("""
-        <div style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.15); 
+        <div role="status" aria-label="Data interface status: Data syncing" style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.15); 
                     border: 2px solid #00FFFF; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);">
-            <div style="font-size: 24px;">🔄</div>
+            <div style="font-size: 24px;" aria-hidden="true">🔄</div>
             <div style="font-size: 12px; color: #00FFFF; font-weight: bold;">DATA SYNCING</div>
         </div>
         """, unsafe_allow_html=True)
     with col_status3:
         st.markdown("""
-        <div style="text-align: center; padding: 12px; background: rgba(157, 0, 255, 0.15); 
+        <div role="status" aria-label="Data interface status: Quantum linked" style="text-align: center; padding: 12px; background: rgba(157, 0, 255, 0.15); 
                     border: 2px solid #9D00FF; border-radius: 12px; box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);">
-            <div style="font-size: 24px;">🌀</div>
+            <div style="font-size: 24px;" aria-hidden="true">🌀</div>
             <div style="font-size: 12px; color: #9D00FF; font-weight: bold;">QUANTUM LINKED</div>
         </div>
         """, unsafe_allow_html=True)
     with col_status4:
         st.markdown("""
-        <div style="text-align: center; padding: 12px; background: rgba(255, 0, 255, 0.15); 
+        <div role="status" aria-label="Data interface status: Secured" style="text-align: center; padding: 12px; background: rgba(255, 0, 255, 0.15); 
                     border: 2px solid #FF00FF; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">
-            <div style="font-size: 24px;">🔐</div>
+            <div style="font-size: 24px;" aria-hidden="true">🔐</div>
             <div style="font-size: 12px; color: #FF00FF; font-weight: bold;">SECURED</div>
         </div>
         """, unsafe_allow_html=True)
