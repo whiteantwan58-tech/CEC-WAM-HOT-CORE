@@ -52,24 +52,31 @@
       100% { filter: contrast(120%) saturate(140%) hue-rotate(0deg) brightness(1); }
     }
 
-    /* Enhanced holographic star dust overlay with animation */
+    /* Enhanced holographic star dust overlay with HD animation */
     .grain {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(circle at 20% 30%, rgba(40,240,255,.12), transparent 40%),
-        radial-gradient(circle at 80% 20%, rgba(188,19,254,.10), transparent 45%),
-        radial-gradient(circle at 60% 80%, rgba(44,255,154,.09), transparent 45%),
+        radial-gradient(circle at 20% 30%, rgba(40,240,255,.15), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(188,19,254,.13), transparent 45%),
+        radial-gradient(circle at 60% 80%, rgba(44,255,154,.12), transparent 45%),
+        radial-gradient(circle at 40% 60%, rgba(255,215,0,.08), transparent 50%),
         linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
       mix-blend-mode: screen;
       animation: grainPulse 8s ease-in-out infinite;
     }
     
     @keyframes grainPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+      0%, 100% { 
+        opacity: 1;
+        filter: blur(1px) brightness(1);
+      }
+      50% { 
+        opacity: 0.75;
+        filter: blur(1.5px) brightness(1.1);
+      }
     }
 
     /* Scrollbar styling */
@@ -164,20 +171,36 @@
       margin-bottom: 12px;
     }
 
-    /* Card styles with enhanced glassmorphism */
+    /* Card styles with enhanced HD glassmorphism */
     .card{
       border-radius: 16px;
-      border: 1px solid rgba(40,240,255,.55);
+      border: 1px solid rgba(40,240,255,.65);
       background: var(--panel);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
-      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px) saturate(200%) brightness(1.1);
+      -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(1.1);
+      box-shadow: var(--shadow), 0 8px 32px rgba(40,240,255,.15), inset 0 1px 1px rgba(255,255,255,.1);
       overflow:hidden;
-      transition: all 0.3s;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(40,240,255,.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
     }
     .card:hover{
-      border-color: rgba(44,255,154,.75);
-      box-shadow: 0 0 25px rgba(40,240,255,.35), 0 0 70px rgba(44,255,154,.15);
+      border-color: rgba(44,255,154,.85);
+      box-shadow: 0 0 35px rgba(40,240,255,.45), 0 0 90px rgba(44,255,154,.25), inset 0 1px 1px rgba(255,255,255,.2);
+      transform: translateY(-2px);
     }
     .card .head{
       display:flex;
@@ -314,18 +337,24 @@
     }
     @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* Corner HUD panels with enhanced glassmorphism */
+    /* Corner HUD panels with enhanced HD glassmorphism */
     .hudPanel{
       position:absolute;
       min-width: 240px;
       border-radius: 12px;
-      border: 1px solid rgba(40,240,255,.35);
-      background: rgba(0, 10, 18, .65);
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(40,240,255,.45);
+      background: rgba(0, 10, 18, .75);
+      box-shadow: var(--shadow), 0 8px 32px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.08);
       padding: 10px;
-      backdrop-filter: blur(16px) saturate(200%);
-      -webkit-backdrop-filter: blur(16px) saturate(200%);
+      backdrop-filter: blur(24px) saturate(220%) brightness(1.05);
+      -webkit-backdrop-filter: blur(24px) saturate(220%) brightness(1.05);
       pointer-events: auto;
+      transition: all 0.3s ease;
+    }
+    .hudPanel:hover {
+      border-color: rgba(40,240,255,.65);
+      background: rgba(0, 10, 18, .85);
+      box-shadow: var(--shadow), 0 12px 48px rgba(40,240,255,.2), inset 0 1px 1px rgba(255,255,255,.12);
     }
     .hudPanel h3{
       font-size: 10px;
@@ -611,21 +640,22 @@
             overflow-x: hidden;
         }
         
-        /* Lock Screen Styles with premium glassmorphism */
+        /* Lock Screen Styles with premium HD glassmorphism */
         #lockScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 26, 46, 0.98) 100%);
+            backdrop-filter: blur(32px) saturate(200%) brightness(1.1);
+            -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(1.1);
             z-index: 9999;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 0 100px rgba(40,240,255,.05);
         }
         
         #lockScreen.hidden {
@@ -734,6 +764,17 @@
             }
         }
         
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 40px rgba(255, 193, 7, 0.7);
+            }
+        }
+        
         .unlock-button {
             background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%);
             border: none;
@@ -753,14 +794,21 @@
         }
         
         .unlock-button.override {
-            background: rgba(255, 193, 7, 0.2);
+            background: rgba(255, 193, 7, 0.25);
             border: 2px solid #FFC107;
             color: #FFC107;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
         }
         
         .unlock-button.override:hover {
-            background: rgba(255, 193, 7, 0.3);
-            box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+            background: rgba(255, 193, 7, 0.4);
+            box-shadow: 0 0 40px rgba(255, 193, 7, 0.7);
+            transform: scale(1.08);
+        }
+        
+        .unlock-button.override-pulse {
+            animation: pulse 2s infinite;
         }
         
         .lock-hint {
@@ -1114,7 +1162,7 @@
                     </div>
                     <div class="stat-item">
                         <div style="font-size: 0.9rem; opacity: 0.8;">Refresh Rate</div>
-                        <div class="stat-value">5 min</div>
+                        <div class="stat-value">30 sec</div>
                     </div>
                     <div class="stat-item">
                         <div style="font-size: 0.9rem; opacity: 0.8;">Status</div>
@@ -2216,8 +2264,6 @@
       eveSay("🗺️ Map & Camera system: INITIALIZING");
     }, 1200);
   </script>
-    }, 1200);
-  </script>
 
   <!-- Real-time functionality modules -->
   <script src="js/starmap.js"></script>
@@ -2272,6 +2318,20 @@ micBtn.onclick = () => {
         
         // Global variable to track manual override timeout
         let manualOverrideTimeout = null;
+        
+        // Helper function to safely escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Helper function to safely set status messages
+        function setStatusMessage(element, message, color) {
+            if (element) {
+                element.innerHTML = `<span style="color: ${color};">${escapeHtml(message)}</span>`;
+            }
+        }
         
         // Helper function to generate random challenge
         function generateRandomChallenge() {
@@ -2376,7 +2436,7 @@ micBtn.onclick = () => {
                     errorMsg = error.message;
                 }
                 
-                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                setStatusMessage(scanStatus, '✗ ' + errorMsg, '#FF4D6D');
                 setupButtons.style.display = 'block';
                 
                 // Show manual override button on registration failure
@@ -2458,27 +2518,64 @@ micBtn.onclick = () => {
                     errorMsg = error.message;
                 }
                 
-                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                setStatusMessage(scanStatus, '✗ ' + errorMsg, '#FF4D6D');
                 biometricButtons.style.display = 'block';
                 
-                // Show manual override button on authentication failure
-                const manualOverrideButton = document.getElementById('manualOverrideButton');
-                if (manualOverrideButton) {
-                    manualOverrideButton.style.display = 'block';
+                // Clear manual override timeout if it's pending to prevent race conditions
+                if (manualOverrideTimeout) {
+                    clearTimeout(manualOverrideTimeout);
+                    manualOverrideTimeout = null;
                 }
                 
-                // Show hint
+                // Always show manual override button on authentication failure with clear visibility
+                const manualOverrideButtonWrapper = document.getElementById('manualOverrideButton');
+                if (manualOverrideButtonWrapper) {
+                    manualOverrideButtonWrapper.style.display = 'block';
+                    // Add pulse animation to the actual button, not the wrapper
+                    const manualOverrideButton = manualOverrideButtonWrapper.querySelector('.unlock-button');
+                    if (manualOverrideButton) {
+                        manualOverrideButton.classList.add('override-pulse');
+                    }
+                }
+                
+                // Show clear hint
                 document.getElementById('lockHint').textContent = 
-                    'Authentication failed. Try again or use Manual Override to proceed.';
+                    'Authentication failed. Use Manual Override button below to proceed without biometrics.';
             }
         }
         
         // Manual override function to bypass biometric authentication
         function manualOverride() {
-            if (confirm('⚠️ SECURITY WARNING\n\nManual override will bypass biometric authentication and grant access to the dashboard.\n\nOnly use this if:\n• Biometric hardware is not available\n• Authentication is not working\n• You are in development/troubleshooting mode\n\nProceed with manual override?')) {
-                console.log('Manual override activated by user');
-                unlockDashboard();
+            const scanStatus = document.getElementById('scanStatus');
+            scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Manual Override Requested</span>';
+            
+            // Log override request for security audit
+            console.log('Manual override requested by user at', new Date().toISOString());
+            localStorage.setItem('last_manual_override', new Date().toISOString());
+            
+            // Require explicit user confirmation before bypassing biometric auth
+            const confirmed = window.confirm(
+                'Manual override will bypass biometric authentication and unlock the dashboard.\n\n' +
+                'Only proceed if you are an authorized operator and physical security is assured.\n\n' +
+                'Do you want to continue with manual override?'
+            );
+            
+            if (!confirmed) {
+                // User cancelled manual override; do not unlock the dashboard
+                scanStatus.innerHTML = '<span style="color: #FF5252;">✕ Manual Override Cancelled</span>';
+                console.log('Manual override cancelled by user at', new Date().toISOString());
+                return;
             }
+            
+            // Show confirmation message
+            setTimeout(() => {
+                scanStatus.innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED VIA MANUAL OVERRIDE</span>';
+            }, 500);
+            
+            // Unlock dashboard after explicit confirmation
+            setTimeout(() => {
+                unlockDashboard();
+            }, 1200);
         }
         
         // Unlock the dashboard after successful authentication
@@ -2764,11 +2861,40 @@ micBtn.onclick = () => {
             }
         }
         
+        // Data masking function for sensitive fields
+        function maskSensitiveData(value, fieldName) {
+            // List of sensitive field patterns
+            const sensitivePatterns = [
+                /key/i, /password/i, /secret/i, /token/i, /api/i,
+                /wallet/i, /private/i, /seed/i, /pin/i, /ssn/i
+            ];
+            
+            // Check if field name matches sensitive patterns
+            const isSensitive = sensitivePatterns.some(pattern => pattern.test(fieldName));
+            
+            if (isSensitive && value && value.length > 0) {
+                // Mask based on length for better security
+                if (value.length <= 2) {
+                    return '**';
+                } else if (value.length <= 4) {
+                    return '****';
+                } else if (value.length <= 8) {
+                    return value.slice(0, 1) + '******' + value.slice(-1);
+                } else {
+                    // Show only first 2 and last 2 characters for longer values
+                    return value.slice(0, 2) + '******' + value.slice(-2);
+                }
+            }
+            
+            return value;
+        }
+        
         function displayData(data, headers) {
             let html = '<table class="data-table"><thead><tr>';
             
             headers.forEach(header => {
-                html += `<th>${header}</th>`;
+                // Escape header text to prevent XSS
+                html += `<th>${escapeHtml(header)}</th>`;
             });
             html += '</tr></thead><tbody>';
             
@@ -2776,7 +2902,12 @@ micBtn.onclick = () => {
                 const statusClass = getStatusClass(row.Status || row.status || '');
                 html += `<tr class="${statusClass}">`;
                 headers.forEach(header => {
-                    html += `<td>${row[header] || ''}</td>`;
+                    // Use nullish coalescing to preserve falsy values like 0
+                    const rawValue = row[header] ?? '';
+                    // Apply data masking for sensitive fields in UI
+                    const displayValue = maskSensitiveData(rawValue, header);
+                    // Escape display value to prevent XSS
+                    html += `<td>${escapeHtml(String(displayValue))}</td>`;
                 });
                 html += '</tr>';
             });
@@ -3034,13 +3165,13 @@ micBtn.onclick = () => {
             
             initStarMap();
             
-            // Auto-refresh every 5 minutes only if page is visible
-            // Saves bandwidth and API calls when user is on another tab
+            // Auto-refresh every 30 seconds for real-time data updates
+            // Only refresh if page is visible to save bandwidth
             setInterval(() => {
                 if (!document.hidden) {
                     refreshData();
                 }
-            }, 300000);  // 300000ms = 5 minutes
+            }, 30000);  // 30000ms = 30 seconds
             
             // Also refresh when page becomes visible after being hidden
             document.addEventListener('visibilitychange', () => {
