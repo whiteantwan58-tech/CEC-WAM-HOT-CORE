@@ -66,7 +66,6 @@
         linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
       mix-blend-mode: screen;
       animation: grainPulse 8s ease-in-out infinite;
-      filter: blur(1px);
     }
     
     @keyframes grainPulse {
@@ -806,6 +805,10 @@
             background: rgba(255, 193, 7, 0.4);
             box-shadow: 0 0 40px rgba(255, 193, 7, 0.7);
             transform: scale(1.08);
+        }
+        
+        .unlock-button.override-pulse {
+            animation: pulse 2s infinite;
         }
         
         .lock-hint {
@@ -2508,7 +2511,7 @@ micBtn.onclick = () => {
                 const manualOverrideButton = document.getElementById('manualOverrideButton');
                 if (manualOverrideButton) {
                     manualOverrideButton.style.display = 'block';
-                    manualOverrideButton.style.animation = 'pulse 2s infinite';
+                    manualOverrideButton.classList.add('override-pulse');
                 }
                 
                 // Show clear hint
@@ -2831,10 +2834,18 @@ micBtn.onclick = () => {
             // Check if field name matches sensitive patterns
             const isSensitive = sensitivePatterns.some(pattern => pattern.test(fieldName));
             
-            if (isSensitive && value && value.length > 4) {
-                // Show only first 2 and last 2 characters
-                const masked = value.slice(0, 2) + '******' + value.slice(-2);
-                return masked;
+            if (isSensitive && value && value.length > 0) {
+                // Mask based on length for better security
+                if (value.length <= 2) {
+                    return '**';
+                } else if (value.length <= 4) {
+                    return '****';
+                } else if (value.length <= 8) {
+                    return value.slice(0, 1) + '******' + value.slice(-1);
+                } else {
+                    // Show only first 2 and last 2 characters for longer values
+                    return value.slice(0, 2) + '******' + value.slice(-2);
+                }
             }
             
             return value;
