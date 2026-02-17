@@ -917,19 +917,17 @@ with tab6:
         </div>
     </div>
     <style>
-        @keyframes brainPulse {
-            0%, 100% { 
+        @keyframes brainPulse {{
+            0%, 100% {{ 
                 transform: scale(1); 
                 filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.6));
-            }
-            50% { 
+            }}
+            50% {{ 
                 transform: scale(1.1); 
                 filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.9));
-            }
-        }
+            }}
+        }}
     </style>
-    """, unsafe_allow_html=True)
-    </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
@@ -1138,5 +1136,4 @@ st.markdown("""
         ⚡ Powered by: Streamlit | Plotly | Pandas | NumPy
     </div>
 </div>
-""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
