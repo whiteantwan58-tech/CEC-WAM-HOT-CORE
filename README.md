@@ -1,6 +1,37 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
-## 🔮 NEW: Standalone HTML Dashboard (Recommended)
+## 🚨 DEPLOYMENT QUICK START
+
+**Having issues with blank screens or "23 open sessions"?**
+
+→ **See: [DEPLOYMENT_QUICK_START.md](./DEPLOYMENT_QUICK_START.md)** for instant fixes!
+
+### Quick Links:
+- **Streamlit Cloud Deployment:** [STREAMLIT_DEPLOYMENT.md](./STREAMLIT_DEPLOYMENT.md)
+- **Static HTML Deployment:** [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+- **Repository Setup:** [DEPLOYMENT_QUICK_START.md](./DEPLOYMENT_QUICK_START.md)
+
+---
+
+## 🔮 Deployment Options
+
+This repository supports **two types of deployments**:
+
+### 1. **Streamlit Cloud** (Dynamic Python Dashboard) - RECOMMENDED
+- **Entry Point:** `streamlit_app.py` 
+- **Best For:** Interactive Python dashboards with live data
+- **Features:** Real-time Google Sheets, NASA API, PSI prices, dynamic charts
+- **Guide:** [STREAMLIT_DEPLOYMENT.md](./STREAMLIT_DEPLOYMENT.md)
+
+### 2. **Static HTML Dashboard** (GitHub Pages / Vercel)
+- **Entry Point:** `index.html`
+- **Best For:** Fast, static HTML interface
+- **Features:** Embedded data, CSV exports, responsive design
+- **Guide:** [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+
+---
+
+## 🔮 Standalone HTML Dashboard
 
 **A comprehensive, standalone HTML dashboard that replaces the Streamlit interface with better data syncing and display.**
 
