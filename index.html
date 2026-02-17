@@ -2319,6 +2319,20 @@ micBtn.onclick = () => {
         // Global variable to track manual override timeout
         let manualOverrideTimeout = null;
         
+        // Helper function to safely escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Helper function to safely set status messages
+        function setStatusMessage(element, message, color) {
+            if (element) {
+                element.innerHTML = `<span style="color: ${color};">${escapeHtml(message)}</span>`;
+            }
+        }
+        
         // Helper function to generate random challenge
         function generateRandomChallenge() {
             const array = new Uint8Array(32);
@@ -2422,7 +2436,7 @@ micBtn.onclick = () => {
                     errorMsg = error.message;
                 }
                 
-                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                setStatusMessage(scanStatus, '✗ ' + errorMsg, '#FF4D6D');
                 setupButtons.style.display = 'block';
                 
                 // Show manual override button on registration failure
@@ -2504,7 +2518,7 @@ micBtn.onclick = () => {
                     errorMsg = error.message;
                 }
                 
-                scanStatus.innerHTML = '<span style="color: #FF4D6D;">✗ ' + errorMsg + '</span>';
+                setStatusMessage(scanStatus, '✗ ' + errorMsg, '#FF4D6D');
                 biometricButtons.style.display = 'block';
                 
                 // Always show manual override button on authentication failure with clear visibility
