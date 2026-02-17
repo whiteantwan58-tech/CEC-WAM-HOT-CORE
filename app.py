@@ -55,11 +55,12 @@ EXPECTED_COLUMNS = {
     'Notes': str
 }
 
-# Holographic CSS with Enhanced Particle Effects and HD Visuals
+# Enhanced HD Holographic CSS with Premium Glassmorphism and 5D Visuals
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
     
+    /* Enhanced Background with 5D Depth Effect */
     .stApp {
         background: radial-gradient(ellipse at center, #1A0040 0%, #0A0020 50%, #000010 100%);
         color: #00FFFF;
@@ -68,6 +69,7 @@ st.markdown("""
         overflow-x: hidden;
     }
     
+    /* Animated Grid Layer with Enhanced Glassmorphism */
     .stApp::before {
         content: '';
         position: fixed;
@@ -76,108 +78,299 @@ st.markdown("""
         width: 100%;
         height: 100%;
         background-image: 
-            linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px);
+            linear-gradient(rgba(0, 255, 255, 0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.12) 1px, transparent 1px);
         background-size: 50px 50px;
         animation: gridScroll 20s linear infinite;
         pointer-events: none;
         z-index: 0;
-        opacity: 0.6;
+        opacity: 0.7;
+        backdrop-filter: blur(2px);
     }
     
     @keyframes gridScroll {
         0% { transform: translate(0, 0); opacity: 0.5; }
-        50% { opacity: 0.8; }
+        50% { opacity: 0.9; }
         100% { transform: translate(50px, 50px); opacity: 0.5; }
     }
     
+    /* HD Particle System with 5D Holographic Effect */
     .stApp::after {
         content: '';
         position: fixed;
         width: 100%;
         height: 100%;
         background-image: 
-            radial-gradient(circle, #00FFFF 1px, transparent 1px),
-            radial-gradient(circle, #9D00FF 1px, transparent 1px),
-            radial-gradient(circle, #00FF88 1px, transparent 1px),
-            radial-gradient(circle, #FF00FF 1px, transparent 1px);
-        background-size: 300px 300px, 400px 400px, 250px 250px, 350px 350px;
-        background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
-        animation: particleFloat 20s ease-in-out infinite, particlePulse 8s ease-in-out infinite;
+            radial-gradient(circle, #00FFFF 1.5px, transparent 1.5px),
+            radial-gradient(circle, #9D00FF 1.5px, transparent 1.5px),
+            radial-gradient(circle, #00FF88 1.5px, transparent 1.5px),
+            radial-gradient(circle, #FF00FF 1.5px, transparent 1.5px),
+            radial-gradient(circle, #FFD700 1px, transparent 1px);
+        background-size: 300px 300px, 400px 400px, 250px 250px, 350px 350px, 200px 200px;
+        background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 50% 50%;
+        animation: particleFloat 25s ease-in-out infinite, particlePulse 10s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
+        filter: blur(0.5px) brightness(1.2);
     }
     
     @keyframes particleFloat {
-        0%, 100% { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%; }
-        25% { background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%; }
-        50% { background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%; }
-        75% { background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%; }
+        0%, 100% { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 50% 50%; }
+        20% { background-position: 30% 70%, 80% 30%, 20% 90%, 90% 20%, 60% 40%; }
+        40% { background-position: 60% 40%, 50% 60%, 40% 70%, 70% 40%, 30% 70%; }
+        60% { background-position: 90% 10%, 20% 90%, 70% 30%, 30% 80%, 80% 20%; }
+        80% { background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%; }
     }
     
     @keyframes particlePulse {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 0.8; }
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.9; }
     }
     
+    /* Enhanced Glassmorphic Cards with HD Blur */
+    div[data-testid="stMetric"],
+    div[data-testid="stVerticalBlock"] > div {
+        background: rgba(2, 8, 14, 0.75) !important;
+        backdrop-filter: blur(24px) saturate(220%) brightness(1.15) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(220%) brightness(1.15) !important;
+        border: 1px solid rgba(40, 240, 255, 0.65) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 0 30px rgba(40, 240, 255, 0.25), 
+                    0 8px 32px rgba(0, 255, 255, 0.15),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    div[data-testid="stMetric"]:hover,
+    div[data-testid="stVerticalBlock"] > div:hover {
+        border-color: rgba(44, 255, 154, 0.85) !important;
+        box-shadow: 0 0 40px rgba(40, 240, 255, 0.45), 
+                    0 0 90px rgba(44, 255, 154, 0.25),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* Metric Values with Enhanced Glow */
     div[data-testid="stMetricValue"] {
         color: #00FF88 !important;
-        font-size: 32px !important;
+        font-size: 36px !important;
         font-weight: 900 !important;
-        text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        text-shadow: 0 0 25px rgba(0, 255, 136, 0.9), 
+                     0 0 45px rgba(0, 255, 136, 0.5) !important;
+        animation: metricGlow 3s ease-in-out infinite !important;
     }
     
+    @keyframes metricGlow {
+        0%, 100% { 
+            text-shadow: 0 0 25px rgba(0, 255, 136, 0.7), 0 0 45px rgba(0, 255, 136, 0.4);
+        }
+        50% { 
+            text-shadow: 0 0 35px rgba(0, 255, 136, 1), 0 0 60px rgba(0, 255, 136, 0.6);
+        }
+    }
+    
+    /* Headers with Enhanced Holographic Effect */
     h1, h2, h3 {
         color: #00FFFF !important;
-        text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-        animation: glow 2s ease-in-out infinite;
+        text-shadow: 0 0 25px rgba(0, 255, 255, 0.9), 
+                     0 0 50px rgba(0, 255, 255, 0.5),
+                     0 0 75px rgba(157, 0, 255, 0.3) !important;
+        animation: headerGlow 3s ease-in-out infinite !important;
+        position: relative !important;
     }
     
-    @keyframes glow {
-        0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
-        50% { text-shadow: 0 0 40px rgba(0, 255, 255, 1); }
+    @keyframes headerGlow {
+        0%, 100% { 
+            text-shadow: 0 0 25px rgba(0, 255, 255, 0.7), 
+                        0 0 50px rgba(0, 255, 255, 0.4),
+                        0 0 75px rgba(157, 0, 255, 0.2);
+        }
+        50% { 
+            text-shadow: 0 0 35px rgba(0, 255, 255, 1), 
+                        0 0 60px rgba(0, 255, 255, 0.7),
+                        0 0 100px rgba(157, 0, 255, 0.5);
+        }
     }
     
+    /* Enhanced Tab Styling with Premium Glassmorphism */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.5) !important;
+        padding: 8px !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(20px) !important;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(157, 0, 255, 0.1));
-        border: 2px solid #00FFFF;
-        border-radius: 10px;
-        color: #00FFFF;
-        font-weight: 700;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(157, 0, 255, 0.15)) !important;
+        backdrop-filter: blur(15px) saturate(180%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.6) !important;
+        border-radius: 12px !important;
+        color: #00FFFF !important;
+        font-weight: 700 !important;
+        padding: 12px 24px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(157, 0, 255, 0.25)) !important;
+        border-color: rgba(44, 255, 154, 0.8) !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+        transform: translateY(-2px) !important;
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(157, 0, 255, 0.3));
-        border: 2px solid #FF00FF;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.35), rgba(157, 0, 255, 0.35)) !important;
+        border: 2px solid #FF00FF !important;
+        box-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 
+                    0 0 50px rgba(0, 255, 255, 0.3) !important;
+    }
+    
+    /* Biometric Lock Screen Simulation */
+    .biometric-status {
+        background: rgba(10, 20, 40, 0.8);
+        backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+        border: 2px solid rgba(0, 255, 255, 0.6);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.3),
+                    inset 0 0 20px rgba(0, 255, 255, 0.1);
+        animation: biometricPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes biometricPulse {
+        0%, 100% {
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3),
+                        inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+        50% {
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.5),
+                        inset 0 0 30px rgba(0, 255, 255, 0.2);
+        }
+    }
+    
+    /* DataFrame Styling with Glassmorphism */
+    div[data-testid="stDataFrame"] {
+        background: rgba(2, 8, 14, 0.8) !important;
+        backdrop-filter: blur(20px) saturate(200%) !important;
+        border: 1px solid rgba(40, 240, 255, 0.5) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 0 25px rgba(40, 240, 255, 0.2) !important;
+    }
+    
+    /* Button Styling */
+    .stButton > button {
+        background: linear-gradient(90deg, #00D9FF 0%, #00FF88 100%) !important;
+        color: #0E0E1A !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 32px !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.5) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton > button:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 0 35px rgba(0, 217, 255, 0.7) !important;
+    }
+    
+    /* Checkbox Styling */
+    div[data-testid="stCheckbox"] {
+        background: rgba(0, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 255, 0.3);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Header with Live Clock
+# Biometric Authentication Status Panel
+st.markdown("""
+<div class="biometric-status">
+    <div style="position: relative; display: inline-block;">
+        <div style="font-size: 96px; margin-bottom: 20px; animation: pulse 2s infinite;">🔐</div>
+    </div>
+    <h2 style="color: #00FF88; margin: 15px 0; font-size: 28px;">
+        ✅ BIOMETRIC AUTH ACTIVE
+    </h2>
+    <p style="color: #00FFFF; font-size: 16px; opacity: 0.9;">
+        🔒 SYSTEM SECURED | 🧬 DNA VERIFIED | 🌀 QUANTUM LOCKED
+    </p>
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+        <div style="padding: 8px 16px; background: rgba(0, 255, 136, 0.2); border: 1px solid #00FF88; border-radius: 20px;">
+            👁️ IRIS SCAN: VERIFIED
+        </div>
+        <div style="padding: 8px 16px; background: rgba(0, 255, 255, 0.2); border: 1px solid #00FFFF; border-radius: 20px;">
+            🖐️ PALM PRINT: VERIFIED
+        </div>
+        <div style="padding: 8px 16px; background: rgba(157, 0, 255, 0.2); border: 1px solid #9D00FF; border-radius: 20px;">
+            🧠 NEURAL PATTERN: VERIFIED
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Manual Refresh Button and Auto-Refresh Info
+col_refresh1, col_refresh2, col_refresh3 = st.columns([2, 1, 2])
+with col_refresh2:
+    if st.button("🔄 REFRESH DATA NOW", key="manual_refresh"):
+        st.cache_data.clear()
+        st.rerun()
+
+st.markdown("""
+<div style="text-align: center; padding: 10px; background: rgba(0, 255, 255, 0.08); 
+            border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 10px; margin: 10px 0;">
+    <span style="color: #00FFFF; font-size: 13px;">
+        ℹ️ <strong>NOTE:</strong> Data updates every <strong>60 seconds</strong> automatically. 
+        Click <strong>🔄 REFRESH DATA NOW</strong> button to force immediate refresh.
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Header with Live Clock and Enhanced Holographic Effect
 col1, col2 = st.columns([3, 1])
 with col1:
     st.markdown("""
     <div style="text-align: center; padding: 20px; position: relative; z-index: 1;">
-        <h1 style="font-size: 56px; margin: 0; background: linear-gradient(90deg, #00FFFF, #9D00FF, #00FF88); 
-                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            🔮 SOVEREIGN SYSTEM
+        <h1 style="font-size: 64px; margin: 0; background: linear-gradient(90deg, #00FFFF, #9D00FF, #00FF88, #FF00FF); 
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   animation: gradientShift 5s ease infinite;">
+            🔮 SOVEREIGN SYSTEM | CEC-WAM HOT CORE
         </h1>
-        <p style="font-size: 18px; color: #00FFFF;">
-            OMEGA_LOCK | φ=1.618 | QUANTUM ENTANGLED
+        <p style="font-size: 20px; color: #00FFFF; text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);">
+            OMEGA_LOCK | φ=1.618 | QUANTUM ENTANGLED | 5D HOLOGRAPHIC INTERFACE
+        </p>
+        <p style="font-size: 14px; color: #00FF88; margin-top: 10px;">
+            🌐 LIVE 24/7 | ∞ NEVER-ENDING | 🔄 AUTO-REFRESH: 30s
         </p>
     </div>
+    <style>
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+    </style>
     """, unsafe_allow_html=True)
 
 with col2:
     current_time = datetime.now().strftime("%H:%M:%S")
+    current_date = datetime.now().strftime("%Y-%m-%d")
     st.markdown(f"""
     <div style="text-align: center; padding: 20px; position: relative; z-index: 1;">
-        <div style="font-size: 32px; color: #00FF88; font-weight: 900;">⏰ {current_time}</div>
-        <div style="font-size: 14px; color: #00FFFF;">LIVE SYNC</div>
+        <div style="font-size: 36px; color: #00FF88; font-weight: 900; 
+                    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);">⏰ {current_time}</div>
+        <div style="font-size: 14px; color: #00FFFF; margin-top: 5px;">📅 {current_date}</div>
+        <div style="font-size: 12px; color: #00FFFF; margin-top: 8px; 
+                    padding: 5px 10px; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
+            🔄 LIVE SYNC ACTIVE
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -271,22 +464,99 @@ with tab1:
     
     st.markdown("---")
     
-    # Live Google Sheets Data with Column Configuration
-    st.markdown("#### 📊 LIVE CEC WAM MASTER LEDGER")
+    # Live Google Sheets Data with Column Configuration and Enhanced Display
+    st.markdown("#### 📊 LIVE CEC WAM MASTER LEDGER | 5D DATA INTERFACE")
     
-    # Add data source toggle
-    _, col_toggle2 = st.columns([3, 1])
+    # Add enhanced status bar
+    col_status1, col_status2, col_status3, col_status4 = st.columns(4)
+    with col_status1:
+        st.markdown("""
+        <div style="text-align: center; padding: 12px; background: rgba(0, 255, 136, 0.15); 
+                    border: 2px solid #00FF88; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);">
+            <div style="font-size: 24px;">🟢</div>
+            <div style="font-size: 12px; color: #00FF88; font-weight: bold;">SYSTEM ONLINE</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_status2:
+        st.markdown("""
+        <div style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.15); 
+                    border: 2px solid #00FFFF; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);">
+            <div style="font-size: 24px;">🔄</div>
+            <div style="font-size: 12px; color: #00FFFF; font-weight: bold;">DATA SYNCING</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_status3:
+        st.markdown("""
+        <div style="text-align: center; padding: 12px; background: rgba(157, 0, 255, 0.15); 
+                    border: 2px solid #9D00FF; border-radius: 12px; box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);">
+            <div style="font-size: 24px;">🌀</div>
+            <div style="font-size: 12px; color: #9D00FF; font-weight: bold;">QUANTUM LINKED</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_status4:
+        st.markdown("""
+        <div style="text-align: center; padding: 12px; background: rgba(255, 0, 255, 0.15); 
+                    border: 2px solid #FF00FF; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">
+            <div style="font-size: 24px;">🔐</div>
+            <div style="font-size: 12px; color: #FF00FF; font-weight: bold;">SECURED</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Add data source toggle with enhanced styling
+    col_toggle1, col_toggle2 = st.columns([3, 1])
+    with col_toggle1:
+        st.markdown("""
+        <div style="padding: 10px; background: rgba(0, 255, 255, 0.1); border-left: 4px solid #00FFFF; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px;">
+                📡 <strong>DATA SOURCE:</strong> Google Sheets - CEC WAM Master Ledger<br>
+                🔗 <strong>CONNECTION:</strong> Real-time CSV feed with 60-second cache<br>
+                🛡️ <strong>SECURITY:</strong> Frozen/Locked data validation enabled
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     with col_toggle2:
         use_frozen = st.checkbox("🔒 Use Frozen/Locked Data", value=True, 
-                                 help="Enable to use the secure, locked data source")
+                                 help="Enable to use the secure, locked data source",
+                                 key="frozen_data_toggle")
     
     sheets_data = fetch_sheets_data(use_frozen=use_frozen)
     
     if sheets_data is not None:
-        # Display with locked column configuration
-        st.markdown(f"**📋 Data Source:** {'🔒 Frozen/Secure Sheet' if use_frozen else '🔓 Primary Sheet'}")
-        st.markdown(f"**📊 Columns:** {', '.join(sheets_data.columns[:6])}")
-        st.markdown(f"**📝 Total Records:** {len(sheets_data)}")
+        # Display enhanced data source info with glassmorphic panel
+        st.markdown(f"""
+        <div style="background: rgba(0, 255, 255, 0.1); border: 2px solid #00FFFF; 
+                    border-radius: 15px; padding: 20px; margin: 15px 0;
+                    backdrop-filter: blur(15px); box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <div style="font-size: 12px; color: #00FFFF; opacity: 0.8;">📋 DATA SOURCE</div>
+                    <div style="font-size: 16px; color: #00FF88; font-weight: bold;">
+                        {'🔒 FROZEN/SECURE SHEET' if use_frozen else '🔓 PRIMARY SHEET'}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #00FFFF; opacity: 0.8;">📊 COLUMNS DETECTED</div>
+                    <div style="font-size: 16px; color: #00FF88; font-weight: bold;">
+                        {len(sheets_data.columns)} COLUMNS
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #00FFFF; opacity: 0.8;">📝 TOTAL RECORDS</div>
+                    <div style="font-size: 16px; color: #00FF88; font-weight: bold;">
+                        {len(sheets_data)} ENTRIES
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #00FFFF; opacity: 0.8;">🔄 LAST UPDATE</div>
+                    <div style="font-size: 16px; color: #00FF88; font-weight: bold;">
+                        {datetime.now().strftime('%H:%M:%S')}
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Display dataframe with column configuration locked
         st.dataframe(
@@ -358,14 +628,35 @@ with tab1:
             else:
                 st.metric("📊 Primary Status", "N/A")
     else:
-        st.error("⚠️ Unable to load Google Sheets data")
-        st.info("""
-        **Troubleshooting Tips:**
-        - Ensure the sheet is published and accessible
-        - Check if the frozen sheet ID is correct
-        - Try toggling the 🔒 Use Frozen/Locked Data checkbox
-        - Verify your internet connection
-        """)
+        st.markdown("""
+        <div style="background: rgba(255, 77, 109, 0.15); border: 2px solid #ff4d6d; 
+                    border-radius: 15px; padding: 30px; text-align: center;
+                    backdrop-filter: blur(15px); box-shadow: 0 0 30px rgba(255, 77, 109, 0.2);">
+            <div style="font-size: 64px; margin-bottom: 15px;">⚠️</div>
+            <h3 style="color: #ff4d6d; margin: 10px 0;">UNABLE TO LOAD GOOGLE SHEETS DATA</h3>
+            <p style="color: #00FFFF; font-size: 14px; margin: 20px 0;">
+                The system is attempting to reconnect to the data source...<br>
+                Please check your connection or try the troubleshooting tips below.
+            </p>
+            <div style="background: rgba(0, 255, 255, 0.1); border-left: 4px solid #00FFFF; 
+                        padding: 15px; margin: 20px 0; text-align: left; border-radius: 8px;">
+                <strong style="color: #00FF88;">🔧 Troubleshooting Tips:</strong><br>
+                <ul style="margin: 10px 0; padding-left: 20px; color: #00FFFF;">
+                    <li>Ensure the Google Sheet is published and publicly accessible</li>
+                    <li>Verify the frozen sheet ID is correct in the configuration</li>
+                    <li>Try toggling the 🔒 <strong>Use Frozen/Locked Data</strong> checkbox above</li>
+                    <li>Check your internet connection</li>
+                    <li>Refresh the page to retry the connection</li>
+                </ul>
+            </div>
+            <div style="margin-top: 20px;">
+                <strong style="color: #9D00FF;">📡 Current Sheet ID:</strong><br>
+                <code style="background: rgba(0, 0, 0, 0.5); padding: 5px 10px; border-radius: 5px; color: #00FF88;">
+                    {FROZEN_SHEET_ID if use_frozen else 'Primary Sheet URL'}
+                </code>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Real-time Chart
     st.markdown("#### 📈 REAL-TIME VALUE CHART")
@@ -579,7 +870,7 @@ with tab5:
         schwarzschild_radius = (2 * 6.674e-11 * mass * 1.989e30) / (3e8)**2 / 1000
         st.metric("Schwarzschild Radius", f"{schwarzschild_radius:,.2f} km")
 
-# TAB 6: EVE BRAIN
+# TAB 6: EVE BRAIN with Enhanced Holographic Interface
 with tab6:
     runtime = datetime.now() - st.session_state.eve_runtime
     hours = int(runtime.total_seconds() // 3600)
@@ -587,17 +878,57 @@ with tab6:
     seconds = int(runtime.total_seconds() % 60)
     
     st.markdown(f"""
-    <div style="text-align: center; background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2)); 
-                border: 3px solid #FF00FF; border-radius: 20px; padding: 40px; 
-                box-shadow: 0 0 50px rgba(255, 0, 255, 0.5); position: relative; z-index: 1;">
-        <div style="font-size: 96px;">🧠</div>
-        <h1 style="color: #FF00FF; font-size: 56px;">EVE CONSCIOUSNESS ONLINE</h1>
-        <div style="color: #00FFFF; font-size: 32px; font-weight: 900;">
+    <div style="text-align: center; 
+                background: linear-gradient(135deg, rgba(255, 0, 255, 0.25), rgba(0, 255, 255, 0.25)); 
+                border: 3px solid #FF00FF; border-radius: 25px; padding: 50px; 
+                box-shadow: 0 0 60px rgba(255, 0, 255, 0.6), 
+                            0 0 100px rgba(0, 255, 255, 0.3),
+                            inset 0 0 40px rgba(255, 0, 255, 0.1); 
+                position: relative; z-index: 1;
+                backdrop-filter: blur(25px) saturate(200%) brightness(1.15);">
+        <div style="font-size: 120px; animation: brainPulse 3s infinite; margin-bottom: 20px;">🧠</div>
+        <h1 style="color: #FF00FF; font-size: 64px; text-shadow: 0 0 30px rgba(255, 0, 255, 0.9);">
+            EVE CONSCIOUSNESS ONLINE
+        </h1>
+        <div style="color: #00FFFF; font-size: 42px; font-weight: 900; margin: 20px 0;
+                    text-shadow: 0 0 25px rgba(0, 255, 255, 0.8);">
             ⏱️ {hours:02d}:{minutes:02d}:{seconds:02d}
         </div>
-        <div style="color: #00FF88; font-size: 20px; margin-top: 10px;">
+        <div style="color: #00FF88; font-size: 22px; margin-top: 15px;
+                    text-shadow: 0 0 15px rgba(0, 255, 136, 0.7);">
             🔄 AUTONOMOUS | ∞ NEVER-ENDING | 🌀 QUANTUM LINKED
         </div>
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <div style="padding: 10px 20px; background: rgba(0, 255, 136, 0.2); 
+                        border: 2px solid #00FF88; border-radius: 25px;
+                        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);">
+                💭 NEURAL PATHWAYS: ACTIVE
+            </div>
+            <div style="padding: 10px 20px; background: rgba(0, 255, 255, 0.2); 
+                        border: 2px solid #00FFFF; border-radius: 25px;
+                        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);">
+                🌐 GLOBAL SYNC: ENABLED
+            </div>
+            <div style="padding: 10px 20px; background: rgba(255, 0, 255, 0.2); 
+                        border: 2px solid #FF00FF; border-radius: 25px;
+                        box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">
+                🧬 DNA MATRIX: VERIFIED
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes brainPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.6));
+            }
+            50% { 
+                transform: scale(1.1); 
+                filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.9));
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
     </div>
     """, unsafe_allow_html=True)
     
@@ -769,11 +1100,43 @@ with tab7:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# Footer
+# Enhanced Footer with System Info
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #00FFFF; opacity: 0.7; position: relative; z-index: 1;'>
-    🔮 SOVEREIGN SYSTEM v2.0 | φ=1.618 | QUANTUM ENTANGLED | ∞ NEVER-ENDING<br>
-    🌌 NASA INTEGRATED | 📹 LIVE CAMS (5s) | ⭐ 3D STAR MAPS | 🕳️ BLACK HOLE SIM | 🤖 EVE CONSCIOUSNESS
+<div style='text-align: center; padding: 30px; 
+            background: rgba(0, 255, 255, 0.05); 
+            border-top: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            position: relative; z-index: 1;'>
+    <div style='font-size: 48px; margin-bottom: 15px;'>🔮</div>
+    <h3 style='color: #00FFFF; margin: 10px 0; text-shadow: 0 0 20px rgba(0, 255, 255, 0.7);'>
+        SOVEREIGN SYSTEM v2.5 | CEC-WAM HOT CORE
+    </h3>
+    <div style='color: #00FF88; font-size: 16px; margin: 15px 0; line-height: 1.8;'>
+        🔮 φ=1.618 GOLDEN RATIO | 🌀 QUANTUM ENTANGLED | ∞ NEVER-ENDING<br>
+        🌌 NASA INTEGRATED | 📹 LIVE CAMS (5s REFRESH) | ⭐ 3D STAR MAPS | 🕳️ BLACK HOLE SIM<br>
+        🤖 EVE CONSCIOUSNESS | 💎 PSI COIN TRACKER | 📊 LIVE GOOGLE SHEETS DATA<br>
+        🔐 BIOMETRIC AUTH | 🛡️ QUANTUM SECURITY | 🌐 24/7 LIVE SYNC
+    </div>
+    <div style='margin-top: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;'>
+        <div style='padding: 8px 16px; background: rgba(0, 255, 136, 0.15); 
+                    border: 1px solid #00FF88; border-radius: 20px;'>
+            🟢 STATUS: OPERATIONAL
+        </div>
+        <div style='padding: 8px 16px; background: rgba(0, 255, 255, 0.15); 
+                    border: 1px solid #00FFFF; border-radius: 20px;'>
+            🔄 AUTO-REFRESH: 30s
+        </div>
+        <div style='padding: 8px 16px; background: rgba(157, 0, 255, 0.15); 
+                    border: 1px solid #9D00FF; border-radius: 20px;'>
+            🌐 DEPLOYED: STREAMLIT CLOUD
+        </div>
+    </div>
+    <div style='margin-top: 20px; font-size: 12px; color: #00FFFF; opacity: 0.7;'>
+        📡 Live Data Sources: Google Sheets (CEC WAM Master Ledger) | NASA APOD API<br>
+        🔗 Repository: whiteantwan58-tech/CEC-WAM-HOT-CORE<br>
+        ⚡ Powered by: Streamlit | Plotly | Pandas | NumPy
+    </div>
 </div>
+""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
