@@ -1,14 +1,17 @@
 # CEC-WAM LIVE — EVE HEI (PWA)
 
-## 🆕 LATEST UPDATE: Enhanced 5D Holographic Interface
+## 🆕 LATEST UPDATE: 24/7 Live Data & Enhanced 5D Holographic Interface
 
 **The Streamlit app now features:**
-- ✨ **HD Glassmorphic Effects**: Premium blur effects on all UI elements
-- 🌟 **5D Particle System**: Multi-layer holographic background with animated particles
+- 🔴 **24/7 Live Data Updates**: Automatic refresh every 30 seconds with user control
+- ✨ **Enhanced HD Glassmorphism**: Premium blur effects (28px) on all UI elements
+- 🌟 **6-Layer 5D Particle System**: Multi-depth holographic background with enhanced animations
+- 🎯 **Live Status Indicators**: Real-time pulsing indicators showing refresh status
 - 🔐 **Biometric UI**: Visual authentication panel with verification badges
-- 📊 **Live Status Indicators**: Real-time system health monitoring
+- 📊 **Dynamic Data Controls**: Toggle auto-refresh, force refresh, and view update times
 - 🧠 **Enhanced EVE Brain**: Premium visualization with pulsing animations
-- 🔄 **Manual Refresh**: Force immediate data updates with button click
+- 🌀 **Multi-Layer Grid**: 4-layer animated grid system with depth effects
+- 💎 **Advanced Card Effects**: Gradient borders, depth transforms, and enhanced hover states
 
 **📖 See:** [STREAMLIT_FEATURES.md](./STREAMLIT_FEATURES.md) for complete feature documentation
 **🚀 Deploy:** [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md) for deployment instructions

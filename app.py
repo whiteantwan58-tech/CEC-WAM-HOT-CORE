@@ -5,8 +5,8 @@ This dashboard provides real-time visualization and monitoring of the CEC-WAM sy
 
 Performance Optimizations:
 - Seeded random data: Uses hour-based seeds to prevent chart flickering
-- Cached API responses: NASA (1hr TTL), Google Sheets (1min TTL)
-- Removed infinite rerun loop: Manual refresh instead of continuous auto-refresh
+- Cached API responses: NASA (1hr TTL), Google Sheets (30sec TTL)
+- Auto-refresh: Configurable automatic data updates every 30 seconds
 - Efficient data structures: Bounded collections prevent memory bloat
 
 For detailed performance guidelines, see PERFORMANCE_OPTIMIZATION.md
@@ -22,6 +22,7 @@ import requests
 import random
 from io import StringIO
 import time
+from streamlit_autorefresh import st_autorefresh
 
 # Page Configuration
 st.set_page_config(
@@ -30,6 +31,20 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# Initialize session state for auto-refresh control
+if 'auto_refresh_enabled' not in st.session_state:
+    st.session_state.auto_refresh_enabled = True
+
+if 'last_refresh' not in st.session_state:
+    st.session_state.last_refresh = datetime.now()
+
+# Auto-refresh component: Refreshes page every 30 seconds when enabled
+# This provides true 24/7 live data updates
+if st.session_state.auto_refresh_enabled:
+    # Auto-refresh every 30 seconds (30000 milliseconds)
+    refresh_count = st_autorefresh(interval=30000, key="data_refresh")
+    st.session_state.last_refresh = datetime.now()
 
 # NASA API Key (demo key - replace with yours from api.nasa.gov)
 NASA_API_KEY = "DEMO_KEY"
@@ -62,14 +77,16 @@ st.markdown("""
     
     /* Enhanced Background with 5D Depth Effect */
     .stApp {
-        background: radial-gradient(ellipse at center, #1A0040 0%, #0A0020 50%, #000010 100%);
+        background: radial-gradient(ellipse at top, #1A0040 0%, #0A0020 40%, #000010 100%),
+                    radial-gradient(ellipse at bottom, #000040 0%, #000020 50%, #000000 100%);
+        background-blend-mode: screen;
         color: #00FFFF;
         font-family: 'Orbitron', monospace;
         position: relative;
         overflow-x: hidden;
     }
     
-    /* Animated Grid Layer with Enhanced Glassmorphism */
+    /* Multi-Layer Animated Grid with 5D Depth */
     .stApp::before {
         content: '';
         position: fixed;
@@ -78,40 +95,54 @@ st.markdown("""
         width: 100%;
         height: 100%;
         background-image: 
-            linear-gradient(rgba(0, 255, 255, 0.12) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.12) 1px, transparent 1px);
-        background-size: 50px 50px;
-        animation: gridScroll 20s linear infinite;
+            linear-gradient(rgba(0, 255, 255, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px),
+            linear-gradient(rgba(157, 0, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(157, 0, 255, 0.08) 1px, transparent 1px);
+        background-size: 50px 50px, 50px 50px, 100px 100px, 100px 100px;
+        background-position: 0 0, 0 0, 25px 25px, 25px 25px;
+        animation: gridScroll 20s linear infinite, gridPulse 8s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
         opacity: 0.7;
-        backdrop-filter: blur(2px);
+        backdrop-filter: blur(3px) saturate(150%);
     }
     
     @keyframes gridScroll {
-        0% { transform: translate(0, 0); opacity: 0.5; }
-        50% { opacity: 0.9; }
-        100% { transform: translate(50px, 50px); opacity: 0.5; }
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
     }
     
-    /* HD Particle System with 5D Holographic Effect */
+    @keyframes gridPulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.95; }
+    }
+    
+    /* Enhanced HD Particle System with 5D Holographic Depth Effect */
     .stApp::after {
         content: '';
         position: fixed;
         width: 100%;
         height: 100%;
         background-image: 
-            radial-gradient(circle, #00FFFF 1.5px, transparent 1.5px),
-            radial-gradient(circle, #9D00FF 1.5px, transparent 1.5px),
+            radial-gradient(circle, #00FFFF 2px, transparent 2px),
+            radial-gradient(circle, #9D00FF 1.8px, transparent 1.8px),
             radial-gradient(circle, #00FF88 1.5px, transparent 1.5px),
-            radial-gradient(circle, #FF00FF 1.5px, transparent 1.5px),
-            radial-gradient(circle, #FFD700 1px, transparent 1px);
-        background-size: 300px 300px, 400px 400px, 250px 250px, 350px 350px, 200px 200px;
-        background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 50% 50%;
-        animation: particleFloat 25s ease-in-out infinite, particlePulse 10s ease-in-out infinite;
+            radial-gradient(circle, #FF00FF 1.3px, transparent 1.3px),
+            radial-gradient(circle, #FFD700 1px, transparent 1px),
+            radial-gradient(circle, rgba(0, 255, 255, 0.5) 0.8px, transparent 0.8px);
+        background-size: 300px 300px, 400px 400px, 250px 250px, 350px 350px, 200px 200px, 180px 180px;
+        background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 50% 50%, 30% 70%;
+        animation: particleFloat 30s ease-in-out infinite, particlePulse 12s ease-in-out infinite, particleDepth 15s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
-        filter: blur(0.5px) brightness(1.2);
+        filter: blur(0.6px) brightness(1.3);
+    }
+    
+    @keyframes particleDepth {
+        0%, 100% { transform: scale(1) translateZ(0); }
+        33% { transform: scale(1.05) translateZ(10px); }
+        66% { transform: scale(0.95) translateZ(-10px); }
     }
     
     @keyframes particleFloat {
@@ -127,27 +158,66 @@ st.markdown("""
         50% { opacity: 0.9; }
     }
     
-    /* Enhanced Glassmorphic Cards with HD Blur */
+    /* Enhanced 5D Glassmorphic Cards with Premium HD Blur & Depth */
     div[data-testid="stMetric"],
     div[data-testid="stVerticalBlock"] > div {
-        background: rgba(2, 8, 14, 0.75) !important;
-        backdrop-filter: blur(24px) saturate(220%) brightness(1.15) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(220%) brightness(1.15) !important;
-        border: 1px solid rgba(40, 240, 255, 0.65) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 0 30px rgba(40, 240, 255, 0.25), 
-                    0 8px 32px rgba(0, 255, 255, 0.15),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: linear-gradient(135deg, rgba(2, 8, 14, 0.85) 0%, rgba(10, 20, 40, 0.75) 100%) !important;
+        backdrop-filter: blur(26px) saturate(200%) brightness(1.2) !important;
+        -webkit-backdrop-filter: blur(26px) saturate(200%) brightness(1.2) !important;
+        border: 2px solid rgba(40, 240, 255, 0.6) !important;
+        border-radius: 18px !important;
+        box-shadow: 0 0 35px rgba(40, 240, 255, 0.35), 
+                    0 10px 40px rgba(0, 255, 255, 0.2),
+                    0 20px 60px rgba(157, 0, 255, 0.15),
+                    inset 0 1px 3px rgba(255, 255, 255, 0.15),
+                    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(157, 0, 255, 0.3) !important;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        animation: cardFloat 6s ease-in-out infinite !important;
+        position: relative !important;
+    }
+    
+    /* Gradient border effect using pseudo-element */
+    div[data-testid="stMetric"]::before,
+    div[data-testid="stVerticalBlock"] > div::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 18px;
+        padding: 2px;
+        background: linear-gradient(135deg, rgba(40, 240, 255, 0.4), rgba(157, 0, 255, 0.3), rgba(0, 255, 136, 0.35));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    @keyframes cardFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
     }
     
     div[data-testid="stMetric"]:hover,
     div[data-testid="stVerticalBlock"] > div:hover {
-        border-color: rgba(44, 255, 154, 0.85) !important;
-        box-shadow: 0 0 40px rgba(40, 240, 255, 0.45), 
-                    0 0 90px rgba(44, 255, 154, 0.25),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
-        transform: translateY(-2px) !important;
+        border-color: rgba(44, 255, 154, 0.8) !important;
+        box-shadow: 0 0 50px rgba(40, 240, 255, 0.55), 
+                    0 0 100px rgba(44, 255, 154, 0.35),
+                    0 15px 50px rgba(157, 0, 255, 0.25),
+                    inset 0 1px 4px rgba(255, 255, 255, 0.25),
+                    inset 0 -1px 3px rgba(0, 0, 0, 0.2),
+                    0 0 0 2px rgba(255, 0, 255, 0.4) !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        backdrop-filter: blur(30px) saturate(220%) brightness(1.25) !important;
+    }
+    
+    div[data-testid="stMetric"]:hover::before,
+    div[data-testid="stVerticalBlock"] > div:hover::before {
+        background: linear-gradient(135deg, rgba(44, 255, 154, 0.6), rgba(0, 255, 255, 0.5), rgba(255, 0, 255, 0.5));
+        opacity: 1;
     }
     
     /* Metric Values with Enhanced Glow */
@@ -333,19 +403,58 @@ st.markdown("""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Manual Refresh Button and Auto-Refresh Info
-_, col_refresh2, _ = st.columns([2, 1, 2])
-with col_refresh2:
-    if st.button("🔄 REFRESH DATA NOW", key="manual_refresh"):
-        st.cache_data.clear()
+# Live Data Controls with Enhanced 5D Interface
+col_auto, col_refresh, col_status = st.columns([1, 1, 2])
+
+with col_auto:
+    # Auto-refresh toggle with glassmorphic styling
+    auto_refresh = st.checkbox(
+        "🔴 LIVE DATA 24/7", 
+        value=st.session_state.auto_refresh_enabled,
+        key="auto_refresh_toggle",
+        help="Enable automatic data refresh every 30 seconds for 24/7 live updates"
+    )
+    if auto_refresh != st.session_state.auto_refresh_enabled:
+        st.session_state.auto_refresh_enabled = auto_refresh
         st.rerun()
+
+with col_refresh:
+    if st.button("🔄 FORCE REFRESH", key="manual_refresh"):
+        st.cache_data.clear()
+        st.session_state.last_refresh = datetime.now()
+        st.rerun()
+
+with col_status:
+    # Live status indicator with pulsing animation
+    refresh_status = "🟢 LIVE" if st.session_state.auto_refresh_enabled else "⚪ PAUSED"
+    last_update = st.session_state.last_refresh.strftime("%H:%M:%S")
+    st.markdown(f"""
+    <div style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.12); 
+                border: 2px solid {'rgba(0, 255, 136, 0.6)' if st.session_state.auto_refresh_enabled else 'rgba(255, 255, 255, 0.3)'}; 
+                border-radius: 15px; box-shadow: 0 0 25px {'rgba(0, 255, 136, 0.3)' if st.session_state.auto_refresh_enabled else 'rgba(255, 255, 255, 0.1)'};
+                animation: {'statusPulse 2s ease-in-out infinite' if st.session_state.auto_refresh_enabled else 'none'};">
+        <span style="color: #00FFFF; font-size: 14px; font-weight: 700;">
+            {refresh_status} | Last Update: {last_update}
+        </span>
+    </div>
+    <style>
+        @keyframes statusPulse {{
+            0%, 100% {{ 
+                box-shadow: 0 0 25px rgba(0, 255, 136, 0.3), 0 0 50px rgba(0, 255, 136, 0.2);
+            }}
+            50% {{ 
+                box-shadow: 0 0 35px rgba(0, 255, 136, 0.6), 0 0 70px rgba(0, 255, 136, 0.4);
+            }}
+        }}
+    </style>
+    """, unsafe_allow_html=True)
 
 st.markdown("""
 <div style="text-align: center; padding: 10px; background: rgba(0, 255, 255, 0.08); 
             border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 10px; margin: 10px 0;">
     <span style="color: #00FFFF; font-size: 13px;">
-        ℹ️ <strong>NOTE:</strong> Data updates every <strong>60 seconds</strong> automatically. 
-        Click <strong>🔄 REFRESH DATA NOW</strong> button to force immediate refresh.
+        ⚡ <strong>24/7 LIVE MODE:</strong> Data refreshes automatically every <strong>30 seconds</strong> when enabled. 
+        Toggle off for manual control or click <strong>🔄 FORCE REFRESH</strong> for immediate update.
     </span>
 </div>
 """, unsafe_allow_html=True)
@@ -410,7 +519,7 @@ def fetch_nasa_apod():
     return None
 
 # Fetch Google Sheets Data with Column Validation and Locking
-@st.cache_data(ttl=60)  # Cache for 1 minute - allows frequent updates
+@st.cache_data(ttl=30)  # Cache for 30 seconds - enables true live updates
 def fetch_sheets_data(use_frozen=True):
     """
     Fetch live data from Google Sheets with error handling and column validation
@@ -490,12 +599,31 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
     with col_status2:
-        st.markdown("""
-        <div role="status" aria-label="Data interface status: Data syncing" style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.15); 
-                    border: 2px solid #00FFFF; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);">
-            <div style="font-size: 24px;" aria-hidden="true">🔄</div>
-            <div style="font-size: 12px; color: #00FFFF; font-weight: bold;">DATA SYNCING</div>
+        # Dynamic live data indicator based on auto-refresh state
+        live_status = "LIVE 24/7" if st.session_state.auto_refresh_enabled else "MANUAL MODE"
+        live_emoji = "🔴" if st.session_state.auto_refresh_enabled else "⚪"
+        live_color = "#FF0066" if st.session_state.auto_refresh_enabled else "#888888"
+        pulse_animation = "livePulse 2s ease-in-out infinite" if st.session_state.auto_refresh_enabled else "none"
+        
+        st.markdown(f"""
+        <div role="status" aria-label="Data interface status: {live_status}" style="text-align: center; padding: 12px; background: rgba(0, 255, 255, 0.15); 
+                    border: 2px solid #00FFFF; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+                    animation: {pulse_animation};">
+            <div style="font-size: 24px;" aria-hidden="true">{live_emoji}</div>
+            <div style="font-size: 12px; color: {live_color}; font-weight: bold;">{live_status}</div>
         </div>
+        <style>
+            @keyframes livePulse {{
+                0%, 100% {{ 
+                    border-color: rgba(0, 255, 255, 0.5);
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+                }}
+                50% {{ 
+                    border-color: rgba(255, 0, 102, 0.8);
+                    box-shadow: 0 0 35px rgba(255, 0, 102, 0.6);
+                }}
+            }}
+        </style>
         """, unsafe_allow_html=True)
     with col_status3:
         st.markdown("""
@@ -1025,8 +1153,17 @@ with tab6:
     
     st.plotly_chart(fig, use_container_width=True)
     
-    # Display live update info without infinite rerun
-    st.info("💡 **Tip:** Refresh the page manually to see updated metrics. Auto-refresh has been disabled to improve performance.")
+    # Display live update info with 5D interface styling
+    st.markdown("""
+    <div style="padding: 15px; background: linear-gradient(135deg, rgba(0, 255, 255, 0.12), rgba(157, 0, 255, 0.1)); 
+                border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 12px; 
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); backdrop-filter: blur(10px);">
+        <span style="color: #00FFFF; font-size: 14px;">
+            💡 <strong>24/7 LIVE DATA:</strong> Enable <strong>🔴 LIVE DATA 24/7</strong> toggle at the top for automatic updates every 30 seconds, 
+            or use <strong>🔄 FORCE REFRESH</strong> for instant updates.
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # TAB 7: PSI COIN TRACKER
 with tab7:
