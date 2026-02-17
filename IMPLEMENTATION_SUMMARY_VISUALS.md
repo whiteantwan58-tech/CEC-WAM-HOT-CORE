@@ -29,7 +29,7 @@ The Streamlit app at `https://cec-wam-hot-core-ggw5qs4tb69hdmyvbatkat.streamlit.
    - Security features detailed
    - Usage tips and troubleshooting
 
-2. **DEPLOYMENT_STATUS.md** (229 lines)
+2. **DEPLOYMENT_STATUS.md** (208 lines)
    - Quick deployment guide
    - Testing checklist
    - Troubleshooting for new deployment
