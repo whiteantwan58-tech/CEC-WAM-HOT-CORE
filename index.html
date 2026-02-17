@@ -2521,11 +2521,21 @@ micBtn.onclick = () => {
                 setStatusMessage(scanStatus, '✗ ' + errorMsg, '#FF4D6D');
                 biometricButtons.style.display = 'block';
                 
+                // Clear manual override timeout if it's pending to prevent race conditions
+                if (manualOverrideTimeout) {
+                    clearTimeout(manualOverrideTimeout);
+                    manualOverrideTimeout = null;
+                }
+                
                 // Always show manual override button on authentication failure with clear visibility
-                const manualOverrideButton = document.getElementById('manualOverrideButton');
-                if (manualOverrideButton) {
-                    manualOverrideButton.style.display = 'block';
-                    manualOverrideButton.classList.add('override-pulse');
+                const manualOverrideButtonWrapper = document.getElementById('manualOverrideButton');
+                if (manualOverrideButtonWrapper) {
+                    manualOverrideButtonWrapper.style.display = 'block';
+                    // Add pulse animation to the actual button, not the wrapper
+                    const manualOverrideButton = manualOverrideButtonWrapper.querySelector('.unlock-button');
+                    if (manualOverrideButton) {
+                        manualOverrideButton.classList.add('override-pulse');
+                    }
                 }
                 
                 // Show clear hint
@@ -2537,18 +2547,32 @@ micBtn.onclick = () => {
         // Manual override function to bypass biometric authentication
         function manualOverride() {
             const scanStatus = document.getElementById('scanStatus');
-            scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Manual Override Activated</span>';
+            scanStatus.innerHTML = '<span style="color: #FFC107;">⚠ Manual Override Requested</span>';
             
-            // Log override for security audit
-            console.log('Manual override activated by user at', new Date().toISOString());
+            // Log override request for security audit
+            console.log('Manual override requested by user at', new Date().toISOString());
             localStorage.setItem('last_manual_override', new Date().toISOString());
+            
+            // Require explicit user confirmation before bypassing biometric auth
+            const confirmed = window.confirm(
+                'Manual override will bypass biometric authentication and unlock the dashboard.\n\n' +
+                'Only proceed if you are an authorized operator and physical security is assured.\n\n' +
+                'Do you want to continue with manual override?'
+            );
+            
+            if (!confirmed) {
+                // User cancelled manual override; do not unlock the dashboard
+                scanStatus.innerHTML = '<span style="color: #FF5252;">✕ Manual Override Cancelled</span>';
+                console.log('Manual override cancelled by user at', new Date().toISOString());
+                return;
+            }
             
             // Show confirmation message
             setTimeout(() => {
                 scanStatus.innerHTML = '<span style="color: #00FF88;">✓ ACCESS GRANTED VIA MANUAL OVERRIDE</span>';
             }, 500);
             
-            // Unlock dashboard
+            // Unlock dashboard after explicit confirmation
             setTimeout(() => {
                 unlockDashboard();
             }, 1200);
@@ -2869,7 +2893,8 @@ micBtn.onclick = () => {
             let html = '<table class="data-table"><thead><tr>';
             
             headers.forEach(header => {
-                html += `<th>${header}</th>`;
+                // Escape header text to prevent XSS
+                html += `<th>${escapeHtml(header)}</th>`;
             });
             html += '</tr></thead><tbody>';
             
@@ -2877,10 +2902,12 @@ micBtn.onclick = () => {
                 const statusClass = getStatusClass(row.Status || row.status || '');
                 html += `<tr class="${statusClass}">`;
                 headers.forEach(header => {
-                    const rawValue = row[header] || '';
+                    // Use nullish coalescing to preserve falsy values like 0
+                    const rawValue = row[header] ?? '';
                     // Apply data masking for sensitive fields in UI
                     const displayValue = maskSensitiveData(rawValue, header);
-                    html += `<td>${displayValue}</td>`;
+                    // Escape display value to prevent XSS
+                    html += `<td>${escapeHtml(String(displayValue))}</td>`;
                 });
                 html += '</tr>';
             });

@@ -44,7 +44,8 @@ GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzT
 FROZEN_SHEET_ID = "14nNp33Dk2YoYcVcQI0lUEp208m-VvZboi_Te8jt_flg2NkNm8WieN0sX"
 FROZEN_SHEETS_URL = f"https://docs.google.com/spreadsheets/d/{FROZEN_SHEET_ID}/export?format=csv"
 
-# Expected column configuration for data locking
+# Expected column schema for data locking (defines order and expected columns)
+# Note: dtype values are for documentation only; actual type enforcement happens in display config
 EXPECTED_COLUMNS = {
     'Category': str,
     'Item': str,
@@ -238,7 +239,7 @@ def fetch_sheets_data(use_frozen=True):
             return df
         return None
     except Exception as e:
-        # Silently fail and return None - UI will show warning
+        # Show warning in UI and return None so callers can handle missing data
         st.warning(f"⚠️ Unable to load data from {'frozen' if use_frozen else 'primary'} sheet: {str(e)}")
         return None
 
@@ -274,7 +275,7 @@ with tab1:
     st.markdown("#### 📊 LIVE CEC WAM MASTER LEDGER")
     
     # Add data source toggle
-    col_toggle1, col_toggle2 = st.columns([3, 1])
+    _, col_toggle2 = st.columns([3, 1])
     with col_toggle2:
         use_frozen = st.checkbox("🔒 Use Frozen/Locked Data", value=True, 
                                  help="Enable to use the secure, locked data source")
