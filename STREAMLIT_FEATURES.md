@@ -1,15 +1,72 @@
 # CEC-WAM HOT CORE Streamlit App - Enhanced Features
 
+## 🔴 24/7 LIVE DATA UPDATES (NEW!)
+
+### Automatic Data Refresh
+- **True Live Updates**: Page automatically refreshes every 30 seconds when enabled
+- **Configurable Control**: Toggle "🔴 LIVE DATA 24/7" checkbox to enable/disable auto-refresh
+- **Live Status Indicator**: Real-time display showing:
+  - 🟢 LIVE status when auto-refresh is enabled (with pulsing animation)
+  - ⚪ PAUSED status when in manual mode
+  - Last update timestamp (HH:MM:SS format)
+- **Force Refresh Button**: Instantly refresh data with "🔄 FORCE REFRESH" button
+- **Smart Caching**: 30-second cache TTL for optimal balance between live updates and performance
+
+### Live Data Controls
+Located at the top of the dashboard:
+1. **Auto-Refresh Toggle** - Enable/disable 24/7 live mode
+2. **Force Refresh Button** - Immediate manual refresh
+3. **Status Display** - Shows live status and last update time
+
+### Performance Benefits
+- **Efficient Updates**: Only refreshes when data cache expires (30 seconds)
+- **User Control**: Can pause auto-refresh to reduce bandwidth usage
+- **No Flickering**: Seeded random data prevents chart animations from jumping
+- **Bounded Collections**: Memory-efficient data structures prevent bloat
+
+## 🎨 Enhanced 5D Holographic Interface
+
+### Premium Glassmorphic Effects
+- **Multi-Layer Cards**: Gradient backgrounds with advanced backdrop filters
+  - Blur: 28px (increased from 24px)
+  - Saturation: 240% (increased from 220%)
+  - Brightness: 1.2 with contrast: 1.1
+  - Gradient borders with multiple colors
+- **5D Depth Animations**: Cards float with translateZ transforms
+- **Enhanced Hover Effects**: Scale, depth, and glow effects on interaction
+- **Inset Shadows**: Multiple shadow layers for depth perception
+
+### Advanced Background Effects
+- **Dual-Gradient Background**: Radial gradients at top and bottom with screen blend mode
+- **Multi-Layer Grid**: 4-layer animated grid system with depth
+  - Primary grid: Cyan, 50px spacing
+  - Secondary grid: Purple, 100px spacing with offset
+  - Grid pulse animation (8s cycle)
+  - Enhanced backdrop filter (blur 3px, saturate 150%)
+- **6-Layer Particle System**: Enhanced holographic particles
+  - 6 different particle layers (increased from 5)
+  - Varied sizes: 2px, 1.8px, 1.5px, 1.3px, 1px, 0.8px
+  - New depth animation with translateZ
+  - Extended animation duration (30s float, 12s pulse, 15s depth)
+
+### Dynamic Visual Indicators
+- **Live Data Status**: Color-coded with pulsing animation when live
+  - Red (#FF0066) when active
+  - Gray when paused
+  - Pulsing border and glow effects
+- **System Status Cards**: Four indicators with unique colors and animations
+- **Biometric Panel**: Pulsing security visualization
+
 ## 🎨 Visual Enhancements
 
 ### HD Glassmorphic Effects
-- **Premium Blur Effects**: Cards, metrics, and panels feature advanced backdrop-filter blur (24px) with saturation (220%) and brightness (115%)
-- **5D Depth Perception**: Multi-layered particle system with 5 different particle colors creating holographic depth
+- **Premium Blur Effects**: Cards, metrics, and panels feature advanced backdrop-filter blur (28px) with saturation (240%) and brightness (1.2)
+- **5D Depth Perception**: Multi-layered particle system with 6 different particle colors creating holographic depth
 - **Enhanced Animations**: Smooth transitions with cubic-bezier easing for premium feel
 
 ### Holographic Interface
-- **Animated Grid Background**: Scrolling grid pattern with dynamic opacity changes
-- **Particle System**: 5-layer particle system with different sizes, colors, and movement patterns
+- **Animated Grid Background**: Multi-layer scrolling grid pattern with dynamic opacity changes
+- **Particle System**: 6-layer particle system with different sizes, colors, and movement patterns
 - **Glow Effects**: Dynamic text shadows and box shadows that pulse with animations
 - **Color Gradients**: Multi-color gradients with hue-rotation animations
 
