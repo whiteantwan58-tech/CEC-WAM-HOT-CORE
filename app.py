@@ -251,6 +251,24 @@ st.markdown("""
         }
     }
     
+    /* Pulse animation for lock icon */
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+        50% {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 40px rgba(0, 255, 255, 0.8));
+        }
+    }
+    
+    /* Gradient shift animation for headers */
+    @keyframes gradientShift {
+        0%, 100% { filter: hue-rotate(0deg); }
+        50% { filter: hue-rotate(30deg); }
+    }
+    
     /* DataFrame Styling with Glassmorphism */
     div[data-testid="stDataFrame"] {
         background: rgba(2, 8, 14, 0.8) !important;
@@ -289,9 +307,9 @@ st.markdown("""
 
 # Biometric Authentication Status Panel
 st.markdown("""
-<div class="biometric-status">
+<div class="biometric-status" role="status" aria-label="Biometric authentication status: Active and verified">
     <div style="position: relative; display: inline-block;">
-        <div style="font-size: 96px; margin-bottom: 20px; animation: biometricPulse 2s infinite;">🔐</div>
+        <div style="font-size: 96px; margin-bottom: 20px; animation: pulse 2s infinite;" aria-hidden="true">🔐</div>
     </div>
     <h2 style="color: #00FF88; margin: 15px 0; font-size: 28px;">
         ✅ BIOMETRIC AUTH ACTIVE
@@ -300,13 +318,13 @@ st.markdown("""
         🔒 SYSTEM SECURED | 🧬 DNA VERIFIED | 🌀 QUANTUM LOCKED
     </p>
     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
-        <div style="padding: 8px 16px; background: rgba(0, 255, 136, 0.2); border: 1px solid #00FF88; border-radius: 20px;">
+        <div style="padding: 8px 16px; background: rgba(0, 255, 136, 0.2); border: 1px solid #00FF88; border-radius: 20px;" role="img" aria-label="Iris scan verified">
             👁️ IRIS SCAN: VERIFIED
         </div>
-        <div style="padding: 8px 16px; background: rgba(0, 255, 255, 0.2); border: 1px solid #00FFFF; border-radius: 20px;">
+        <div style="padding: 8px 16px; background: rgba(0, 255, 255, 0.2); border: 1px solid #00FFFF; border-radius: 20px;" role="img" aria-label="Palm print verified">
             🖐️ PALM PRINT: VERIFIED
         </div>
-        <div style="padding: 8px 16px; background: rgba(157, 0, 255, 0.2); border: 1px solid #9D00FF; border-radius: 20px;">
+        <div style="padding: 8px 16px; background: rgba(157, 0, 255, 0.2); border: 1px solid #9D00FF; border-radius: 20px;" role="img" aria-label="Neural pattern verified">
             🧠 NEURAL PATTERN: VERIFIED
         </div>
     </div>
@@ -351,12 +369,6 @@ with col1:
             🌐 LIVE 24/7 | ∞ NEVER-ENDING | 🔄 AUTO-REFRESH: 60s
         </p>
     </div>
-    <style>
-        @keyframes gradientShift {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(30deg); }
-        }
-    </style>
     """, unsafe_allow_html=True)
 
 with col2:
@@ -471,9 +483,9 @@ with tab1:
     col_status1, col_status2, col_status3, col_status4 = st.columns(4)
     with col_status1:
         st.markdown("""
-        <div style="text-align: center; padding: 12px; background: rgba(0, 255, 136, 0.15); 
+        <div role="status" aria-label="System operational status: Online" style="text-align: center; padding: 12px; background: rgba(0, 255, 136, 0.15); 
                     border: 2px solid #00FF88; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);">
-            <div style="font-size: 24px;">🟢</div>
+            <div style="font-size: 24px;" aria-hidden="true">🟢</div>
             <div style="font-size: 12px; color: #00FF88; font-weight: bold;">SYSTEM ONLINE</div>
         </div>
         """, unsafe_allow_html=True)
