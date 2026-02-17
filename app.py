@@ -35,8 +35,24 @@ st.set_page_config(
 NASA_API_KEY = "DEMO_KEY"
 NASA_APOD_URL = f"https://api.nasa.gov/planetary/apod?api_key={NASA_API_KEY}"
 
-# Google Sheets CSV (your CEC WAM Master Ledger)
+# Google Sheets Configuration
+# Primary Google Sheets CSV (CEC WAM Master Ledger)
 GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
+
+# Alternative frozen/locked sheet ID for secure data display
+# Format: https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv
+FROZEN_SHEET_ID = "14nNp33Dk2YoYcVcQI0lUEp208m-VvZboi_Te8jt_flg2NkNm8WieN0sX"
+FROZEN_SHEETS_URL = f"https://docs.google.com/spreadsheets/d/{FROZEN_SHEET_ID}/export?format=csv"
+
+# Expected column configuration for data locking
+EXPECTED_COLUMNS = {
+    'Category': str,
+    'Item': str,
+    'Value': float,
+    'Status': str,
+    'Date': str,
+    'Notes': str
+}
 
 # Holographic CSS with Enhanced Particle Effects and HD Visuals
 st.markdown("""
@@ -187,15 +203,43 @@ def fetch_nasa_apod():
         pass
     return None
 
-# Fetch Google Sheets Data
+# Fetch Google Sheets Data with Column Validation and Locking
 @st.cache_data(ttl=60)  # Cache for 1 minute - allows frequent updates
-def fetch_sheets_data():
-    """Fetch live data from Google Sheets with error handling"""
+def fetch_sheets_data(use_frozen=True):
+    """
+    Fetch live data from Google Sheets with error handling and column validation
+    
+    Args:
+        use_frozen: If True, use the frozen/locked sheet for secure data display
+    
+    Returns:
+        pandas.DataFrame with validated columns or None on error
+    """
     try:
-        df = pd.read_csv(GOOGLE_SHEETS_URL)
-        return df
+        # Use frozen sheet by default for data security
+        sheet_url = FROZEN_SHEETS_URL if use_frozen else GOOGLE_SHEETS_URL
+        df = pd.read_csv(sheet_url)
+        
+        # Validate and standardize column names
+        if df is not None and not df.empty:
+            # Strip whitespace from column names
+            df.columns = df.columns.str.strip()
+            
+            # Ensure expected columns exist (create if missing)
+            for col, dtype in EXPECTED_COLUMNS.items():
+                if col not in df.columns:
+                    df[col] = None
+            
+            # Reorder columns to match expected configuration
+            available_cols = [col for col in EXPECTED_COLUMNS.keys() if col in df.columns]
+            other_cols = [col for col in df.columns if col not in EXPECTED_COLUMNS.keys()]
+            df = df[available_cols + other_cols]
+            
+            return df
+        return None
     except Exception as e:
         # Silently fail and return None - UI will show warning
+        st.warning(f"⚠️ Unable to load data from {'frozen' if use_frozen else 'primary'} sheet: {str(e)}")
         return None
 
 # Main Tabs
@@ -226,31 +270,101 @@ with tab1:
     
     st.markdown("---")
     
-    # Live Google Sheets Data
+    # Live Google Sheets Data with Column Configuration
     st.markdown("#### 📊 LIVE CEC WAM MASTER LEDGER")
-    sheets_data = fetch_sheets_data()
+    
+    # Add data source toggle
+    col_toggle1, col_toggle2 = st.columns([3, 1])
+    with col_toggle2:
+        use_frozen = st.checkbox("🔒 Use Frozen/Locked Data", value=True, 
+                                 help="Enable to use the secure, locked data source")
+    
+    sheets_data = fetch_sheets_data(use_frozen=use_frozen)
     
     if sheets_data is not None:
-        st.dataframe(sheets_data, use_container_width=True, height=300)
+        # Display with locked column configuration
+        st.markdown(f"**📋 Data Source:** {'🔒 Frozen/Secure Sheet' if use_frozen else '🔓 Primary Sheet'}")
+        st.markdown(f"**📊 Columns:** {', '.join(sheets_data.columns[:6])}")
+        st.markdown(f"**📝 Total Records:** {len(sheets_data)}")
         
-        # Auto-calculated formulas
+        # Display dataframe with column configuration locked
+        st.dataframe(
+            sheets_data, 
+            use_container_width=True, 
+            height=300,
+            column_config={
+                "Category": st.column_config.TextColumn(
+                    "Category",
+                    help="Data category classification",
+                    width="medium"
+                ),
+                "Item": st.column_config.TextColumn(
+                    "Item",
+                    help="Item name or description",
+                    width="large"
+                ),
+                "Value": st.column_config.NumberColumn(
+                    "Value",
+                    help="Numeric value",
+                    format="$%.2f"
+                ),
+                "Status": st.column_config.TextColumn(
+                    "Status",
+                    help="Current status",
+                    width="small"
+                ),
+                "Date": st.column_config.TextColumn(
+                    "Date",
+                    help="Date information",
+                    width="small"
+                ),
+                "Notes": st.column_config.TextColumn(
+                    "Notes",
+                    help="Additional notes",
+                    width="medium"
+                )
+            }
+        )
+        
+        # Auto-calculated formulas with locked column configuration
         st.markdown("#### 🔢 AUTO FORMULAS")
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             if 'Value' in sheets_data.columns:
-                total_value = sheets_data['Value'].sum() if pd.api.types.is_numeric_dtype(sheets_data['Value']) else 0
+                # Convert to numeric, coercing errors to NaN
+                numeric_values = pd.to_numeric(sheets_data['Value'], errors='coerce')
+                total_value = numeric_values.sum() if not numeric_values.isna().all() else 0
                 st.metric("📈 Total Value", f"${total_value:,.2f}")
+            else:
+                st.metric("📈 Total Value", "N/A")
         
         with col2:
             st.metric("📝 Total Entries", len(sheets_data))
         
         with col3:
             if 'Category' in sheets_data.columns:
-                categories = sheets_data['Category'].nunique()
+                categories = sheets_data['Category'].dropna().nunique()
                 st.metric("🏷️ Categories", categories)
+            else:
+                st.metric("🏷️ Categories", "N/A")
+        
+        with col4:
+            if 'Status' in sheets_data.columns:
+                status_counts = sheets_data['Status'].value_counts()
+                primary_status = status_counts.index[0] if len(status_counts) > 0 else "N/A"
+                st.metric("📊 Primary Status", primary_status)
+            else:
+                st.metric("📊 Primary Status", "N/A")
     else:
-        st.warning("⚠️ Unable to load Google Sheets data")
+        st.error("⚠️ Unable to load Google Sheets data")
+        st.info("""
+        **Troubleshooting Tips:**
+        - Ensure the sheet is published and accessible
+        - Check if the frozen sheet ID is correct
+        - Try toggling the 🔒 Use Frozen/Locked Data checkbox
+        - Verify your internet connection
+        """)
     
     # Real-time Chart
     st.markdown("#### 📈 REAL-TIME VALUE CHART")
