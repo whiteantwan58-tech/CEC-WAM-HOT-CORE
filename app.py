@@ -291,7 +291,7 @@ st.markdown("""
 st.markdown("""
 <div class="biometric-status">
     <div style="position: relative; display: inline-block;">
-        <div style="font-size: 96px; margin-bottom: 20px; animation: pulse 2s infinite;">🔐</div>
+        <div style="font-size: 96px; margin-bottom: 20px; animation: biometricPulse 2s infinite;">🔐</div>
     </div>
     <h2 style="color: #00FF88; margin: 15px 0; font-size: 28px;">
         ✅ BIOMETRIC AUTH ACTIVE
