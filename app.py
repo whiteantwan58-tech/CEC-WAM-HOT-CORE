@@ -316,7 +316,7 @@ st.markdown("""
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Manual Refresh Button and Auto-Refresh Info
-col_refresh1, col_refresh2, col_refresh3 = st.columns([2, 1, 2])
+_, col_refresh2, _ = st.columns([2, 1, 2])
 with col_refresh2:
     if st.button("🔄 REFRESH DATA NOW", key="manual_refresh"):
         st.cache_data.clear()
