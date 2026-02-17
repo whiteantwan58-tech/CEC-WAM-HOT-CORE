@@ -162,36 +162,62 @@ st.markdown("""
     div[data-testid="stMetric"],
     div[data-testid="stVerticalBlock"] > div {
         background: linear-gradient(135deg, rgba(2, 8, 14, 0.85) 0%, rgba(10, 20, 40, 0.75) 100%) !important;
-        backdrop-filter: blur(28px) saturate(240%) brightness(1.2) contrast(1.1) !important;
-        -webkit-backdrop-filter: blur(28px) saturate(240%) brightness(1.2) contrast(1.1) !important;
-        border: 2px solid transparent !important;
-        border-image: linear-gradient(135deg, rgba(40, 240, 255, 0.7), rgba(157, 0, 255, 0.5), rgba(0, 255, 136, 0.6)) 1 !important;
+        backdrop-filter: blur(26px) saturate(200%) brightness(1.2) !important;
+        -webkit-backdrop-filter: blur(26px) saturate(200%) brightness(1.2) !important;
+        border: 2px solid rgba(40, 240, 255, 0.6) !important;
         border-radius: 18px !important;
         box-shadow: 0 0 35px rgba(40, 240, 255, 0.35), 
                     0 10px 40px rgba(0, 255, 255, 0.2),
                     0 20px 60px rgba(157, 0, 255, 0.15),
                     inset 0 1px 3px rgba(255, 255, 255, 0.15),
-                    inset 0 -1px 2px rgba(0, 0, 0, 0.3) !important;
+                    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(157, 0, 255, 0.3) !important;
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        transform: translateZ(0) !important;
         animation: cardFloat 6s ease-in-out infinite !important;
+        position: relative !important;
+    }
+    
+    /* Gradient border effect using pseudo-element */
+    div[data-testid="stMetric"]::before,
+    div[data-testid="stVerticalBlock"] > div::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 18px;
+        padding: 2px;
+        background: linear-gradient(135deg, rgba(40, 240, 255, 0.4), rgba(157, 0, 255, 0.3), rgba(0, 255, 136, 0.35));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0.7;
     }
     
     @keyframes cardFloat {
-        0%, 100% { transform: translateY(0px) translateZ(0); }
-        50% { transform: translateY(-3px) translateZ(5px); }
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
     }
     
     div[data-testid="stMetric"]:hover,
     div[data-testid="stVerticalBlock"] > div:hover {
-        border-image: linear-gradient(135deg, rgba(44, 255, 154, 0.9), rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.7)) 1 !important;
+        border-color: rgba(44, 255, 154, 0.8) !important;
         box-shadow: 0 0 50px rgba(40, 240, 255, 0.55), 
                     0 0 100px rgba(44, 255, 154, 0.35),
                     0 15px 50px rgba(157, 0, 255, 0.25),
                     inset 0 1px 4px rgba(255, 255, 255, 0.25),
-                    inset 0 -1px 3px rgba(0, 0, 0, 0.2) !important;
-        transform: translateY(-4px) scale(1.02) translateZ(10px) !important;
-        backdrop-filter: blur(32px) saturate(260%) brightness(1.3) contrast(1.15) !important;
+                    inset 0 -1px 3px rgba(0, 0, 0, 0.2),
+                    0 0 0 2px rgba(255, 0, 255, 0.4) !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        backdrop-filter: blur(30px) saturate(220%) brightness(1.25) !important;
+    }
+    
+    div[data-testid="stMetric"]:hover::before,
+    div[data-testid="stVerticalBlock"] > div:hover::before {
+        background: linear-gradient(135deg, rgba(44, 255, 154, 0.6), rgba(0, 255, 255, 0.5), rgba(255, 0, 255, 0.5));
+        opacity: 1;
     }
     
     /* Metric Values with Enhanced Glow */
