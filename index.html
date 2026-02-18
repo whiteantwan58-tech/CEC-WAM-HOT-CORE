@@ -3,21 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CEC-WAM // SOVEREIGN NEURAL CORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>// --- LIVE API & CAMERA INTEGRATION ---
-const CONFIG = {
-    CAMERA_API_KEY: "YOUR_API_KEY_HERE", // Insert your main API key
-    LIVE_FEED_URL: "https://your-camera-stream-url.com/stream.m3u8", // Your live camera URL
-};
-
-function connectLiveFeeds() {
-    const videoElement = document.querySelector('img[alt="Motherboard Core"]'); 
-    // Replace the static image with an iframe or video tag for live feed
-    videoElement.outerHTML = `<iframe src="${CONFIG.LIVE_FEED_URL}" class="w-full h-full border-none"></iframe>`;
-    addLog("[API] CAMERA LINK ESTABLISHED.");
-}
-// Run connection on load
-window.onload = connectLiveFeeds;
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background: #000; color: #00f3ff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; }
@@ -57,21 +43,102 @@ window.onload = connectLiveFeeds;
     </div>
 
     <script>
+        // --- CONFIGURATION ---
+        // For live camera feeds, configure these values in your deployment environment
+        // DO NOT commit actual API keys to version control
+        const CONFIG = {
+            // Option 1: Use environment variables (recommended for production)
+            CAMERA_API_KEY: window.ENV?.CAMERA_API_KEY || null,
+            LIVE_FEED_URL: window.ENV?.LIVE_FEED_URL || null,
+            
+            // Option 2: For demo purposes, fallback to placeholder
+            enableLiveFeed: false // Set to true when camera feed is configured
+        };
+
+        // --- LOGGING SYSTEM ---
         const logs = document.getElementById('log-container');
-        function addLog() {
-            const m = ["[SYS] GMAIL_SYNC_COMPLETE", "[SEC] BRAIN_SHIELD_ACTIVE", "[DATA] ENTROPY_0.999", "[VAL] ASSET_LOCKED"];
+        
+        /**
+         * Add a log entry to the neural sync log
+         * @param {string} message - The log message to display
+         * @param {string} level - Log level (SYS, SEC, DATA, VAL, API, ERR)
+         */
+        function addLog(message = null, level = null) {
+            const defaultMessages = [
+                "[SYS] GMAIL_SYNC_COMPLETE",
+                "[SEC] BRAIN_SHIELD_ACTIVE", 
+                "[DATA] ENTROPY_0.999",
+                "[VAL] ASSET_LOCKED",
+                "[API] MONITORING_ACTIVE",
+                "[SYS] NEURAL_CORE_ONLINE"
+            ];
+            
+            const logMessage = message || defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
+            const timestamp = new Date().toLocaleTimeString();
+            
             const div = document.createElement('div');
-            div.innerText = `> ${m[Math.floor(Math.random()*m.length)]} @ ${new Date().toLocaleTimeString()}`;
+            div.innerText = `> ${logMessage} @ ${timestamp}`;
+            
+            // Add color coding based on level
+            if (message) {
+                if (message.includes('[ERR]')) div.style.color = '#ff4444';
+                else if (message.includes('[SEC]')) div.style.color = '#44ff44';
+                else if (message.includes('[API]')) div.style.color = '#ffaa44';
+            }
+            
             logs.prepend(div);
-            if(logs.children.length > 30) logs.lastChild.remove();
+            if(logs.children.length > 50) logs.lastChild.remove();
         }
+        
+        // Auto-generate logs every 1.5 seconds
         setInterval(addLog, 1500);
 
-        // Value Ticker
+        // --- LIVE CAMERA FEED INTEGRATION ---
+        function connectLiveFeeds() {
+            if (!CONFIG.enableLiveFeed || !CONFIG.LIVE_FEED_URL) {
+                addLog('[API] CAMERA_FEED_DISABLED (Configure in deployment)', 'API');
+                return;
+            }
+            
+            try {
+                const videoElement = document.querySelector('img[alt="Motherboard Core"]');
+                if (videoElement) {
+                    // Replace static image with live feed
+                    videoElement.outerHTML = `<iframe 
+                        src="${CONFIG.LIVE_FEED_URL}" 
+                        class="w-full h-full border-none"
+                        allow="camera; microphone"
+                        sandbox="allow-scripts allow-same-origin"
+                    ></iframe>`;
+                    addLog('[API] CAMERA_LINK_ESTABLISHED', 'API');
+                } else {
+                    addLog('[API] CAMERA_ELEMENT_NOT_FOUND', 'API');
+                }
+            } catch (error) {
+                addLog('[ERR] CAMERA_CONNECTION_FAILED: ' + error.message, 'ERR');
+                console.error('Camera feed error:', error);
+            }
+        }
+
+        // --- VALUE TICKER ---
         setInterval(() => {
             const base = 1250343000;
-            document.getElementById('val-disp').innerText = "$" + (base + Math.floor(Math.random()*5000)).toLocaleString();
+            const variation = Math.floor(Math.random() * 5000);
+            document.getElementById('val-disp').innerText = "$" + (base + variation).toLocaleString();
         }, 100);
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            addLog('[SYS] NEURAL_CORE_INITIALIZED', 'SYS');
+            connectLiveFeeds();
+            addLog('[SYS] DASHBOARD_READY', 'SYS');
+        };
+        
+        // Log errors globally
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            addLog('[ERR] SYSTEM_ERROR: ' + msg, 'ERR');
+            return false;
+        };
     </script>
 </body>
 </html>
