@@ -946,7 +946,6 @@ with tabs[2]:
         font=dict(family='Orbitron', color='#EAEAEA'),
         hovermode='x unified'
     )
-    
     st.plotly_chart(fig, use_container_width=True)
     
     # Volume and Market Stats
