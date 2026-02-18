@@ -22,7 +22,15 @@ import requests
 import random
 from io import StringIO
 import time
+import os
 from streamlit_autorefresh import st_autorefresh
+
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not required in production
 
 # Page Configuration
 st.set_page_config(
@@ -46,9 +54,13 @@ if st.session_state.auto_refresh_enabled:
     refresh_count = st_autorefresh(interval=30000, key="data_refresh")
     st.session_state.last_refresh = datetime.now()
 
-# NASA API Key (demo key - replace with yours from api.nasa.gov)
-NASA_API_KEY = "DEMO_KEY"
+# NASA API Configuration
+# Get key from environment or use demo key (with rate limits)
+NASA_API_KEY = os.getenv('NASA_API_KEY', 'DEMO_KEY')
 NASA_APOD_URL = f"https://api.nasa.gov/planetary/apod?api_key={NASA_API_KEY}"
+
+# OpenWeatherMap API Configuration  
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')
 
 # Google Sheets Configuration
 # Primary Google Sheets CSV (CEC WAM Master Ledger)

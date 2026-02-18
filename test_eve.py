@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 """
-EVE Voice AI Assistant - Demo Script
-Tests EVE's capabilities without API keys (fallback mode)
+EVE Voice AI Assistant - Demo & Test Script
+Tests EVE's capabilities and validates API configurations
 """
 
 import sys
 import os
+import requests
+from datetime import datetime
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
+
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✓ Environment variables loaded from .env")
+except ImportError:
+    print("ℹ️  python-dotenv not installed, using system environment variables")
 
 from eve_voice_agent import get_eve
 
@@ -18,15 +28,166 @@ def print_header(text):
     print(f"  {text}")
     print("="*60 + "\n")
 
-def main():
-    """Run EVE demo"""
+def test_api_configurations():
+    """Test all API configurations"""
+    print_header("API Configuration Tests")
     
-    print_header("EVE Voice AI Assistant Demo")
+    results = {
+        'passed': 0,
+        'failed': 0,
+        'skipped': 0
+    }
+    
+    # Test NASA API
+    print("🛰️  Testing NASA API...")
+    nasa_key = os.getenv('NASA_API_KEY', 'DEMO_KEY')
+    try:
+        url = f"https://api.nasa.gov/planetary/apod?api_key={nasa_key}"
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            print(f"  ✓ NASA API: Connected (using {'DEMO_KEY' if nasa_key == 'DEMO_KEY' else 'custom key'})")
+            if nasa_key == 'DEMO_KEY':
+                print("    ⚠️  Using DEMO_KEY - has rate limits, get your own at https://api.nasa.gov/")
+            results['passed'] += 1
+        else:
+            print(f"  ✗ NASA API: Failed (status {response.status_code})")
+            results['failed'] += 1
+    except Exception as e:
+        print(f"  ✗ NASA API: Error - {str(e)}")
+        results['failed'] += 1
+    
+    # Test NOAA Weather API
+    print("\n🌦️  Testing NOAA Weather API...")
+    try:
+        url = "https://api.weather.gov/alerts/active"
+        headers = {
+            'User-Agent': '(EVE-System-Test, test@evesystem.com)',
+            'Accept': 'application/geo+json'
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code == 200:
+            print("  ✓ NOAA Weather API: Connected (no key required)")
+            results['passed'] += 1
+        else:
+            print(f"  ✗ NOAA Weather API: Failed (status {response.status_code})")
+            results['failed'] += 1
+    except Exception as e:
+        print(f"  ✗ NOAA Weather API: Error - {str(e)}")
+        results['failed'] += 1
+    
+    # Test OpenWeatherMap API
+    print("\n⛅ Testing OpenWeatherMap API...")
+    openweather_key = os.getenv('OPENWEATHER_API_KEY', '')
+    if openweather_key:
+        try:
+            url = f"https://api.openweathermap.org/data/2.5/weather?q=Seattle&appid={openweather_key}"
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                print("  ✓ OpenWeatherMap API: Connected")
+                results['passed'] += 1
+            else:
+                print(f"  ✗ OpenWeatherMap API: Failed (status {response.status_code})")
+                results['failed'] += 1
+        except Exception as e:
+            print(f"  ✗ OpenWeatherMap API: Error - {str(e)}")
+            results['failed'] += 1
+    else:
+        print("  ⊘ OpenWeatherMap API: Not configured (optional)")
+        print("    Get free key at: https://openweathermap.org/api")
+        results['skipped'] += 1
+    
+    # Test ElevenLabs API
+    print("\n🗣️  Testing ElevenLabs API...")
+    elevenlabs_key = os.getenv('ELEVENLABS_API_KEY', '')
+    if elevenlabs_key:
+        try:
+            # Test with voices endpoint
+            url = "https://api.elevenlabs.io/v1/voices"
+            headers = {"xi-api-key": elevenlabs_key}
+            response = requests.get(url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                print("  ✓ ElevenLabs API: Connected")
+                results['passed'] += 1
+            else:
+                print(f"  ✗ ElevenLabs API: Failed (status {response.status_code})")
+                results['failed'] += 1
+        except Exception as e:
+            print(f"  ✗ ElevenLabs API: Error - {str(e)}")
+            results['failed'] += 1
+    else:
+        print("  ⊘ ElevenLabs API: Not configured")
+        print("    Required for voice synthesis - Get key at: https://elevenlabs.io/")
+        results['skipped'] += 1
+    
+    # Test OpenAI API
+    print("\n🤖 Testing OpenAI API...")
+    openai_key = os.getenv('OPENAI_API_KEY', '')
+    if openai_key:
+        try:
+            # Test with models endpoint
+            url = "https://api.openai.com/v1/models"
+            headers = {"Authorization": f"Bearer {openai_key}"}
+            response = requests.get(url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                print("  ✓ OpenAI API: Connected")
+                results['passed'] += 1
+            else:
+                print(f"  ✗ OpenAI API: Failed (status {response.status_code})")
+                results['failed'] += 1
+        except Exception as e:
+            print(f"  ✗ OpenAI API: Error - {str(e)}")
+            results['failed'] += 1
+    else:
+        print("  ⊘ OpenAI API: Not configured")
+        print("    Required for AI chat - Get key at: https://platform.openai.com/api-keys")
+        results['skipped'] += 1
+    
+    # Test Google Sheets (public CSV)
+    print("\n📊 Testing Google Sheets Data Feed...")
+    try:
+        url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            print("  ✓ Google Sheets CSV: Accessible")
+            results['passed'] += 1
+        else:
+            print(f"  ✗ Google Sheets CSV: Failed (status {response.status_code})")
+            results['failed'] += 1
+    except Exception as e:
+        print(f"  ✗ Google Sheets CSV: Error - {str(e)}")
+        results['failed'] += 1
+    
+    # Print summary
+    print_header("API Test Summary")
+    total = results['passed'] + results['failed'] + results['skipped']
+    print(f"  Total Tests: {total}")
+    print(f"  ✓ Passed: {results['passed']}")
+    print(f"  ✗ Failed: {results['failed']}")
+    print(f"  ⊘ Skipped: {results['skipped']}")
+    
+    if results['failed'] > 0:
+        print("\n  ⚠️  Some APIs failed - check your .env configuration")
+    elif results['skipped'] > 0:
+        print("\n  ℹ️  Some APIs not configured - app will use fallback data")
+    else:
+        print("\n  🎉 All configured APIs are working!")
+    
+    return results
+
+def main():
+    """Run EVE demo and tests"""
+    
+    print_header("EVE Voice AI Assistant - Test Suite")
     print("System Code: CEC_WAM_HEI_EVE_7A2F-9C4B")
     print("Owner: Twan")
+    print(f"Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
     
+    # Run API configuration tests first
+    test_results = test_api_configurations()
+    
     # Initialize EVE
+    print_header("EVE Initialization")
     print("Initializing EVE...")
     eve = get_eve()
     print("✓ EVE initialized successfully!\n")

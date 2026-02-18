@@ -1,4 +1,3 @@
-import streamlit as st
 
 import pandas as pd
 import numpy as np
@@ -1856,254 +1855,104 @@ with tabs[8]:
 
 # TAB 10: EVE AI
 with tabs[9]:
-    st.header("🤖 EVE / HEI BRAIN - AI Assistant")
+    st.header("🤖 EVE AI Assistant")
     
-    # Initialize EVE Voice Agent
-    if 'eve_agent' not in st.session_state:
-        try:
-            from eve_voice_agent import get_eve
-            st.session_state.eve_agent = get_eve()
-        except Exception as e:
-            st.session_state.eve_agent = None
-            st.error(f"EVE initialization error: {str(e)}")
-    
-    # EVE Status Panel with 5D Holographic Theme
     st.markdown("""
-    <div style='background: linear-gradient(135deg, rgba(157, 0, 255, 0.15), rgba(0, 255, 255, 0.15)); 
-                padding: 30px; border-radius: 20px; 
-                border: 2px solid rgba(157, 0, 255, 0.5);
-                box-shadow: 0 0 40px rgba(157, 0, 255, 0.4), inset 0 0 20px rgba(0, 255, 255, 0.2);
-                text-align: center; position: relative; overflow: hidden;'>
-        <div style='position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: radial-gradient(circle at 50% 50%, rgba(157, 0, 255, 0.1), transparent);
-                    animation: pulse 3s infinite;'></div>
-        <div style='position: relative; z-index: 1;'>
-            <h1 style='font-size: 3rem; margin-bottom: 10px; 
-                       background: linear-gradient(90deg, #9D00FF, #00FFFF, #00FF88);
-                       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                       text-shadow: 0 0 30px rgba(157, 0, 255, 0.8);'>
-                🧠 EVE / HEI BRAIN
-            </h1>
-            <p style='font-size: 1.2rem; color: #00FFFF; margin: 10px 0;'>Enhanced Virtual Entity - Neural Core System</p>
-            <p style='font-size: 0.9rem; color: #9D00FF;'><strong>System Code:</strong> CEC_WAM_HEI_EVE_7A2F-9C4B</p>
-            <div style='display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap;'>
-                <div>
-                    <div style='color: #00FF88; font-size: 0.8rem;'>Owner</div>
-                    <div style='color: #FFFFFF; font-weight: bold;'>Twan</div>
-                </div>
-                <div>
-                    <div style='color: #00FF88; font-size: 0.8rem;'>Access Level</div>
-                    <div style='color: #FFFFFF; font-weight: bold;'>FULL</div>
-                </div>
-                <div>
-                    <div style='color: #00FF88; font-size: 0.8rem;'>Status</div>
-                    <div style='color: #00FF88; font-weight: bold;'>✓ ONLINE</div>
-                </div>
-            </div>
-        </div>
+    <div style='background: rgba(157, 0, 255, 0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(157, 0, 255, 0.3); text-align: center;'>
+        <h2>👋 Hello, I'm EVE</h2>
+        <p>Enhanced Virtual Entity - Your AI assistant</p>
+        <p><strong>System Code:</strong> CEC_WAM_HEI_EVE_7A2F-9C4B</p>
+        <p><strong>Owner:</strong> Twan | <strong>Access Level:</strong> Full</p>
+        <p><strong>Personality:</strong> Professional, Helpful, Intelligent, Learning</p>
+        <p style='color: #00FF88;'><strong>Status:</strong> ✓ Online and Ready</p>
     </div>
-    
-    <style>
-    @keyframes pulse {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.05); }
-    }
-    </style>
     """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Real-time EVE Status Metrics
-    if st.session_state.eve_agent:
-        try:
-            eve_status = st.session_state.eve_agent.get_status()
-            
-            # Status Cards Row
-            status_cols = st.columns(4)
-            
-            with status_cols[0]:
-                api_status = "🟢 READY" if eve_status.get('openai_ready', False) else "🟡 FALLBACK"
-                st.markdown(f"""
-                <div style='background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 12px; 
-                            border: 1px solid rgba(0, 255, 255, 0.3); text-align: center;
-                            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);'>
-                    <div style='font-size: 2rem;'>🤖</div>
-                    <div style='color: #00FFFF; font-size: 0.85rem; margin-top: 5px;'>AI Core</div>
-                    <div style='color: #FFFFFF; font-weight: bold; margin-top: 5px;'>{api_status}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with status_cols[1]:
-                voice_status = "🟢 READY" if eve_status.get('elevenlabs_ready', False) else "🟡 FALLBACK"
-                st.markdown(f"""
-                <div style='background: rgba(157, 0, 255, 0.1); padding: 15px; border-radius: 12px; 
-                            border: 1px solid rgba(157, 0, 255, 0.3); text-align: center;
-                            box-shadow: 0 4px 15px rgba(157, 0, 255, 0.2);'>
-                    <div style='font-size: 2rem;'>🗣️</div>
-                    <div style='color: #9D00FF; font-size: 0.85rem; margin-top: 5px;'>Voice</div>
-                    <div style='color: #FFFFFF; font-weight: bold; margin-top: 5px;'>{voice_status}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with status_cols[2]:
-                conv_count = eve_status.get('conversation_count', 0)
-                st.markdown(f"""
-                <div style='background: rgba(0, 255, 136, 0.1); padding: 15px; border-radius: 12px; 
-                            border: 1px solid rgba(0, 255, 136, 0.3); text-align: center;
-                            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);'>
-                    <div style='font-size: 2rem;'>💬</div>
-                    <div style='color: #00FF88; font-size: 0.85rem; margin-top: 5px;'>Conversations</div>
-                    <div style='color: #FFFFFF; font-weight: bold; margin-top: 5px;'>{conv_count}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with status_cols[3]:
-                uptime = eve_status.get('uptime', '24/7')
-                st.markdown(f"""
-                <div style='background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 12px; 
-                            border: 1px solid rgba(255, 215, 0, 0.3); text-align: center;
-                            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);'>
-                    <div style='font-size: 2rem;'>⏰</div>
-                    <div style='color: #FFD700; font-size: 0.85rem; margin-top: 5px;'>Uptime</div>
-                    <div style='color: #FFFFFF; font-weight: bold; margin-top: 5px;'>{uptime}</div>
-                </div>
-                """, unsafe_allow_html=True)
-        except Exception as e:
-            st.warning(f"Could not load EVE status: {str(e)}")
     
     st.markdown("---")
     
-    # EVE Capabilities with enhanced visuals
-    st.subheader("🎯 Neural Core Capabilities")
+    # EVE Capabilities
+    st.subheader("🎯 EVE Capabilities")
     
     cap_col1, cap_col2, cap_col3 = st.columns(3)
     
     with cap_col1:
         st.markdown("""
-        <div style='background: rgba(0, 255, 255, 0.08); padding: 20px; border-radius: 15px; 
-                    border: 2px solid rgba(0, 255, 255, 0.3);
-                    box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
-                    backdrop-filter: blur(10px);'>
-            <h4 style='color: #00FFFF; margin-bottom: 15px;'>🧠 Intelligence</h4>
-            <ul style='text-align: left; color: #FFFFFF; line-height: 1.8;'>
-                <li>Natural Language Processing</li>
-                <li>Real-time Data Analysis</li>
-                <li>Adaptive Learning System</li>
-                <li>Mathematical Computations</li>
-                <li>Financial Insights</li>
+        <div style='background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 255, 255, 0.3);'>
+            <h4>🧠 Intelligence</h4>
+            <ul style='text-align: left;'>
+                <li>Natural language understanding</li>
+                <li>Data analysis and insights</li>
+                <li>Learning from interactions</li>
+                <li>Code generation</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
     with cap_col2:
         st.markdown("""
-        <div style='background: rgba(157, 0, 255, 0.08); padding: 20px; border-radius: 15px; 
-                    border: 2px solid rgba(157, 0, 255, 0.3);
-                    box-shadow: 0 0 25px rgba(157, 0, 255, 0.2);
-                    backdrop-filter: blur(10px);'>
-            <h4 style='color: #9D00FF; margin-bottom: 15px;'>🔧 System Control</h4>
-            <ul style='text-align: left; color: #FFFFFF; line-height: 1.8;'>
-                <li>Full Dashboard Access</li>
-                <li>Multi-API Integration</li>
-                <li>Voice Synthesis (TTS)</li>
-                <li>Data Export & Analysis</li>
-                <li>Auto-Sync Capabilities</li>
+        <div style='background: rgba(157, 0, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(157, 0, 255, 0.3);'>
+            <h4>🔧 System Access</h4>
+            <ul style='text-align: left;'>
+                <li>Full dashboard control</li>
+                <li>API integration</li>
+                <li>Data export capabilities</li>
+                <li>Auto-sync enabled</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
     with cap_col3:
         st.markdown("""
-        <div style='background: rgba(0, 255, 136, 0.08); padding: 20px; border-radius: 15px; 
-                    border: 2px solid rgba(0, 255, 136, 0.3);
-                    box-shadow: 0 0 25px rgba(0, 255, 136, 0.2);
-                    backdrop-filter: blur(10px);'>
-            <h4 style='color: #00FF88; margin-bottom: 15px;'>🎨 Neural Traits</h4>
-            <ul style='text-align: left; color: #FFFFFF; line-height: 1.8;'>
-                <li>Professional & Helpful</li>
-                <li>Context-Aware Responses</li>
-                <li>Proactive Assistance</li>
-                <li>Island Rhythm Personality</li>
-                <li>Continuous Evolution</li>
+        <div style='background: rgba(0, 255, 136, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.3);'>
+            <h4>🎨 Personality</h4>
+            <ul style='text-align: left;'>
+                <li>Building rapport</li>
+                <li>Adapting to user needs</li>
+                <li>Proactive assistance</li>
+                <li>Continuous improvement</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Enhanced Chat Interface with EVE integration
-    st.subheader("💬 Neural Interface - Chat with EVE")
+    # Chat Interface
+    st.subheader("💬 Chat with EVE")
     
     if 'messages' not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Hello! I'm EVE, your Enhanced Virtual Entity. I'm here to assist you with data analysis, system monitoring, and any questions you have about CEC-WAM. How can I help you today? 🧠✨"}
+            {"role": "assistant", "content": "Hello! I'm EVE, your Enhanced Virtual Entity. How can I assist you today?"}
         ]
     
-    # Chat container with custom styling
-    chat_container = st.container()
-    with chat_container:
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
+    # Display chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
     
     # Chat input
-    if prompt := st.chat_input("Ask EVE anything about your systems, data, or calculations..."):
+    if prompt := st.chat_input("Ask EVE anything..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         with st.chat_message("user"):
             st.write(prompt)
         
         with st.chat_message("assistant"):
-            # Use actual EVE agent if available
-            if st.session_state.eve_agent:
-                try:
-                    # Try using EVE's chat function
-                    response = st.session_state.eve_agent.chat(prompt, include_history=False)
-                    st.write(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                except Exception as e:
-                    response = f"I'm processing your request: '{prompt}'. However, I encountered an issue: {str(e)}\n\nTo enable full AI capabilities, please ensure the OpenAI API key is configured in your .env file."
-                    st.write(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-            else:
-                response = f"I received your message: '{prompt}'. To enable full AI capabilities, please configure the OpenAI API key in your environment variables. See .env.example for setup instructions."
-                st.write(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+            # Simple response system (can be enhanced with OpenAI API)
+            response = f"I received your message: '{prompt}'. To enable full AI capabilities, please configure the OpenAI API key in your environment variables."
+            st.write(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
     
     st.markdown("---")
     
-    # Voice & Actions Panel
-    st.subheader("🎛️ Neural Actions")
+    # Voice Controls
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🎤 Voice Input", use_container_width=True):
+            st.info("Voice input requires microphone access. Configure SpeechRecognition API.")
     
-    action_col1, action_col2, action_col3, action_col4 = st.columns(4)
-    
-    with action_col1:
-        if st.button("🎤 Voice Input", use_container_width=True, help="Requires microphone access"):
-            st.info("🎤 Voice input requires SpeechRecognition API and microphone permissions. Feature coming soon!")
-    
-    with action_col2:
-        if st.button("🔊 Voice Output", use_container_width=True, help="Requires ElevenLabs API"):
-            if st.session_state.eve_agent and st.session_state.eve_agent.elevenlabs_ready:
-                st.success("🔊 Voice synthesis ready! Add voice output to messages.")
-            else:
-                st.warning("🔊 Voice synthesis requires ElevenLabs API key. Add ELEVENLABS_API_KEY to .env file.")
-    
-    with action_col3:
-        if st.button("🔄 Reset Chat", use_container_width=True, help="Clear conversation history"):
-            st.session_state.messages = [
-                {"role": "assistant", "content": "Chat history cleared. How can I assist you? 🧠"}
-            ]
-            if st.session_state.eve_agent:
-                st.session_state.eve_agent.conversation_history = []
-            st.rerun()
-    
-    with action_col4:
-        if st.button("📊 EVE Status", use_container_width=True, help="View detailed EVE status"):
-            if st.session_state.eve_agent:
-                status = st.session_state.eve_agent.get_status()
-                st.json(status)
-            else:
-                st.error("EVE agent not initialized")
+    with col2:
+        if st.button("🔊 Voice Output", use_container_width=True):
+            st.info("Voice synthesis requires ElevenLabs API configuration.")
 
 # TAB 11: Analytics
 with tabs[10]:
@@ -2340,3 +2189,4 @@ st.markdown("""
     <p style='color: #00FF88; margin: 0; font-size: 0.8rem;'>Last Updated: {}</p>
 </div>
 """.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")), unsafe_allow_html=True)
+
