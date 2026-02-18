@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>CEC-WAM // SOVEREIGN NEURAL CORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>// --- LIVE API & CAMERA INTEGRATION ---
+const CONFIG = {
+    CAMERA_API_KEY: "YOUR_API_KEY_HERE", // Insert your main API key
+    LIVE_FEED_URL: "https://your-camera-stream-url.com/stream.m3u8", // Your live camera URL
+};
+
+function connectLiveFeeds() {
+    const videoElement = document.querySelector('img[alt="Motherboard Core"]'); 
+    // Replace the static image with an iframe or video tag for live feed
+    videoElement.outerHTML = `<iframe src="${CONFIG.LIVE_FEED_URL}" class="w-full h-full border-none"></iframe>`;
+    addLog("[API] CAMERA LINK ESTABLISHED.");
+}
+// Run connection on load
+window.onload = connectLiveFeeds;
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background: #000; color: #00f3ff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; }
