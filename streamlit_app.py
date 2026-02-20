@@ -5,6 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 import requests
+from io import StringIO
 from datetime import datetime, timedelta
 import time
 import os
@@ -202,32 +203,37 @@ if st.session_state.hud_enabled:
 @st.cache_data(ttl=60)
 def load_google_sheets_data():
     """Load data from Google Sheets CSV with enhanced error handling"""
+    def _build_demo_data(sync_status, sync_message):
+        dates = pd.date_range(start='2024-01-01', periods=100, freq='D')
+        demo_df = pd.DataFrame({
+            'Date': dates,
+            'Metric1': np.random.randint(50, 200, 100),
+            'Metric2': np.random.randint(100, 500, 100),
+            'Category': np.random.choice(['A', 'B', 'C'], 100),
+            'Status': np.random.choice(['Active', 'Pending', 'Complete'], 100)
+        })
+        demo_df.attrs['sync_status'] = sync_status
+        demo_df.attrs['sync_message'] = sync_message
+        demo_df.attrs['last_sync'] = datetime.now().strftime('%H:%M:%S')
+        return demo_df
+
     try:
         url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
-        df = pd.read_csv(url, timeout=10)
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        df = pd.read_csv(StringIO(response.text))
         if len(df) == 0:
             raise ValueError("Empty dataset received")
+        df.attrs['sync_status'] = 'live'
+        df.attrs['sync_message'] = 'Google Sheets sync active'
+        df.attrs['last_sync'] = datetime.now().strftime('%H:%M:%S')
         return df
     except requests.exceptions.Timeout:
-        # Timeout - use demo data
-        dates = pd.date_range(start='2024-01-01', periods=100, freq='D')
-        return pd.DataFrame({
-            'Date': dates,
-            'Metric1': np.random.randint(50, 200, 100),
-            'Metric2': np.random.randint(100, 500, 100),
-            'Category': np.random.choice(['A', 'B', 'C'], 100),
-            'Status': np.random.choice(['Active', 'Pending', 'Complete'], 100)
-        })
+        return _build_demo_data('timeout', 'Google Sheets request timed out; using demo data')
+    except requests.exceptions.RequestException as e:
+        return _build_demo_data('error', f'Google Sheets request failed: {str(e)}')
     except Exception as e:
-        # Any other error - use demo data
-        dates = pd.date_range(start='2024-01-01', periods=100, freq='D')
-        return pd.DataFrame({
-            'Date': dates,
-            'Metric1': np.random.randint(50, 200, 100),
-            'Metric2': np.random.randint(100, 500, 100),
-            'Category': np.random.choice(['A', 'B', 'C'], 100),
-            'Status': np.random.choice(['Active', 'Pending', 'Complete'], 100)
-        })
+        return _build_demo_data('error', f'Data parse error: {str(e)}')
 
 @st.cache_data(ttl=60)
 def get_psi_price():
@@ -713,20 +719,36 @@ with tabs[0]:
 # TAB 2: Live Data
 with tabs[1]:
     st.header("📈 Live Data Feed")
+
+    data = load_google_sheets_data()
+    sync_status = data.attrs.get('sync_status', 'error')
+    sync_message = data.attrs.get('sync_message', 'Unknown data sync state')
+    sync_time = data.attrs.get('last_sync', datetime.now().strftime('%H:%M:%S'))
+
+    data_status_badge = {
+        'live': ('🟢', 'Synced', '#00FF88'),
+        'timeout': ('🟠', 'Timeout', '#FFA500'),
+        'error': ('🔴', 'Sync Error', '#FF4444')
+    }
+    status_emoji, status_label, status_color = data_status_badge.get(sync_status, ('🔴', 'Sync Error', '#FF4444'))
     
     col_info1, col_info2 = st.columns([3, 1])
     with col_info1:
         st.info("🔄 Auto-refresh enabled - Data updates every 60 seconds")
     with col_info2:
         # Data source indicator
-        st.markdown("""
+        st.markdown(f"""
         <div style='background: rgba(0, 255, 136, 0.1); padding: 10px; border-radius: 5px; text-align: center;'>
-            <span style='color: #00FF88;'>🟢 Data Source: Active</span>
+            <span style='color: {status_color};'>{status_emoji} Data Source: {status_label}</span>
         </div>
         """, unsafe_allow_html=True)
-    
-    # Load data
-    data = load_google_sheets_data()
+
+    if sync_status == 'live':
+        st.success(f"{status_emoji} {sync_message} | Last sync: {sync_time}")
+    elif sync_status == 'timeout':
+        st.warning(f"{status_emoji} {sync_message} | Last attempt: {sync_time}")
+    else:
+        st.error(f"{status_emoji} {sync_message} | Last attempt: {sync_time}")
     
     st.subheader(f"📊 Dataset: {len(data)} records loaded")
     
