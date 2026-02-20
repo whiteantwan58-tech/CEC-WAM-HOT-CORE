@@ -1840,7 +1840,10 @@ with tabs[8]:
             <div style='background: rgba(26, 26, 46, 0.8); padding: 20px; border-radius: 10px; border: 1px solid rgba(0, 255, 255, 0.3);'>
                 <h3 style='color: #00FFFF;'>Nuclear Fusion Reactor</h3>
                 <p><strong>Reaction:</strong> D-T Fusion</p>
-                <p><strong>Temperature:</strong> 150 million °C</p>
+                data = {
+    'Mass (kg)': [5000, 800, 1200, 300, 400],
+    'Velocity': [10, 20, 30, 40, 50]
+}
                 <p><strong>Output:</strong> 500 MW</p>
                 <p><strong>Status:</strong> <span style='color: #FFA500;'>Experimental</span></p>
             </div>
