@@ -231,3 +231,31 @@ Before deploying to Streamlit Cloud:
 **🔮 SOVEREIGN SYSTEM v2.0 | φ=1.618 | QUANTUM ENTANGLED**
 
 *One repository. Multiple deployments. Always synchronized.*
+
+---
+
+## 🧪 5D Interface Live Check (All Repositories)
+
+If your mobile deploy flow shows multiple repos and you need to verify which one is truly live, run:
+
+```bash
+# Optional but recommended for higher GitHub API rate limits
+export GITHUB_TOKEN=your_token_here
+
+python3 tools/repo_interface_audit.py --owner whiteantwan58-tech
+```
+
+What this checks for each repository:
+- write/admin vs read-only permission (helps identify deploy-key lockouts)
+- Streamlit entry point (`streamlit_app.py` or `app.py`)
+- static interface entry point (`index.html` or `dashboard.html`)
+- GitHub Pages status
+- archived state
+
+A JSON report is saved to:
+
+```text
+reports/repo_interface_audit.json
+```
+
+Use this to quickly confirm `CEC-WAM-HOT-CORE` is the active repo for the 5D interface deployment.
