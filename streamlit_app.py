@@ -12,6 +12,13 @@ import os
 from collections import deque
 import random
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not required in production
+
 # Page Configuration
 st.set_page_config(
     page_title="EVE System - 5D Holographic Dashboard",

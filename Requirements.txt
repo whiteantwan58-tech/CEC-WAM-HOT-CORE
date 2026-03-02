@@ -1,7 +1,15 @@
-/
-├─ streamlit_app.py
-├─ requirements.txt
-├─ README.md
-├─ .gitignore
-└─ data/
-   └─ ledger.csv
+streamlit>=1.30.0
+streamlit-autorefresh>=1.0.1
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0
+requests>=2.31.0
+plotly>=5.18.0
+gspread>=5.12.0
+oauth2client>=4.1.3
+elevenlabs>=0.2.27
+openai>=1.3.0
+SpeechRecognition>=3.10.0
+pydub>=0.25.1
+python-dotenv>=1.0.0
+matplotlib
