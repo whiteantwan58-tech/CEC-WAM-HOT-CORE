@@ -458,7 +458,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            GOOGLE_SHEETS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv',
+            GOOGLE_SHEETS_URL: window.ENV?.GOOGLE_SHEETS_URL || '',
             // NASA API Key: DEMO_KEY has rate limits (30 requests/hour, 50 requests/day)
             // For production use, get your own free API key from https://api.nasa.gov/
             NASA_API_KEY: 'DEMO_KEY',
@@ -599,6 +599,9 @@
         async function loadGoogleSheetsData() {
             const loadStart = Date.now();
             try {
+                if (!CONFIG.GOOGLE_SHEETS_URL) {
+                    throw new Error('GOOGLE_SHEETS_URL not configured (set window.ENV.GOOGLE_SHEETS_URL)');
+                }
                 const response = await fetch(CONFIG.GOOGLE_SHEETS_URL);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 

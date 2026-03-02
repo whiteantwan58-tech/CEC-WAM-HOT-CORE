@@ -218,7 +218,9 @@ def load_google_sheets_data():
         return demo_df
 
     try:
-        url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
+        url = os.environ.get('GOOGLE_SHEETS_URL', '')
+        if not url:
+            return _build_demo_data('unconfigured', 'GOOGLE_SHEETS_URL not set; using demo data')
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         df = pd.read_csv(StringIO(response.text))

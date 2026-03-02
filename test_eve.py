@@ -145,14 +145,18 @@ def test_api_configurations():
     # Test Google Sheets (public CSV)
     print("\n📊 Testing Google Sheets Data Feed...")
     try:
-        url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            print("  ✓ Google Sheets CSV: Accessible")
-            results['passed'] += 1
+        url = os.getenv('GOOGLE_SHEETS_URL', '')
+        if not url:
+            print("  ⊘ Google Sheets CSV: GOOGLE_SHEETS_URL not set; skipping")
+            results['skipped'] += 1
         else:
-            print(f"  ✗ Google Sheets CSV: Failed (status {response.status_code})")
-            results['failed'] += 1
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                print("  ✓ Google Sheets CSV: Accessible")
+                results['passed'] += 1
+            else:
+                print(f"  ✗ Google Sheets CSV: Failed (status {response.status_code})")
+                results['failed'] += 1
     except Exception as e:
         print(f"  ✗ Google Sheets CSV: Error - {str(e)}")
         results['failed'] += 1
