@@ -1,0 +1,27 @@
+# Gitleaks configuration for CEC-WAM-HOT-CORE
+# Suppresses false positives from example/template files.
+
+title = "CEC-WAM-HOT-CORE gitleaks configuration"
+
+[extend]
+# Extend the default ruleset provided by gitleaks
+useDefault = true
+
+[[allowlists]]
+description = "Ignore example and template files that intentionally contain placeholder values"
+paths = [
+    '''.env\.example''',
+    '''\.env\.example''',
+]
+
+[[allowlists]]
+description = "Ignore EVE system code identifier (not a real secret)"
+regexes = [
+    '''CEC_WAM_HEI_EVE_7A2F-9C4B''',
+]
+
+[[allowlists]]
+description = "Ignore known ElevenLabs default Adam voice ID (public default, not a secret)"
+regexes = [
+    '''21m00Tcm4TlvDq8ikWAM''',
+]

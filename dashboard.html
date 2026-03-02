@@ -459,9 +459,10 @@
         // Configuration
         const CONFIG = {
             GOOGLE_SHEETS_URL: window.ENV?.GOOGLE_SHEETS_URL || '',
-            // NASA API Key: DEMO_KEY has rate limits (30 requests/hour, 50 requests/day)
-            // For production use, get your own free API key from https://api.nasa.gov/
-            NASA_API_KEY: 'DEMO_KEY',
+            // NASA API Key: loaded from environment (window.ENV.NASA_API_KEY).
+            // Falls back to 'DEMO_KEY' which has rate limits (30 req/hr, 50 req/day).
+            // Set NASA_API_KEY in your .env file – free key at https://api.nasa.gov/
+            NASA_API_KEY: window.ENV?.NASA_API_KEY || 'DEMO_KEY',
             COINGECKO_API: 'https://api.coingecko.com/api/v3/simple/price?ids=tridentdao&vs_currencies=usd&include_24h_change=true',
             REFRESH_INTERVAL: 60000, // 1 minute
             ASSETS_CSV: 'data/CEC_Matrix_System_Operational_Metrics_and_Assets.csv',

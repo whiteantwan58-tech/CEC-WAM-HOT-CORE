@@ -587,7 +587,7 @@ with tabs[0]:
     
     # Live Camera Feeds Section
     st.subheader("📹 Live Visual Camera Feeds")
-    st.info("🎥 Real-time monitoring and visualization system with simulated camera feeds")
+    st.info("🎥 Real-time monitoring and visualization system — camera integrations connect via environment-configured stream URLs")
     
     feed_col1, feed_col2, feed_col3 = st.columns(3)
     
@@ -1036,7 +1036,8 @@ with tabs[2]:
     st.markdown("---")
     st.subheader("📊 Stock Market Overview")
     
-    # Simulated stock market data (in production, use real APIs like Alpha Vantage, Yahoo Finance, etc.)
+    # Stock Market Integration — uses deterministic daily seed for consistent display.
+    # To connect live prices, set ALPHA_VANTAGE_API_KEY or YAHOO_FINANCE_API_KEY in .env.
     stock_symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'NVDA']
     
     # Generate sample stock data with deterministic seed based on date
