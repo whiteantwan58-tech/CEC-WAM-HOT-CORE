@@ -64,12 +64,17 @@ OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')
 
 # Google Sheets Configuration
 # Primary Google Sheets CSV (CEC WAM Master Ledger)
-GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREgUUHPCzTBWK8i1PWBrE2E4pKRTAgaReJahFqmrTetCZyCO0QHVlAleodUsTlJv_86KpzH_NPv9dv/pub?output=csv"
+# Set GOOGLE_SHEETS_URL in environment or .env file; see .env.example
+GOOGLE_SHEETS_URL = os.getenv('GOOGLE_SHEETS_URL', '')
 
 # Alternative frozen/locked sheet ID for secure data display
 # Format: https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv
-FROZEN_SHEET_ID = "14nNp33Dk2YoYcVcQI0lUEp208m-VvZboi_Te8jt_flg2NkNm8WieN0sX"
-FROZEN_SHEETS_URL = f"https://docs.google.com/spreadsheets/d/{FROZEN_SHEET_ID}/export?format=csv"
+# Set FROZEN_SHEET_ID in environment or .env file; see .env.example
+FROZEN_SHEET_ID = os.getenv('FROZEN_SHEET_ID', '')
+FROZEN_SHEETS_URL = (
+    f"https://docs.google.com/spreadsheets/d/{FROZEN_SHEET_ID}/export?format=csv"
+    if FROZEN_SHEET_ID else ''
+)
 
 # Expected column schema for data locking (defines order and expected columns)
 # Note: dtype values are for documentation only; actual type enforcement happens in display config
@@ -545,6 +550,8 @@ def fetch_sheets_data(use_frozen=True):
     try:
         # Use frozen sheet by default for data security
         sheet_url = FROZEN_SHEETS_URL if use_frozen else GOOGLE_SHEETS_URL
+        if not sheet_url:
+            return None
         df = pd.read_csv(sheet_url)
         
         # Validate and standardize column names

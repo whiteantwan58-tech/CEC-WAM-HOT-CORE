@@ -697,10 +697,13 @@ CEC-WAM-HOT-CORE/
 ## 🔒 Security Notes
 
 - **Lock Screen**: Theatrical UI only, not real security
-- **Environment Variables**: Never commit `.env` file
+- **Environment Variables**: Never commit `.env` file; copy `.env.example` → `.env` and fill in your values
+- **Google Sheets**: Store the sheet URL and sheet ID in env vars (`GOOGLE_SHEETS_URL`, `FROZEN_SHEET_ID`); see `.env.example`
 - **Service Account**: Keep JSON credentials secret
 - **HTTPS**: Always use HTTPS in production
 - **CORS**: Ensure proper CORS headers for API calls
+- **Secret Scanning**: Automated gitleaks scanning runs on every push/PR via `.github/workflows/secret-scanning.yml`
+- **Compromised Keys**: If a key was committed, revoke it immediately and follow the rotation steps in `SECURITY.md`
 
 ## 🗺️ Map, Camera, Weather & Traffic Features
 
