@@ -2,87 +2,187 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CEC-WAM // SOVEREIGN CORE // LIVE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSI Coin // CEC-WAM // SOVEREIGN CORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --glow: #00f3ff; --matrix: #00ff41; --alert: #ff003c; }
-        body { background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; margin: 0; }
+        :root { --glow: #00f3ff; --matrix: #00ff41; --alert: #ff003c; --gold: #ffd700; }
+        body { background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; margin: 0; min-height: 100vh; }
         .border-system { border: 1px solid rgba(0, 243, 255, 0.3); background: rgba(0, 0, 0, 0.9); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
         .scanline { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 100; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .psi-glow { text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 40px rgba(0, 243, 255, 0.4); }
+        .gold-glow { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        .stat-card { border: 1px solid rgba(0, 243, 255, 0.25); background: rgba(0, 10, 20, 0.85); border-radius: 8px; padding: 1rem; }
+        .feature-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; }
+        @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes orbit-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .ticker-inner { display: flex; gap: 4rem; animation: ticker-scroll 30s linear infinite; white-space: nowrap; }
+        /* Fallback for browsers without CSS animations */
+        @media (prefers-reduced-motion: reduce) {
+            .ticker-inner { animation: none; }
+            .orbit-ring, .orbit-ring-reverse { animation: none !important; }
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col p-6 relative">
-    <div class="scanline"></div>
+<body class="flex flex-col p-4 md:p-6 relative">
+    <div class="scanline" aria-hidden="true"></div>
 
-    <header class="flex justify-between items-start mb-8 z-10">
+    <!-- Header -->
+    <header class="flex flex-wrap justify-between items-start mb-8 z-10 gap-4">
         <div>
-            <h1 class="font-orbitron text-3xl text-[--glow] tracking-widest uppercase">CEC-WAM</h1>
-            <p class="text-[10px] font-mono opacity-60 uppercase">System: Live // User: White // Dir: C:\Users\white</p>
+            <h1 class="font-orbitron text-3xl text-[--glow] tracking-widest uppercase psi-glow">CEC-WAM</h1>
+            <p class="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-1">
+                Sovereign AI &bull; PSI Coin Platform &bull; Decentralized Finance
+            </p>
         </div>
         <div class="text-right font-orbitron">
-            <div class="text-2xl text-yellow-400 font-bold" id="liquid-val">$1,250,039,000</div>
-            <div class="text-[10px] text-[--matrix] tracking-widest">KEY: SECURED_LOCAL</div>
+            <div class="text-2xl text-[--gold] font-bold gold-glow" id="psi-market-cap">$1.25B+</div>
+            <div class="text-[10px] text-[--matrix] tracking-widest uppercase">PROJECTED MARKET CAP</div>
         </div>
     </header>
 
-    <div class="grid grid-cols-12 gap-6 flex-1 z-10 overflow-hidden">
-        <div class="col-span-4 flex flex-col gap-4">
-            <div class="border-system p-4 flex-1">
-                <h3 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2">LOGISTICS MATRIX</h3>
-                <div class="space-y-4 text-sm font-mono">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] opacity-50 uppercase">Target: Walmart</span>
-                        <span class="text-white">1900 S 314th St, Federal Way</span>
+    <!-- Main content grid -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 z-10">
+
+        <!-- Left panel: PSI Coin stats & features -->
+        <div class="md:col-span-4 flex flex-col gap-4">
+            <div class="border-system p-4 rounded-lg">
+                <h2 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2 uppercase tracking-widest">
+                    PSI COIN METRICS
+                </h2>
+                <div class="space-y-3 text-sm font-mono">
+                    <div class="stat-card flex justify-between items-center">
+                        <span class="text-[10px] opacity-60 uppercase">Token Symbol</span>
+                        <span class="text-[--gold] font-bold text-base">Ψ PSI</span>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] opacity-50 uppercase">Target: USPS Office</span>
-                        <span class="text-white">32815 1st Ave S, Federal Way</span>
+                    <div class="stat-card flex justify-between items-center">
+                        <span class="text-[10px] opacity-60 uppercase">Total Supply</span>
+                        <span class="text-[--glow]">100,000,000</span>
                     </div>
-                    <div class="mt-6 p-3 border border-red-600 bg-red-900/20 text-[--alert] text-center font-bold animate-pulse">
-                        STATUS: LLC FILING OVERDUE
+                    <div class="stat-card flex justify-between items-center">
+                        <span class="text-[10px] opacity-60 uppercase">Network</span>
+                        <span class="text-[--matrix]">TridentDAO</span>
                     </div>
+                    <div class="stat-card flex justify-between items-center">
+                        <span class="text-[10px] opacity-60 uppercase">Backing</span>
+                        <span class="text-white">AI-Sovereign Reserve</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-system p-4 rounded-lg">
+                <h2 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2 uppercase tracking-widest">
+                    PLATFORM FEATURES
+                </h2>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-start gap-2">
+                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
+                        <span>AI-driven autonomous treasury management</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
+                        <span>Real-time liquidity monitoring &amp; rebalancing</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
+                        <span>Biometric-secured sovereign identity layer</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
+                        <span>Cross-chain bridge &amp; DeFi integrations</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
+                        <span>EVE AI agent task automation &amp; compliance</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-system p-4 rounded-lg">
+                <div class="p-3 border border-[--matrix] bg-green-900/20 text-[--matrix] text-center font-bold rounded">
+                    <div class="font-orbitron text-xs tracking-widest mb-1">SYSTEM STATUS</div>
+                    <div class="text-sm">ALL SYSTEMS OPERATIONAL</div>
                 </div>
             </div>
         </div>
 
-        <div class="col-span-8 border-system relative flex flex-col p-4 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 to-black overflow-hidden">
-            <div class="flex justify-between text-[10px] font-mono mb-4">
-                <span>LAT: 47.3223° N // LON: 122.3126° W</span>
+        <!-- Right panel: Visual core -->
+        <div class="md:col-span-8 border-system relative flex flex-col p-4 rounded-lg" style="background: radial-gradient(circle at center, rgba(0,40,60,0.4) 0%, rgba(0,0,0,0.95) 100%);">
+            <div class="flex flex-wrap justify-between text-[10px] font-mono mb-4 gap-2">
+                <span class="opacity-70">NETWORK: DECENTRALIZED // NODES: 1,024 ACTIVE</span>
                 <span class="text-[--matrix]">INTEGRITY: 100%</span>
             </div>
-            <div class="flex-1 flex items-center justify-center">
-                <div class="relative w-80 h-80">
-                    <div class="absolute inset-0 border-2 border-dashed border-cyan-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
-                    <div class="absolute inset-4 border border-yellow-500/10 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+
+            <!-- Animated core visual -->
+            <div class="flex-1 flex flex-col items-center justify-center py-6">
+                <div class="relative w-72 h-72 mb-6">
+                    <div class="orbit-ring absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-full" style="animation: orbit 20s linear infinite;"></div>
+                    <div class="orbit-ring-reverse absolute inset-6 border border-yellow-500/20 rounded-full" style="animation: orbit-reverse 15s linear infinite;"></div>
+                    <div class="absolute inset-12 border border-[--glow]/20 rounded-full" style="animation: orbit 10s linear infinite;"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span class="font-orbitron text-2xl text-[--glow] mb-1">BRAIN_SECURED</span>
-                        <span class="text-[9px] tracking-[0.4em] text-white opacity-70">CEC-WAM AUTONOMOUS</span>
+                        <div class="font-orbitron text-5xl text-[--gold] mb-1 gold-glow">Ψ</div>
+                        <span class="font-orbitron text-xl text-[--glow] psi-glow">PSI COIN</span>
+                        <span class="text-[9px] tracking-[0.4em] text-white opacity-70 mt-1 uppercase">CEC-WAM SOVEREIGN</span>
                     </div>
                 </div>
+
+                <!-- Key pitch stats -->
+                <div class="grid grid-cols-3 gap-4 w-full max-w-lg text-center">
+                    <div class="stat-card">
+                        <div class="font-orbitron text-lg text-[--gold] gold-glow">24/7</div>
+                        <div class="text-[9px] opacity-60 uppercase mt-1">AI Monitoring</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="font-orbitron text-lg text-[--glow] psi-glow">∞</div>
+                        <div class="text-[9px] opacity-60 uppercase mt-1">Scalability</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="font-orbitron text-lg text-[--matrix]">SEC</div>
+                        <div class="text-[9px] opacity-60 uppercase mt-1">Grade Security</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="mt-4 text-center">
+                <a href="dashboard.html" class="inline-block font-orbitron text-xs tracking-widest px-6 py-3 rounded-full text-black font-bold transition-all"
+                   style="background: linear-gradient(90deg, #00f3ff, #00ff41); box-shadow: 0 0 20px rgba(0,243,255,0.5);">
+                    VIEW LIVE DASHBOARD &rarr;
+                </a>
             </div>
         </div>
     </div>
 
-    <footer class="mt-6 border-t border-cyan-900 pt-4 font-mono text-[10px] flex justify-between overflow-hidden opacity-60">
-        <div id="live-stream" class="flex gap-8 whitespace-nowrap">
-            <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
-            <span>[NET] MONITORING FEDERAL WAY SECTOR...</span>
-            <span>[LOG] PENDING PAPERWORK DROP-OFF...</span>
+    <!-- Ticker footer -->
+    <footer class="mt-6 border-t border-cyan-900 pt-4 font-mono text-[10px] overflow-hidden opacity-60 z-10" aria-label="System status ticker">
+        <div class="overflow-hidden">
+            <div class="ticker-inner">
+                <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
+                <span>[PSI] TOKEN LAUNCH PHASE INITIATED</span>
+                <span>[NET] GLOBAL NODE NETWORK ONLINE</span>
+                <span>[AI] EVE AUTONOMOUS AGENT RUNNING</span>
+                <span>[DAO] TRIDENTDAO GOVERNANCE LIVE</span>
+                <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
+                <span>[PSI] TOKEN LAUNCH PHASE INITIATED</span>
+                <span>[NET] GLOBAL NODE NETWORK ONLINE</span>
+                <span>[AI] EVE AUTONOMOUS AGENT RUNNING</span>
+                <span>[DAO] TRIDENTDAO GOVERNANCE LIVE</span>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Update live status matching your actual Terminal
-        function syncMatrix() {
-            const stream = document.getElementById('live-stream');
-            const log = document.createElement('span');
-            log.innerText = `[${new Date().toLocaleTimeString()}] POSITION SYNC: TRACKING MOBILE METRICS...`;
-            stream.prepend(log);
-            if (stream.children.length > 5) stream.lastElementChild.remove();
-        }
-        setInterval(syncMatrix, 10000);
+        // Update timestamp in ticker
+        (function addTimestampTicker() {
+            var ticker = document.querySelector('.ticker-inner');
+            if (!ticker) return;
+            var span = document.createElement('span');
+            span.textContent = '[SYNC] LAST SYNC: ' + new Date().toLocaleTimeString();
+            ticker.appendChild(span);
+        })();
     </script>
 </body>
 </html>
