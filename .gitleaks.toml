@@ -1,0 +1,20 @@
+# gitleaks configuration
+# See https://github.com/gitleaks/gitleaks#configuration
+
+title = "CEC-WAM-HOT-CORE gitleaks config"
+
+[extend]
+# use the default ruleset
+useDefault = true
+
+[allowlist]
+description = "Historical findings for credentials that have been rotated and removed from the codebase; public voice IDs that are not secrets"
+commits = [
+  # bf4c910: "Initial plan" commit — contained ElevenLabs API key in CONFIGURATION_COMPLETE.md:94
+  # and ELEVENLABS_CONFIG.md:168. Key has been rotated and redacted in the next commit.
+  "bf4c910b2bac9956ae8ed3ae19dfcd6df6eb774a",
+]
+# ElevenLabs public voice IDs are not secrets — they are published in documentation
+regexes = [
+  "21m00Tcm4TlvDq8ikWAM",
+]

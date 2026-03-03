@@ -91,7 +91,7 @@ ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 #### Vercel:
 ```bash
 # Add to environment variables in dashboard:
-ELEVENLABS_API_KEY=sk_7bed04b2f191a4b4d632c9aa46cc7a44fbec65ce266f11b6
+ELEVENLABS_API_KEY=<YOUR_ELEVENLABS_API_KEY>
 ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
 ```
 
