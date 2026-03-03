@@ -6,11 +6,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --glow: #00f3ff; --alert: #ff003c; --matrix: #00ff41; }
+        :root { --glow: #00f3ff; --matrix: #00ff41; --alert: #ff003c; }
         body { background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; margin: 0; }
-        .border-system { border: 1px solid rgba(0, 243, 255, 0.3); background: rgba(0, 0, 0, 0.9); }
-        .font-mono { font-family: 'Consolas', 'Courier New', monospace; }
+        .border-system { border: 1px solid rgba(0, 243, 255, 0.3); background: rgba(0, 0, 0, 0.9); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
         .scanline { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 100; }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
 <body class="h-screen flex flex-col p-6 relative">
@@ -19,29 +19,29 @@
     <header class="flex justify-between items-start mb-8 z-10">
         <div>
             <h1 class="font-orbitron text-3xl text-[--glow] tracking-widest uppercase">CEC-WAM</h1>
-            <p class="text-[10px] font-mono opacity-60">USER: WHITE // DIR: C:\Users\white // KEY: SECURED_LOCAL</p>
+            <p class="text-[10px] font-mono opacity-60 uppercase">System: Live // User: White // Dir: C:\Users\white</p>
         </div>
         <div class="text-right font-orbitron">
-            <div class="text-2xl text-yellow-400">$1,250,039,000</div>
-            <div class="text-[10px] text-[--matrix] tracking-widest">BRAIN_SECURED</div>
+            <div class="text-2xl text-yellow-400 font-bold" id="liquid-val">$1,250,039,000</div>
+            <div class="text-[10px] text-[--matrix] tracking-widest">KEY: SECURED_LOCAL</div>
         </div>
     </header>
 
     <div class="grid grid-cols-12 gap-6 flex-1 z-10 overflow-hidden">
         <div class="col-span-4 flex flex-col gap-4">
-            <div class="border-system p-4 flex-1 overflow-hidden">
+            <div class="border-system p-4 flex-1">
                 <h3 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2">LOGISTICS MATRIX</h3>
                 <div class="space-y-4 text-sm font-mono">
                     <div class="flex flex-col">
                         <span class="text-[10px] opacity-50 uppercase">Target: Walmart</span>
-                        <span class="text-white">1900 S 314th St</span>
+                        <span class="text-white">1900 S 314th St, Federal Way</span>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-[10px] opacity-50 uppercase">Target: USPS Federal Way</span>
-                        <span class="text-white">32815 1st Ave S</span>
+                        <span class="text-[10px] opacity-50 uppercase">Target: USPS Office</span>
+                        <span class="text-white">32815 1st Ave S, Federal Way</span>
                     </div>
-                    <div id="status-alert" class="mt-6 p-2 border border-red-600 bg-red-900/20 text-[--alert] text-center font-bold animate-pulse">
-                        LLC FILING: OVERDUE
+                    <div class="mt-6 p-3 border border-red-600 bg-red-900/20 text-[--alert] text-center font-bold animate-pulse">
+                        STATUS: LLC FILING OVERDUE
                     </div>
                 </div>
             </div>
@@ -49,16 +49,16 @@
 
         <div class="col-span-8 border-system relative flex flex-col p-4 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 to-black overflow-hidden">
             <div class="flex justify-between text-[10px] font-mono mb-4">
-                <span>COORD: 47.3223° N, 122.3126° W</span>
-                <span class="text-[--matrix]">STATUS: 1:1 LIVE DATA STREAM</span>
+                <span>LAT: 47.3223° N // LON: 122.3126° W</span>
+                <span class="text-[--matrix]">INTEGRITY: 100%</span>
             </div>
             <div class="flex-1 flex items-center justify-center">
                 <div class="relative w-80 h-80">
                     <div class="absolute inset-0 border-2 border-dashed border-cyan-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
                     <div class="absolute inset-4 border border-yellow-500/10 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span class="font-orbitron text-2xl text-[--glow] mb-2">AUTONOMOUS</span>
-                        <span class="text-[9px] tracking-[0.4em] text-white opacity-70">PROTECTING THE BRAIN</span>
+                        <span class="font-orbitron text-2xl text-[--glow] mb-1">BRAIN_SECURED</span>
+                        <span class="text-[9px] tracking-[0.4em] text-white opacity-70">CEC-WAM AUTONOMOUS</span>
                     </div>
                 </div>
             </div>
@@ -68,22 +68,21 @@
     <footer class="mt-6 border-t border-cyan-900 pt-4 font-mono text-[10px] flex justify-between overflow-hidden opacity-60">
         <div id="live-stream" class="flex gap-8 whitespace-nowrap">
             <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
-            <span>[LOC] SCANNING FEDERAL WAY SECTOR...</span>
+            <span>[NET] MONITORING FEDERAL WAY SECTOR...</span>
             <span>[LOG] PENDING PAPERWORK DROP-OFF...</span>
         </div>
     </footer>
 
     <script>
-        const CORE_KEY = "CEC-WAM-SHIELD-V4-9928-ALPHA-0302";
-        
-        function updateCore() {
+        // Update live status matching your actual Terminal
+        function syncMatrix() {
             const stream = document.getElementById('live-stream');
             const log = document.createElement('span');
-            log.innerText = `[${new Date().toLocaleTimeString()}] POSITION SYNCING WITH LOCAL TERMINAL...`;
+            log.innerText = `[${new Date().toLocaleTimeString()}] POSITION SYNC: TRACKING MOBILE METRICS...`;
             stream.prepend(log);
             if (stream.children.length > 5) stream.lastElementChild.remove();
         }
-        setInterval(updateCore, 8000);
+        setInterval(syncMatrix, 10000);
     </script>
 </body>
 </html>
