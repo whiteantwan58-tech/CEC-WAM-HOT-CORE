@@ -15,13 +15,21 @@ paths = [
 ]
 
 [[allowlists]]
-description = "Ignore EVE system code identifier (not a real secret)"
+description = "Ignore EVE system code identifier (not a real secret) in docs/examples"
 regexes = [
     '''CEC_WAM_HEI_EVE_7A2F-9C4B''',
 ]
+paths = [
+    '''docs/.*''',
+    '''examples/.*''',
+]
 
 [[allowlists]]
-description = "Ignore known ElevenLabs default Adam voice ID (public default, not a secret)"
+description = "Ignore known ElevenLabs default Adam voice ID (public default, not a secret) in docs/examples"
 regexes = [
     '''21m00Tcm4TlvDq8ikWAM''',
+]
+paths = [
+    '''docs/.*''',
+    '''examples/.*''',
 ]
