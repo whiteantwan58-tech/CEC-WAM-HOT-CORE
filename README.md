@@ -101,7 +101,7 @@ ELEVENLABS_API_KEY = "your-key"
 3. Copy the published URL
 4. Set it as `GOOGLE_SHEETS_URL` in your `.env` or Streamlit secrets
 
-Expected CSV columns: `Category`, `Item`, `Value`, `Status`, `Date`, `Notes`
+The app can work with flexible CSV schemas. Commonly used example columns are: `Category`, `Item`, `Value`, `Status`, `Date`, `Notes`, but you can use any column names that make sense for your data.
 
 ---
 
