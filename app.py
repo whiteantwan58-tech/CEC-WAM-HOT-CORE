@@ -532,7 +532,7 @@ _NASA_APOD_FALLBACK = {
         "being born. The nebula is approximately 7,000 light-years from Earth. "
         "(Live NASA APOD data is unavailable — check your NASA_API_KEY and network access.)"
     ),
-    "date": "",
+    "date": None,
     "media_type": "image",
     "status": "demo",
 }
@@ -979,8 +979,7 @@ with tab3:
 
     with col2:
         st.markdown(f"### {nasa_data.get('title', 'N/A')}")
-        if nasa_data.get('date'):
-            st.markdown(f"**📅 Date:** {nasa_data.get('date')}")
+        st.markdown(f"**📅 Date:** {nasa_data.get('date') or 'N/A'}")
         st.markdown("**📝 Explanation:**")
         st.write(nasa_data.get('explanation', 'No description available'))
 
