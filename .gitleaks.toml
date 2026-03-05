@@ -1,0 +1,27 @@
+# gitleaks configuration
+# See https://github.com/gitleaks/gitleaks#configuration
+
+title = "CEC-WAM-HOT-CORE gitleaks config"
+
+[extend]
+# use the default ruleset
+useDefault = true
+
+[allowlist]
+description = "Historical findings for credentials that have been rotated and removed from the codebase; public voice IDs that are not secrets"
+commits = [
+  # bf4c910: "Initial plan" commit — contained ElevenLabs API key in CONFIGURATION_COMPLETE.md:94
+  # and ELEVENLABS_CONFIG.md:168. Key has been rotated and redacted in the next commit.
+  "bf4c910b2bac9956ae8ed3ae19dfcd6df6eb774a",
+  # Commits that contained a hardcoded Groq API key (gsk_...) in index.html.
+  # The key has been rotated and removed from the codebase.
+  "718011710d37b01da50a2d7329f608be1faccda7",
+  "1910788d1ce0be0c7fedf4836d6a977fe343e85b",
+  "c0c26b80e74e61c9c0f991dd6806c741a47d6656",
+]
+# ElevenLabs public voice IDs are not secrets — they are published in documentation.
+# The Groq API key below appeared in historical index.html commits and has been rotated.
+regexes = [
+  "21m00Tcm4TlvDq8ikWAM",
+  "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",
+]
