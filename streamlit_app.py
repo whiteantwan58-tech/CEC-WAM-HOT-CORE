@@ -587,7 +587,7 @@ with tabs[0]:
     
     # Live Camera Feeds Section
     st.subheader("📹 Live Visual Camera Feeds")
-    st.info("🎥 Real-time monitoring and visualization system — camera integrations connect via environment-configured stream URLs")
+    st.info("🎥 Demo of a real-time monitoring and visualization interface with simulated camera tiles (no live streams connected in this demo)")
     
     feed_col1, feed_col2, feed_col3 = st.columns(3)
     
