@@ -1,4 +1,4 @@
-# CEC-WAM LIVE — EVE HEI (PWA)
+# Quantum Sovereign — CEC-WAM LIVE · EVE HEI (PWA)
 
 ## 🆕 LATEST UPDATE: 24/7 Live Data & Enhanced 5D Holographic Interface
 
@@ -270,6 +270,102 @@ Real security using WebAuthn API for biometric login:
 - **Streamlit Cloud**: [Deploy to Streamlit](https://streamlit.io/)
 - **GitHub Pages**: View the standalone HTML version at your GitHub Pages URL
 - **Vercel**: Alternative deployment option for Streamlit apps
+
+## ⚙️ Environment Variables (.env Setup)
+
+> **Quick start:** copy `.env.example` → `.env` and fill in your values.
+> The `.env` file is listed in `.gitignore` — **never commit it**.
+
+```bash
+cp .env.example .env
+```
+
+### Required vs Optional
+
+| Variable | Required | Where to get it |
+|---|---|---|
+| `GOOGLE_SHEETS_URL` | Recommended | Google Sheets → File → Share → Publish to web → CSV |
+| `FROZEN_SHEET_ID` | Optional | Sheet URL: `…/spreadsheets/d/<ID>/edit` |
+| `NASA_API_KEY` | Optional (has `DEMO_KEY` fallback) | [api.nasa.gov](https://api.nasa.gov/) — free, instant |
+| `OPENWEATHER_API_KEY` | Optional | [openweathermap.org/api](https://openweathermap.org/api) — free tier |
+| `OPENAI_API_KEY` | Optional (EVE AI) | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| `OPENAI_MODEL` | Optional | Default: `gpt-4` |
+| `ELEVENLABS_API_KEY` | Optional (EVE voice) | [elevenlabs.io/app/settings/api-keys](https://elevenlabs.io/app/settings/api-keys) |
+| `ELEVENLABS_VOICE_ID` | Optional | Default: `21m00Tcm4TlvDq8ikWAM` (Adam) |
+| `GROQ_API_KEY` | Optional (EVE Sovereign) | [console.groq.com/keys](https://console.groq.com/keys) |
+| `GROQ_MODEL` | Optional | Default: `llama-3.1-70b-versatile` |
+| `EVE_SYSTEM_CODE` | Optional | Default: `CEC_WAM_HEI_EVE_7A2F-9C4B` |
+| `EVE_OWNER_NAME` | Optional | Your name (e.g. `Twan`) |
+| `EVE_PERSONALITY` | Optional | Comma-separated traits |
+
+### Minimal `.env` for Local Development
+
+```env
+# Paste your published Google Sheets CSV URL (required for live data)
+GOOGLE_SHEETS_URL=https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?output=csv
+
+# NASA API key — DEMO_KEY works but is rate-limited (30 req/hr)
+NASA_API_KEY=DEMO_KEY
+```
+
+### Full `.env` Example
+
+```env
+# Google Sheets live data feed
+GOOGLE_SHEETS_URL=https://docs.google.com/spreadsheets/d/e/<PUBLISHED_ID>/pub?output=csv
+FROZEN_SHEET_ID=<SHEET_ID>
+
+# NASA API (free key from https://api.nasa.gov/)
+NASA_API_KEY=YOUR_NASA_API_KEY_HERE
+
+# Weather
+OPENWEATHER_API_KEY=YOUR_OPENWEATHER_KEY_HERE
+
+# OpenAI (EVE AI chat)
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
+
+# ElevenLabs (EVE voice)
+ELEVENLABS_API_KEY=YOUR_ELEVENLABS_KEY_HERE
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+
+# Groq (EVE Sovereign)
+GROQ_API_KEY=gsk_...
+GROQ_MODEL=llama-3.1-70b-versatile
+
+# EVE identity
+EVE_SYSTEM_CODE=CEC_WAM_HEI_EVE_7A2F-9C4B
+EVE_OWNER_NAME=Twan
+EVE_PERSONALITY=professional,helpful,intelligent,learning,warm,light-island-rhythm
+```
+
+### Streamlit Cloud Secrets
+
+When deploying to Streamlit Cloud, add the same variables in your app's
+**Settings → Secrets** panel using TOML syntax:
+
+```toml
+GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+NASA_API_KEY = "YOUR_KEY"
+OPENAI_API_KEY = "sk-..."
+ELEVENLABS_API_KEY = "YOUR_KEY"
+GROQ_API_KEY = "gsk_..."
+EVE_OWNER_NAME = "Twan"
+```
+
+### Troubleshooting `.env`
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `NASA API rate limit` warning | Using `DEMO_KEY` | Get a free key at [api.nasa.gov](https://api.nasa.gov/) |
+| Google Sheets shows demo data | `GOOGLE_SHEETS_URL` not set | Publish sheet as CSV and set the URL |
+| EVE AI returns generic replies | `OPENAI_API_KEY` missing or expired | Add/rotate key at [platform.openai.com](https://platform.openai.com/api-keys) |
+| EVE voice silent | `ELEVENLABS_API_KEY` missing | Add key from ElevenLabs dashboard |
+| `load_dotenv` ImportError | `python-dotenv` not installed | Run `pip install -r requirements.txt` |
+
+> **See also:** [API_SETUP_GUIDE.md](./API_SETUP_GUIDE.md) and [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed help.
+
+---
 
 ## 📦 Installation & Setup
 

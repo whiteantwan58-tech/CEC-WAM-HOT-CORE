@@ -1,13 +1,102 @@
-# Troubleshooting Guide - Streamlit App Errors
+# Troubleshooting Guide — Quantum Sovereign · CEC-WAM
 
 ## Overview
-This guide addresses common errors and issues when running the CEC-WAM Streamlit applications (app.py and streamlit_app.py).
+This guide addresses common errors and issues when running the Quantum Sovereign /
+CEC-WAM Streamlit applications (`app.py` and `streamlit_app.py`).
 
 ---
 
 ## Table of Contents
-1. [Installation Issues](#installation-issues)
-2. [Streamlit Runtime Errors](#streamlit-runtime-errors)
+1. [.env Configuration](#env-configuration)
+2. [Installation Issues](#installation-issues)
+3. [Streamlit Runtime Errors](#streamlit-runtime-errors)
+4. [Data Loading Errors](#data-loading-errors)
+5. [API Integration Errors](#api-integration-errors)
+6. [Display & UI Errors](#display--ui-errors)
+7. [Performance Issues](#performance-issues)
+8. [Deployment Issues](#deployment-issues)
+
+---
+
+## .env Configuration
+
+### Step-by-step First-Time Setup
+
+1. **Copy the template:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Verify the file was created:**
+   ```bash
+   ls -la .env
+   ```
+
+3. **Open and edit `.env`** in your editor and fill in your API keys.
+   At minimum you need `GOOGLE_SHEETS_URL` for live data. All other keys are optional
+   but unlock additional features (EVE AI, voice synthesis, weather).
+
+4. **Verify values load correctly:**
+   ```python
+   import os
+   from dotenv import load_dotenv
+   load_dotenv()
+   print("Sheets URL:", os.getenv("GOOGLE_SHEETS_URL", "NOT SET"))
+   print("NASA key  :", os.getenv("NASA_API_KEY", "DEMO_KEY (default)"))
+   ```
+
+### Common `.env` Issues
+
+**Variables not loading (values appear as `None`)**
+
+```
+API key is None or empty
+```
+
+Checklist:
+- The file must be named exactly `.env` (not `.env.txt` or `env`)
+- Each line must be `KEY=value` with **no spaces around `=`**
+- String values do **not** need quotes in a `.env` file
+- Run `pip install python-dotenv` if `load_dotenv` is unavailable
+- Make sure you're running the app from the project root directory
+
+**`.env` file is committed to git**
+
+```bash
+# Remove it immediately and rotate all exposed keys
+git rm --cached .env
+echo ".env" >> .gitignore
+git commit -m "remove accidentally committed .env"
+```
+
+Then rotate every key that was exposed. See [SECURITY.md](./SECURITY.md) for details.
+
+**Google Sheets JSON credentials formatting**
+
+The `GOOGLE_SHEETS_CREDS` value (service-account JSON) must be a **single line** —
+no newlines inside the value:
+
+```env
+# ✅ Correct — single line
+GOOGLE_SHEETS_CREDS={"type":"service_account","project_id":"...","private_key":"-----BEGIN RSA...\\n-----END RSA...\\n","client_email":"..."}
+
+# ❌ Wrong — multi-line breaks .env parsing
+GOOGLE_SHEETS_CREDS={
+  "type": "service_account",
+  ...
+}
+```
+
+Minify the JSON before pasting it:
+```python
+import json
+with open("service_account.json") as f:
+    print(json.dumps(json.load(f)))
+```
+
+---
+
+
 3. [Data Loading Errors](#data-loading-errors)
 4. [API Integration Errors](#api-integration-errors)
 5. [Display & UI Errors](#display--ui-errors)
@@ -217,39 +306,59 @@ def fetch_sheets_data():
 
 ### NASA API Errors
 
-**Error:**
+**Error: Rate limit exceeded**
 ```
 requests.exceptions.HTTPError: 429 Too Many Requests
 ```
 
-**Cause:** Rate limit exceeded with DEMO_KEY (30 req/hour)
+**Cause:** `DEMO_KEY` is limited to 30 requests/hour per IP address.
 
-**Solution:**
-```python
-# Get your own NASA API key (free)
-# https://api.nasa.gov/
+**Fix:**
+1. Get a free key (instant) at <https://api.nasa.gov/>
+2. Set it in your `.env`:
+   ```env
+   NASA_API_KEY=YOUR_KEY_HERE
+   ```
+   Free keys get **1,000 requests/hour**.
 
-NASA_API_KEY = os.getenv('NASA_API_KEY', 'DEMO_KEY')
-
-@st.cache_data(ttl=3600)  # Cache for 1 hour
-def fetch_nasa_data():
-    try:
-        response = requests.get(
-            f"https://api.nasa.gov/planetary/apod?api_key={NASA_API_KEY}",
-            timeout=10
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 429:
-            st.warning("NASA API rate limit exceeded. Get your free API key at https://api.nasa.gov/")
-        return None
-    except Exception as e:
-        st.error(f"NASA API error: {e}")
-        return None
+**Error: Connection refused / network unreachable**
+```
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='api.nasa.gov', port=443)
 ```
 
+**Cause:** No internet access or DNS failure in the deployment environment.
+
+**Behaviour in `app.py`:** The `fetch_nasa_apod()` function now returns a demo fallback
+image instead of `None`, so the UI remains functional. An informational banner is shown
+indicating that live data is unavailable.
+
+**Fix:** Ensure outbound HTTPS traffic to `api.nasa.gov` is allowed in your firewall /
+proxy settings. On Streamlit Cloud this is allowed by default.
+
 ---
+
+### NOAA Weather API Errors (`api.weather.gov`)
+
+**Error:**
+```
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='api.weather.gov', port=443)
+```
+
+**Cause:** The NOAA API requires no API key but **does** require a `User-Agent` header
+and outbound HTTPS access.
+
+**Behaviour in `streamlit_app.py`:** `get_weather_alerts()` catches all exceptions and
+returns demo alert data, so the UI always renders.
+
+**Fix:**
+- Ensure `User-Agent` is set (already done in the app):
+  ```python
+  headers = {'User-Agent': '(EVE-System, contact@evesystem.com)'}
+  ```
+- Check that outbound HTTPS to `api.weather.gov` is not blocked.
+
+---
+
 
 ## API Integration Errors
 

@@ -19,9 +19,10 @@ commits = [
   "1910788d1ce0be0c7fedf4836d6a977fe343e85b",
   "c0c26b80e74e61c9c0f991dd6806c741a47d6656",
 ]
-# ElevenLabs public voice IDs are not secrets — they are published in documentation.
-# The Groq API key below appeared in historical index.html commits and has been rotated.
+# ElevenLabs public voice IDs are not secrets — they are published in documentation
+# and are safe to suppress globally.  The rotated Groq API key is already covered
+# by the commits allowlist above, so it is NOT repeated here to avoid silencing any
+# future detection of a similar-format key.
 regexes = [
   "21m00Tcm4TlvDq8ikWAM",
-  "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",
 ]

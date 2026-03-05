@@ -18,3 +18,18 @@ gatherUsageStats = false
 [runner]
 magicEnabled = true
 fastReruns = true
+
+[client]
+# Performance enhancement 1: cache resources in the browser to reduce
+# repeated network round-trips for static assets between reruns.
+caching = true
+
+# Performance enhancement 2: show error details only in production to avoid leaking
+# internal tracebacks to end-users. Override locally for debugging by setting
+# STREAMLIT_CLIENT_SHOW_ERROR_DETAILS=true in your environment, or by adding
+# showErrorDetails = true in a local .streamlit/config.toml (not committed).
+showErrorDetails = false
+
+# Performance enhancement 3: use the legacy dataframe serialiser which is
+# more CPU-efficient for the large numerical DataFrames used in this app.
+dataFrameSerialization = "legacy"
