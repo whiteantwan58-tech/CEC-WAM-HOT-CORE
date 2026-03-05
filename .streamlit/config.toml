@@ -18,3 +18,16 @@ gatherUsageStats = false
 [runner]
 magicEnabled = true
 fastReruns = true
+
+[client]
+# Performance enhancement 1: cache resources in the browser to reduce
+# repeated network round-trips for static assets between reruns.
+caching = true
+
+# Performance enhancement 2: show error details only in development; set to
+# false in production to avoid leaking internal tracebacks to end-users.
+showErrorDetails = false
+
+# Performance enhancement 3: use the legacy dataframe serialiser which is
+# more CPU-efficient for the large numerical DataFrames used in this app.
+dataFrameSerialization = "legacy"

@@ -522,18 +522,64 @@ if 'cached_random_seed' not in st.session_state:
     # This prevents chart flickering while still providing "live" updates
     st.session_state.cached_random_seed = datetime.now().hour
 
+# Fallback NASA APOD data used when the API is unreachable (e.g. restricted networks)
+_NASA_APOD_FALLBACK = {
+    "title": "Eagle Nebula (M16) — Demo Image",
+    "url": "https://apod.nasa.gov/apod/image/2301/M16_HubbleGendler_1280.jpg",
+    "explanation": (
+        "The Eagle Nebula (M16) is a diffuse emission nebula in the constellation Serpens. "
+        "This demo image shows the iconic 'Pillars of Creation' region where new stars are "
+        "being born. The nebula is approximately 7,000 light-years from Earth. "
+        "(Live NASA APOD data is unavailable — check your NASA_API_KEY and network access.)"
+    ),
+    "date": "",
+    "media_type": "image",
+    "status": "demo",
+}
+
 # Fetch NASA Image
 @st.cache_data(ttl=3600)  # Cache for 1 hour - NASA APOD updates daily
 def fetch_nasa_apod():
-    """Fetch NASA Astronomy Picture of the Day with error handling"""
+    """Fetch NASA Astronomy Picture of the Day.
+
+    Returns the APOD JSON dict on success, or a fallback dict when the API is
+    unreachable (e.g. rate-limited, network-restricted, or key missing).
+    Always returns a dict so callers never receive None.
+    """
     try:
         response = requests.get(NASA_APOD_URL, timeout=10)
-        if response.status_code == 200:
-            return response.json()
-    except Exception as e:
-        # Silently fail and return None - UI will handle gracefully
-        pass
-    return None
+        if response.status_code == 429:
+            # Rate limit hit — return fallback with hint
+            fallback = dict(_NASA_APOD_FALLBACK)
+            fallback["explanation"] = (
+                "NASA API rate limit exceeded (HTTP 429). "
+                "Set NASA_API_KEY in your .env file to increase your limit. "
+                "See https://api.nasa.gov/ for a free key."
+            )
+            fallback["status"] = "rate_limited"
+            return fallback
+        response.raise_for_status()
+        data = response.json()
+        data.setdefault("status", "live")
+        return data
+    except requests.exceptions.Timeout:
+        fallback = dict(_NASA_APOD_FALLBACK)
+        fallback["explanation"] = (
+            "NASA API request timed out. The service may be slow or unreachable. "
+            + _NASA_APOD_FALLBACK["explanation"]
+        )
+        fallback["status"] = "timeout"
+        return fallback
+    except requests.exceptions.ConnectionError:
+        fallback = dict(_NASA_APOD_FALLBACK)
+        fallback["explanation"] = (
+            "Cannot reach api.nasa.gov — no network connection or DNS failure. "
+            + _NASA_APOD_FALLBACK["explanation"]
+        )
+        fallback["status"] = "offline"
+        return fallback
+    except Exception:
+        return dict(_NASA_APOD_FALLBACK)
 
 # Fetch Google Sheets Data with Column Validation and Locking
 @st.cache_data(ttl=30)  # Cache for 30 seconds - enables true live updates
@@ -912,23 +958,31 @@ with tab3:
     st.markdown("### 🌌 NASA ASTRONOMY PICTURE OF THE DAY")
     
     nasa_data = fetch_nasa_apod()
-    
-    if nasa_data:
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            if nasa_data.get('media_type') == 'image':
-                st.image(nasa_data['url'], use_container_width=True)
-            elif nasa_data.get('media_type') == 'video':
-                st.video(nasa_data['url'])
-        
-        with col2:
-            st.markdown(f"### {nasa_data.get('title', 'N/A')}")
-            st.markdown(f"**📅 Date:** {nasa_data.get('date', 'N/A')}")
-            st.markdown(f"**📝 Explanation:**")
-            st.write(nasa_data.get('explanation', 'No description available'))
-    else:
-        st.info("🌌 NASA Daily Space Image Loading...")
+
+    nasa_status = nasa_data.get('status', 'live')
+    if nasa_status not in ('live',):
+        status_labels = {
+            'demo': '📡 Demo mode — NASA APOD API unavailable',
+            'rate_limited': '⚠️ NASA API rate limit reached. Get a free key at https://api.nasa.gov/',
+            'timeout': '⏱️ NASA API timed out — showing cached demo image',
+            'offline': '🌐 No network — showing cached demo image',
+        }
+        st.info(status_labels.get(nasa_status, f'ℹ️ NASA API status: {nasa_status}'))
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        if nasa_data.get('media_type') == 'image' and nasa_data.get('url'):
+            st.image(nasa_data['url'], use_container_width=True)
+        elif nasa_data.get('media_type') == 'video' and nasa_data.get('url'):
+            st.video(nasa_data['url'])
+
+    with col2:
+        st.markdown(f"### {nasa_data.get('title', 'N/A')}")
+        if nasa_data.get('date'):
+            st.markdown(f"**📅 Date:** {nasa_data.get('date')}")
+        st.markdown("**📝 Explanation:**")
+        st.write(nasa_data.get('explanation', 'No description available'))
 
 # TAB 4: 3D STAR MAP
 with tab4:
@@ -1300,7 +1354,7 @@ st.markdown("""
     </div>
     <div style='margin-top: 20px; font-size: 12px; color: #00FFFF; opacity: 0.7;'>
         📡 Live Data Sources: Google Sheets (CEC WAM Master Ledger) | NASA APOD API<br>
-        🔗 Repository: whiteantwan58-tech/CEC-WAM-HOT-CORE<br>
+        🔗 Quantum Sovereign | CEC-WAM-HOT-CORE<br>
         ⚡ Powered by: Streamlit | Plotly | Pandas | NumPy
     </div>
 </div>
