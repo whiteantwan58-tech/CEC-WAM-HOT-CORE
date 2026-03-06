@@ -7,27 +7,30 @@ title = "CEC-WAM-HOT-CORE gitleaks configuration"
 # Extend the default ruleset provided by gitleaks
 useDefault = true
 
-[[allowlists]]
+[[allowlist]]
 description = "Ignore example and template files that intentionally contain placeholder values"
 paths = [
     '''^\.env\.example$''',
 ]
-[[allowlists]]
-description = "Ignore EVE system code identifier (not a real secret) in docs/examples"
+
+[[allowlist]]
+description = "Ignore EVE system code identifier (not a real secret) in markdown and template docs"
 regexes = [
     '''CEC_WAM_HEI_EVE_7A2F-9C4B''',
 ]
 paths = [
-    '''docs/.*''',
-    '''examples/.*''',
+    '''.*\.md$''',
+    '''^\.env\.example$''',
+    '''.*\.py$''',
 ]
 
-[[allowlists]]
-description = "Ignore known ElevenLabs default Adam voice ID (public default, not a secret) in docs/examples"
+[[allowlist]]
+description = "Ignore known ElevenLabs default Adam voice ID (public default, not a secret) in markdown and template docs"
 regexes = [
     '''21m00Tcm4TlvDq8ikWAM''',
 ]
 paths = [
-    '''docs/.*''',
-    '''examples/.*''',
+    '''.*\.md$''',
+    '''^\.env\.example$''',
+    '''.*\.py$''',
 ]

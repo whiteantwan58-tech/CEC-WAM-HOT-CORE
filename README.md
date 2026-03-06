@@ -55,7 +55,7 @@ Push to `main` — the GitHub Actions workflow automatically deploys `index.html
 | 🗺️ **Interactive Map** | Federal Way real-time map with asset overlays |
 | 🔐 **Biometric UI** | Visual authentication panel with verification badges |
 | 📈 **Asset Ledger** | CSV / Excel ledger display with live refresh |
-| ♻️ **Auto-Refresh** | Configurable 30-second live data cycle with toggle control |
+| ♻️ **Auto-Refresh** | Manual refresh button with 60-second auto-refresh toggle (`app.py` has 30-second continuous refresh) |
 
 ---
 
@@ -110,7 +110,7 @@ The app can work with flexible CSV schemas. Commonly used example columns are: `
 ```
 CEC-WAM-HOT-CORE/
 ├── streamlit_app.py          # 🎯 Primary entry point (Streamlit Cloud)
-├── app.py                    # Alternative Streamlit dashboard
+├── app.py                    # Alternative Streamlit dashboard (30s auto-refresh)
 ├── index.html                # Static HTML dashboard (GitHub Pages)
 ├── dashboard.html            # Full-featured HTML dashboard
 ├── eve_voice_agent.py        # EVE AI voice assistant
@@ -133,6 +133,15 @@ CEC-WAM-HOT-CORE/
 │   ├── CEC_Matrix_System_Operational_Metrics_and_Assets.csv
 │   ├── CEC_WAM_MASTER_LEDGER_LIVE.xlsx
 │   └── EVE_UNFINISHED_TASKS.csv
+├── docs/
+│   ├── API_SETUP_GUIDE.md    # API key setup walkthrough
+│   ├── BIOMETRIC_AUTH.md     # Biometric UI documentation
+│   ├── DEPLOYMENT_QUICK_START.md  # Fast deployment guide
+│   ├── ELEVENLABS_CONFIG.md  # ElevenLabs voice config
+│   ├── EVE_SETUP_GUIDE.md    # EVE AI setup guide
+│   ├── MAP_FEATURES_GUIDE.md # Map features guide
+│   ├── STREAMLIT_DEPLOYMENT.md # Streamlit Cloud deployment
+│   └── TROUBLESHOOTING.md    # Common issues and fixes
 └── .github/
     └── workflows/
         ├── deploy-dashboard.yml  # GitHub Pages auto-deploy
@@ -148,7 +157,7 @@ CEC-WAM-HOT-CORE/
 python -m pytest test_eve.py -v
 ```
 
-The test suite validates API configurations, environment variable loading, and EVE agent initialization.
+This is a smoke test script that exercises API configuration, environment variable loading, and EVE agent initialization. It prints diagnostic output — review the logs rather than relying solely on the exit code, as it may still exit 0 when external APIs are unavailable.
 
 ---
 
