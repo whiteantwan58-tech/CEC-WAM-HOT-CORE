@@ -8,21 +8,61 @@ title = "CEC-WAM-HOT-CORE gitleaks config"
 useDefault = true
 
 [allowlist]
-description = "Historical findings for credentials that have been rotated and removed from the codebase; public voice IDs that are not secrets"
+description = "Historical findings for credentials that have been rotated and removed from the codebase; public addresses and template placeholders that are not secrets"
 commits = [
-  # bf4c910: "Initial plan" commit — contained ElevenLabs API key in CONFIGURATION_COMPLETE.md:94
-  # and ELEVENLABS_CONFIG.md:168. Key has been rotated and redacted in the next commit.
+  # bf4c910: "Initial plan" commit on the delete-api-keys-branch. Per the original
+  # gitleaks config this commit was associated with an ElevenLabs API key that has
+  # since been rotated and removed. Kept for continuity with prior allowlist entries.
   "bf4c910b2bac9956ae8ed3ae19dfcd6df6eb774a",
-  # Commits that contained a hardcoded Groq API key (gsk_...) in index.html.
-  # The key has been rotated and removed from the codebase.
+  # 82b704e: Added ELEVENLABS_CONFIG.md which included the ElevenLabs API key.
+  # Key has been rotated and redacted. Commit kept for history; key no longer active.
+  "82b704ea8feebd85c2dbf216fb8b46cd1df66d38",
+  # 0e6df68: Added CONFIGURATION_COMPLETE.md which included the ElevenLabs API key.
+  # Key has been rotated and redacted. Commit kept for history; key no longer active.
+  "0e6df68e268f924b8ade791e32261425f5575b55",
+  # 656cd548: Merge commit that pulled in CONFIGURATION_COMPLETE.md and ELEVENLABS_CONFIG.md
+  # containing the ElevenLabs API key. Key has been rotated and redacted.
+  "656cd548cb3d14fb2caf1ce3e70350abce240445",
+  # 58f4a80: .gitignore was (incorrectly) replaced with env variable content including
+  # a VERCEL_API_KEY and a template private-key placeholder. Key has been rotated.
+  "58f4a80f5602a2579d5cdff32a23e344e62b9801",
+  # 52a7c55: .env.example contained a VERCEL_API_KEY and template private-key placeholder.
+  # The Vercel key has been rotated and removed from the codebase.
+  "52a7c55e63a83c39de0951d3e467e9d732870580",
+  # 918182c: .env.example update that still contained the template private-key placeholder
+  # (YOUR_PRIVATE_KEY_HERE). This is a documentation placeholder, not a real credential.
+  "918182c041dae5bf22ccef5486824f24e1d6c991",
+  # 65a1852: app.py contained PSI_COIN_TOKEN — a public Solana token mint address,
+  # not a secret. The address is public blockchain data and has been removed from the file.
+  "65a1852e2cc7a58132f96afad043794ec114446a",
+  # 0ea3636, 84052711, 42adcb03: eve_cec_wam_live.py / EVE_CEC_WAM_LIVE.PY contained
+  # DEFAULT_PSI_TOKEN_MINT — a public Solana token mint address, not a secret.
+  # These files have been removed from the repository.
+  "0ea36363ee4f96c459a06f67561774c02a211abd",
+  "84052711b2f7f22b0638e879268f2b8f546d814c",
+  "42adcb03624ed44f048e734f1d68bcd7bd857359",
+  # 19107374: omega_eve.py contained a hardcoded GCP API key (AIzaSy...).
+  # The key has been rotated and the file has been removed from the repository.
+  "19107374a89e82d969eec249fe7ef0ede057ee35",
+  # 49218a0, 28e6e4a: index.html contained a hardcoded Groq API key (gsk_...) in
+  # earlier history — commits not covered by the three entries below. The key has
+  # been rotated and removed from the codebase.
+  "49218a0292dacfca31cf51581e0ae650e0293afb",
+  "28e6e4a308561007b5b7372b42a59e01970a104a",
+  # 718011710, 1910788, c0c26b80: additional index.html commits containing the same
+  # rotated Groq API key; identified in an earlier remediation pass and already
+  # documented in the prior version of this config.
   "718011710d37b01da50a2d7329f608be1faccda7",
   "1910788d1ce0be0c7fedf4836d6a977fe343e85b",
   "c0c26b80e74e61c9c0f991dd6806c741a47d6656",
 ]
 # ElevenLabs public voice IDs are not secrets — they are published in documentation
-# and are safe to suppress globally.  The rotated Groq API key is already covered
-# by the commits allowlist above, so it is NOT repeated here to avoid silencing any
-# future detection of a similar-format key.
+# and are safe to suppress globally.  The rotated keys above are covered by the
+# commits allowlist, so they are NOT repeated here to avoid silencing any future
+# detection of a similar-format key.
+# YOUR_PRIVATE_KEY_HERE is a documentation template placeholder used in .env.example
+# to illustrate where a real private key would go; it is never a real credential.
 regexes = [
   "21m00Tcm4TlvDq8ikWAM",
+  "YOUR_PRIVATE_KEY_HERE",
 ]

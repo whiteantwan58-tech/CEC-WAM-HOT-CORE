@@ -10,7 +10,7 @@ The ElevenLabs API key has been successfully configured for EVE voice assistant 
 
 ### ✅ API Key Configuration
 - **API Key:** Configured and validated (51 characters)
-- **Format:** `sk_7bed04b2f191a4b4d632c9aa46cc7a44fbec65ce266f11b6`
+- **Format:** `sk_...` (51 characters — stored in `.env`, not in the repository)
 - **Voice ID:** 21m00Tcm4TlvDq8ikWAM (Rachel - default voice)
 - **System Code:** CEC_WAM_HEI_EVE_7A2F-9C4B
 - **Owner:** Twan
@@ -84,7 +84,7 @@ streamlit run app.py
 #### Streamlit Cloud:
 ```toml
 # Add to secrets:
-ELEVENLABS_API_KEY = "sk_7bed04b2f191a4b4d632c9aa46cc7a44fbec65ce266f11b6"
+ELEVENLABS_API_KEY = "<YOUR_ELEVENLABS_API_KEY>"
 ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 ```
 
@@ -258,7 +258,7 @@ Project Root
 
 **EVE voice assistant is now fully configured with ElevenLabs API for real-time voice synthesis.**
 
-The API key (`sk_7bed04b2f191a4b4d632c9aa46cc7a44fbec65ce266f11b6`) is:
+The API key (`<YOUR_ELEVENLABS_API_KEY>`) is:
 - ✅ Properly configured
 - ✅ Securely stored
 - ✅ Ready for production use
