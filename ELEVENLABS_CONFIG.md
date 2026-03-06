@@ -98,7 +98,7 @@ With the ElevenLabs API configured, EVE can now:
 
 ### API Key Information
 
-**Format:** `sk_7bed04b2f191a4b4d632c9aa46cc7a44fbec65ce266f11b6`
+**Format:** `sk_...` (51 characters — stored in `.env`, not in the repository)
 **Length:** 51 characters
 **Type:** ElevenLabs API key for real-time voice synthesis
 **Status:** ✅ Valid and configured
