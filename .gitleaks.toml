@@ -10,10 +10,8 @@ useDefault = true
 [[allowlists]]
 description = "Ignore example and template files that intentionally contain placeholder values"
 paths = [
-    '''.env\.example''',
-    '''\.env\.example''',
+    '''^\.env\.example$''',
 ]
-
 [[allowlists]]
 description = "Ignore EVE system code identifier (not a real secret) in docs/examples"
 regexes = [
