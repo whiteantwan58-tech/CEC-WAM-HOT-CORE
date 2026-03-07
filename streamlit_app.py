@@ -1037,8 +1037,8 @@ with tabs[2]:
     st.subheader("📊 Stock Market Overview")
     
     # Stock Market Integration — uses deterministic daily seed for consistent display.
-    # Future work: live prices could be fetched using APIs configured via
-    # ALPHA_VANTAGE_API_KEY or YAHOO_FINANCE_API_KEY in .env.
+    # Future work: integrate live prices using a configurable stock market data API
+    # and corresponding credentials defined in the environment.
     stock_symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'NVDA']
     
     # Generate sample stock data with deterministic seed based on date
