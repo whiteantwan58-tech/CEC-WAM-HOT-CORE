@@ -587,7 +587,7 @@ with tabs[0]:
     
     # Live Camera Feeds Section
     st.subheader("📹 Live Visual Camera Feeds")
-    st.info("🎥 Real-time monitoring and visualization system with simulated camera feeds")
+    st.info("🎥 Demo placeholder tiles — no live streams are connected yet. Live feeds are planned as a future enhancement.")
     
     feed_col1, feed_col2, feed_col3 = st.columns(3)
     
@@ -1036,7 +1036,7 @@ with tabs[2]:
     st.markdown("---")
     st.subheader("📊 Stock Market Overview")
     
-    # Simulated stock market data (in production, use real APIs like Alpha Vantage, Yahoo Finance, etc.)
+    # Placeholder stock data — live market API integration (Alpha Vantage, Yahoo Finance, etc.) is future work
     stock_symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'NVDA']
     
     # Generate sample stock data with deterministic seed based on date
