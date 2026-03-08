@@ -11,6 +11,9 @@ on:
     paths:
       - "contracts/**"
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Compile & Test Solidity contracts
