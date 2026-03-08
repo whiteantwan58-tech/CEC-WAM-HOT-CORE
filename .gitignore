@@ -60,3 +60,11 @@ node_modules/
 dist/
 build/
 .cache/
+
+# Solidity / Hardhat build artifacts
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+contracts/.openzeppelin/
+typechain/
+typechain-types/

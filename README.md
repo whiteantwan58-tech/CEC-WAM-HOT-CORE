@@ -1,161 +1,138 @@
-# Quantum Sovereign — CEC-WAM LIVE · EVE HEI
+# PSI Coin · Sovereign Quantum Logistics Token
 
+[![PSI Coin Contract Tests](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/psi-coin-tests.yml/badge.svg)](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/psi-coin-tests.yml)
 [![Secret Scanning](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/secret-scanning.yml/badge.svg)](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/secret-scanning.yml)
 [![CodeQL](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/codeql.yml/badge.svg)](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?logo=solidity)](https://soliditylang.org/)
 [![Deploy Dashboard](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/deploy-dashboard.yml/badge.svg)](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE/actions/workflows/deploy-dashboard.yml)
 
-A high-tech, 5D holographic quantum sovereign logistics dashboard featuring live Google Sheets data, PSI cryptocurrency tracking, biometric UI, and EVE — an advanced AI voice assistant.
+> **🔒 Private Beta — By Invitation Only**
+>
+> PSI Coin is the native utility and governance token of the **CEC-WAM Sovereign Quantum Logistics Network** —
+> a next-generation freight & supply-chain platform powered by quantum-inspired AI.
+> Token holders stake PSI to unlock tiered freight discounts, participate in governance,
+> and earn rewards through the logistics ecosystem.
 
 ---
 
-## Project Structure
+## 🪙 Token Overview
+
+| Property       | Value                                     |
+|----------------|-------------------------------------------|
+| **Name**       | PSI Coin                                  |
+| **Symbol**     | PSI                                       |
+| **Standard**   | ERC-20 (Solidity 0.8.20, OpenZeppelin 5)  |
+| **Max Supply** | 1,000,000,000 PSI                         |
+| **Presale**    | ❌ None — no presale                      |
+| **Use-case**   | Freight staking · Governance · Discounts  |
+| **Network**    | EVM-compatible (Ethereum / Polygon / L2)  |
+| **License**    | MIT                                       |
+
+---
+
+## 📦 Staking Tiers — Freight Discounts
+
+Stake PSI Coin to unlock freight cost reductions in the CEC-WAM logistics network.
+
+| Tier       | Minimum Stake    | Freight Discount |
+|------------|------------------|-----------------|
+| 🥉 Bronze  | 10,000 PSI       | 5%              |
+| 🥈 Silver  | 50,000 PSI       | 10%             |
+| 🥇 Gold    | 250,000 PSI      | 20%             |
+| ⚛️ Quantum | 1,000,000 PSI    | 35%             |
+
+Staking has a **30-day lock period**. Tokens are returned in full on withdrawal.
+
+---
+
+## 🏗️ Repository Structure
 
 ```
 CEC-WAM-HOT-CORE/
-├── app.py                   # Main Streamlit app (30s auto-refresh, recommended)
-├── streamlit_app.py         # Alternate Streamlit entry point (60s manual toggle)
-├── cec_dashboard.py         # Legacy CEC Matrix dashboard
-├── dashboard.html           # Standalone HTML dashboard (no dependencies)
-├── index.html               # PWA frontend
-├── eve_voice_agent.py       # EVE HEI voice agent
-├── Eve_sovereign_v6_updated.py  # EVE Sovereign v6
-├── test_eve.py              # EVE smoke-test script (run via __main__)
-├── requirements.txt         # Python dependencies
-├── .env.example             # Environment variable template
-├── .gitleaks.toml           # Secret scanning configuration
-├── data/                    # CSV/XLSX data files
-│   ├── CEC_WAM_MASTER_LEDGER_LIVE.xlsx
-│   ├── CEC_Matrix_System_Operational_Metrics_and_Assets.csv
-│   └── EVE_UNFINISHED_TASKS.csv
-├── api/                     # Serverless API endpoints
-├── js/                      # JavaScript utilities
-└── .github/workflows/       # CI workflows
+├── contracts/                      # Solidity smart contracts
+│   ├── PSICoin.sol                 # ERC-20 token (mintable, burnable, pausable)
+│   ├── PSICoinStaking.sol          # Freight-discount staking contract
+│   ├── hardhat.config.js           # Hardhat configuration
+│   ├── package.json                # Node dependencies (Hardhat + OpenZeppelin)
+│   ├── scripts/
+│   │   └── deploy.js               # Deployment script
+│   └── test/
+│       └── PSICoin.test.js         # Full contract test suite
+├── index.html                      # PSI Coin public-facing dashboard (PWA)
+├── dashboard.html                  # Standalone HTML logistics dashboard
+├── app.py                          # Streamlit live-data app (EVE HEI core)
+├── streamlit_app.py                # Alternate Streamlit entry point
+├── eve_voice_agent.py              # EVE AI voice agent
+├── requirements.txt                # Python dependencies
+├── LICENSE                         # MIT License
+├── .env.example                    # Environment variable template (no secrets)
+├── .gitignore                      # Excludes secrets, node_modules, artifacts
+└── .github/workflows/              # CI/CD pipelines
+    ├── psi-coin-tests.yml          # Solidity contract tests
+    ├── secret-scanning.yml         # Gitleaks secret detection
+    ├── codeql.yml                  # CodeQL static analysis
+    └── deploy-dashboard.yml        # GitHub Pages deployment
 ```
 
 ---
 
-## Quick Start
+## 🚀 Quick Start — Contracts
 
 ```bash
 git clone https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE.git
-cd CEC-WAM-HOT-CORE
-pip install -r requirements.txt
-cp .env.example .env   # fill in your keys — see table below
-streamlit run app.py
+cd CEC-WAM-HOT-CORE/contracts
+npm install
+npm run compile          # Compile Solidity contracts
+npm test                 # Run full test suite
+npm run deploy:local     # Deploy to local Hardhat node
 ```
 
-Open `http://localhost:8501` in your browser.
+> **Keys stay offline.** Never commit private keys or RPC URLs.
+> Configure deployment credentials in `.env` (see `.env.example`).
 
 ---
 
-## Environment Variables
+## 📊 Live Dashboard
 
-> Copy `.env.example` → `.env` and fill in your values.  
-> **Never commit `.env`** — it is listed in `.gitignore`.
+The PSI Coin sovereign dashboard is available at:
 
-| Variable | Required | Default | Where to get it |
-|---|---|---|---|
-| `GOOGLE_SHEETS_URL` | Recommended | — | Sheets → File → Share → Publish to web → CSV |
-| `FROZEN_SHEET_ID` | Optional | — | Sheet URL: `…/spreadsheets/d/<ID>/edit` |
-| `NASA_API_KEY` | Optional | `DEMO_KEY` | [api.nasa.gov](https://api.nasa.gov/) — free, instant |
-| `OPENWEATHER_API_KEY` | Optional | — | [openweathermap.org/api](https://openweathermap.org/api) — free tier |
-| `OPENAI_API_KEY` | Optional (EVE AI) | — | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
-| `OPENAI_MODEL` | Optional | `gpt-4` | — |
-| `ELEVENLABS_API_KEY` | Optional (EVE voice) | — | [elevenlabs.io/app/settings/api-keys](https://elevenlabs.io/app/settings/api-keys) |
-| `ELEVENLABS_VOICE_ID` | Optional | `21m00Tcm4TlvDq8ikWAM` | ElevenLabs voice library |
-| `GROQ_API_KEY` | Optional (EVE Sovereign) | — | [console.groq.com/keys](https://console.groq.com/keys) |
-| `GROQ_MODEL` | Optional | `llama-3.1-70b-versatile` | — |
-| `EVE_SYSTEM_CODE` | Optional | `CEC_WAM_HEI_EVE_7A2F-9C4B` | — |
-| `EVE_OWNER_NAME` | Optional | — | Your name (e.g. `Twan`) |
-| `EVE_PERSONALITY` | Optional | — | Comma-separated traits |
+🌐 **[https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/](https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/)**
 
-### Streamlit Cloud Secrets
-
-In **Settings → Secrets**, use TOML format:
-
-```toml
-GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
-NASA_API_KEY      = "your-key"
-OPENAI_API_KEY    = "sk-..."
-ELEVENLABS_API_KEY = "your-key"
-GROQ_API_KEY      = "gsk_..."
-EVE_OWNER_NAME    = "Twan"
-```
-
-### Google Sheets Setup
-
-1. Open your sheet in Google Sheets.
-2. **File → Share → Publish to web → Comma-separated values (.csv) → Publish**.
-3. Copy the URL and set it as `GOOGLE_SHEETS_URL` in `.env` or Streamlit Secrets.
-4. For the frozen/private sheet, copy the Sheet ID from the URL bar and set `FROZEN_SHEET_ID`.
+Open `index.html` locally for a zero-dependency standalone experience.
 
 ---
 
-## Deployment
+## 🔐 Security
 
-### Streamlit Cloud (recommended)
-
-1. Push this repo to GitHub.
-2. Go to [share.streamlit.io](https://share.streamlit.io), connect your repo.
-3. Set **Main file path** to `app.py`.
-4. Add secrets (see above).
-5. Deploy.
-
-### Standalone HTML Dashboard
-
-Open `dashboard.html` directly in a browser — no server required.  
-For full API functionality (CORS), serve it locally:
-
-```bash
-python3 -m http.server 8080
-# Then visit http://localhost:8080/dashboard.html
-```
-
-### GitHub Pages
-
-The `deploy-dashboard.yml` workflow publishes the root of the repo to GitHub Pages on every push to `main`.
-
----
-
-## CI Workflows
-
-| Workflow | Trigger | Purpose |
-|---|---|---|
-| `secret-scanning.yml` | push / PR / weekly | Gitleaks secret detection |
-| `codeql.yml` | push / PR / weekly | CodeQL static analysis |
-| `deploy-dashboard.yml` | push to `main` / manual | GitHub Pages deployment |
-
----
-
-## Testing
-
-`test_eve.py` is a standalone smoke-test script for the EVE agent. Run it directly:
-
-```bash
-python test_eve.py
-```
-
----
-
-## Security
-
-- Secrets are managed via `.env` (local) or Streamlit Cloud Secrets (production).
-- Gitleaks scans every push and pull request; configuration lives in `.gitleaks.toml`.
-- Historical commits containing rotated keys are covered by the commits allowlist in `.gitleaks.toml`.
+- **No secrets committed** — all keys and credentials are managed via `.env` (local) or cloud secrets.
+- Gitleaks scans every push and pull request (`secret-scanning.yml`).
+- CodeQL static analysis runs on every push to `main` (`codeql.yml`).
 - See [SECURITY.md](./SECURITY.md) for the vulnerability disclosure policy.
 
 ---
 
-## Documentation
+## 📬 Contact & Private Beta
 
-| File | Purpose |
-|---|---|
-| [API_SETUP_GUIDE.md](./API_SETUP_GUIDE.md) | Detailed API key setup |
-| [BIOMETRIC_AUTH.md](./BIOMETRIC_AUTH.md) | WebAuthn biometric authentication |
-| [DEPLOYMENT_QUICK_START.md](./DEPLOYMENT_QUICK_START.md) | Deployment troubleshooting |
-| [ELEVENLABS_CONFIG.md](./ELEVENLABS_CONFIG.md) | ElevenLabs voice configuration |
-| [EVE_QUICK_START.md](./EVE_QUICK_START.md) | EVE agent quick-start |
-| [EVE_SETUP_GUIDE.md](./EVE_SETUP_GUIDE.md) | Full EVE setup guide |
-| [MAP_FEATURES_GUIDE.md](./MAP_FEATURES_GUIDE.md) | Map & camera feature guide |
-| [STREAMLIT_DEPLOYMENT.md](./STREAMLIT_DEPLOYMENT.md) | Streamlit deployment guide |
-| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Common issues and fixes |
+PSI Coin is in **private beta**. Access is by invitation only.
+
+- **GitHub:** [https://github.com/whiteantwan58-tech](https://github.com/whiteantwan58-tech)
+- **Repository:** [https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE](https://github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE)
+- **For partnership & beta enquiries:** open an issue or contact via GitHub.
+
+---
+
+## 🤝 License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+© 2026 CEC-WAM / PSI Coin — Sovereign Quantum Logistics
+
+---
+
+## ⚙️ CEC-WAM Platform (EVE HEI Core)
+
+The contracts above power the on-chain layer of the broader CEC-WAM platform,
+which includes a live logistics dashboard and the EVE HEI AI voice assistant.
+
+
