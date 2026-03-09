@@ -28,11 +28,11 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: contracts/package.json
+          cache-dependency-path: contracts/package-lock.json
 
       - name: Install dependencies
         working-directory: contracts
-        run: npm install
+        run: npm ci
 
       - name: Compile contracts
         working-directory: contracts

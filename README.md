@@ -50,11 +50,13 @@ Staking has a **30-day lock period**. Tokens are returned in full on withdrawal.
 
 ```
 CEC-WAM-HOT-CORE/
-├── contracts/                      # Solidity smart contracts
-│   ├── PSICoin.sol                 # ERC-20 token (mintable, burnable, pausable)
-│   ├── PSICoinStaking.sol          # Freight-discount staking contract
-│   ├── hardhat.config.js           # Hardhat configuration
+├── contracts/                      # Solidity smart contracts (Hardhat project)
+│   ├── src/
+│   │   ├── PSICoin.sol             # ERC-20 token (mintable, burnable, pausable)
+│   │   └── PSICoinStaking.sol      # Freight-discount staking contract
+│   ├── hardhat.config.js           # Hardhat configuration (dotenv-aware)
 │   ├── package.json                # Node dependencies (Hardhat + OpenZeppelin)
+│   ├── package-lock.json           # Locked dependency tree for reproducible CI
 │   ├── scripts/
 │   │   └── deploy.js               # Deployment script
 │   └── test/

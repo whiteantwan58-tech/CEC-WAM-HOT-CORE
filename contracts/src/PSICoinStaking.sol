@@ -38,7 +38,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
     // ─── Discount tiers ──────────────────────────────────────────────────────
     struct Tier {
         uint256 minStake;      // minimum PSI (18 dec) for this tier
-        uint8   discountBps;   // discount in basis points (500 = 5 %)
+        uint16  discountBps;   // discount in basis points (500 = 5 %, max 65535)
         string  name;
     }
 
@@ -50,7 +50,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
     // ─── Events ──────────────────────────────────────────────────────────────
     event Staked(address indexed user, uint256 amount, uint256 unlocksAt);
     event Unstaked(address indexed user, uint256 amount);
-    event TierUpdated(uint256 indexed index, uint256 minStake, uint8 discountBps, string name);
+    event TierUpdated(uint256 indexed index, uint256 minStake, uint16 discountBps, string name);
     event LockPeriodUpdated(uint256 newLockPeriod);
 
     // ─── Errors ──────────────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
     }
 
     // ─── Admin ───────────────────────────────────────────────────────────────
-    function updateTier(uint256 index, uint256 minStake, uint8 discountBps, string calldata name)
+    function updateTier(uint256 index, uint256 minStake, uint16 discountBps, string calldata name)
         external
         onlyOwner
     {
@@ -161,7 +161,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
         emit TierUpdated(index, minStake, discountBps, name);
     }
 
-    function addTier(uint256 minStake, uint8 discountBps, string calldata name)
+    function addTier(uint256 minStake, uint16 discountBps, string calldata name)
         external
         onlyOwner
     {

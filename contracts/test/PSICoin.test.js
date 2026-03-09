@@ -90,14 +90,14 @@ describe("PSICoinStaking", function () {
   it("returns correct tier for staked amount", async function () {
     await staking.connect(user1).stake(ethers.parseEther("50000"));
     const [, discountBps, tierName] = await staking.getDiscount(user1.address);
-    expect(discountBps).to.equal(1000); // Silver = 10%
+    expect(discountBps).to.equal(1000n); // Silver = 10%
     expect(tierName).to.equal("Silver");
   });
 
   it("returns Gold tier for 250k stake", async function () {
     await staking.connect(user1).stake(ethers.parseEther("250000"));
     const [, discountBps, tierName] = await staking.getDiscount(user1.address);
-    expect(discountBps).to.equal(2000); // Gold = 20%
+    expect(discountBps).to.equal(2000n); // Gold = 20%
     expect(tierName).to.equal("Gold");
   });
 
@@ -122,7 +122,7 @@ describe("PSICoinStaking", function () {
 
   it("returns None tier for unstaked address", async function () {
     const [, discountBps, tierName] = await staking.getDiscount(user2.address);
-    expect(discountBps).to.equal(0);
+    expect(discountBps).to.equal(0n);
     expect(tierName).to.equal("None");
   });
 });
