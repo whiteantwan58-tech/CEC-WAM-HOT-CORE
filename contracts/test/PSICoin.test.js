@@ -112,7 +112,7 @@ describe("PSICoinStaking", function () {
 
     // Fast-forward 31 days
     await ethers.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
-    await ethers.provider.send("evm_mine");
+    await ethers.provider.send("evm_mine", []);
 
     const balBefore = await psiCoin.balanceOf(user1.address);
     await staking.connect(user1).unstake();
