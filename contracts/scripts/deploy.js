@@ -25,10 +25,6 @@ async function main() {
   const stakingAddress = await staking.getAddress();
   console.log("PSICoinStaking deployed to:", stakingAddress);
 
-  // ── Authorise staking contract to mint rewards ────────────────────────────
-  await psiCoin.addMinter(stakingAddress);
-  console.log("Staking contract added as minter.");
-
   console.log("\n✅ Deployment complete.");
   console.log("  PSICoin   :", psiCoinAddress);
   console.log("  Staking   :", stakingAddress);
