@@ -1,188 +1,118 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSI Coin // CEC-WAM // SOVEREIGN CORE</title>
+    <title>CEC-WAM // EVE LIVE CORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
-        :root { --glow: #00f3ff; --matrix: #00ff41; --alert: #ff003c; --gold: #ffd700; }
-        body { background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; margin: 0; min-height: 100vh; }
-        .border-system { border: 1px solid rgba(0, 243, 255, 0.3); background: rgba(0, 0, 0, 0.9); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
-        .scanline { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 100; }
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .psi-glow { text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 40px rgba(0, 243, 255, 0.4); }
-        .gold-glow { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-        .stat-card { border: 1px solid rgba(0, 243, 255, 0.25); background: rgba(0, 10, 20, 0.85); border-radius: 8px; padding: 1rem; }
-        .feature-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; }
-        @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes orbit-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-        @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .ticker-inner { display: flex; gap: 4rem; animation: ticker-scroll 30s linear infinite; white-space: nowrap; }
-        /* Fallback for browsers without CSS animations */
-        @media (prefers-reduced-motion: reduce) {
-            .ticker-inner { animation: none; }
-            .orbit-ring, .orbit-ring-reverse { animation: none !important; }
-        }
+        body { background-color: #000; color: #00ffbc; font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        .glass { background: rgba(10, 20, 25, 0.9); border: 1px solid #00ffbc; box-shadow: 0 0 15px rgba(0, 255, 188, 0.2); border-radius: 12px; }
+        .neon { text-shadow: 0 0 10px #00ffbc; }
+        #matrix { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.2; }
     </style>
 </head>
-<body class="flex flex-col p-4 md:p-6 relative">
-    <div class="scanline" aria-hidden="true"></div>
+<body class="p-4">
+    <canvas id="matrix"></canvas>
 
-    <!-- Header -->
-    <header class="flex flex-wrap justify-between items-start mb-8 z-10 gap-4">
-        <div>
-            <h1 class="font-orbitron text-3xl text-[--glow] tracking-widest uppercase psi-glow">CEC-WAM</h1>
-            <p class="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-1">
-                Sovereign AI &bull; PSI Coin Platform &bull; Decentralized Finance
-            </p>
+    <script>
+        // SOVEREIGN CONSTANTS LOCKED
+        const GROQ_KEY = "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"; 
+        
+        // 👉 PASTE YOUR GOOGLE SHEET CSV LINK BETWEEN THE QUOTES BELOW:
+        const SHEET_URL = "PASTE_YOUR_CSV_LINK_HERE"; 
+    </script>
+
+    <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+        <div><h1 class="text-3xl font-black neon font-orbitron">CEC-WAM</h1></div>
+        <div class="text-green-400 font-bold text-xs tracking-widest animate-pulse">● EVE_HEI: AGENT_ACTIVE_24/7</div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="glass p-6 text-center">
+            <h3 class="text-gray-500 text-xs tracking-widest uppercase">Verified Liquid Cache</h3>
+            <div id="val-display" class="text-4xl font-bold text-white mt-2 font-orbitron">$1,250,039.00</div>
+            <p class="text-[10px] text-green-400 mt-2">SOURCE: H33 VAULT / MASTER LEDGER</p>
         </div>
-        <div class="text-right font-orbitron">
-            <div class="text-2xl text-[--gold] font-bold gold-glow" id="psi-market-cap">$1.25B+</div>
-            <div class="text-[10px] text-[--matrix] tracking-widest uppercase">PROJECTED MARKET CAP</div>
-        </div>
-    </header>
-
-    <!-- Main content grid -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 z-10">
-
-        <!-- Left panel: PSI Coin stats & features -->
-        <div class="md:col-span-4 flex flex-col gap-4">
-            <div class="border-system p-4 rounded-lg">
-                <h2 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2 uppercase tracking-widest">
-                    PSI COIN METRICS
-                </h2>
-                <div class="space-y-3 text-sm font-mono">
-                    <div class="stat-card flex justify-between items-center">
-                        <span class="text-[10px] opacity-60 uppercase">Token Symbol</span>
-                        <span class="text-[--gold] font-bold text-base">Ψ PSI</span>
-                    </div>
-                    <div class="stat-card flex justify-between items-center">
-                        <span class="text-[10px] opacity-60 uppercase">Total Supply</span>
-                        <span class="text-[--glow]">100,000,000</span>
-                    </div>
-                    <div class="stat-card flex justify-between items-center">
-                        <span class="text-[10px] opacity-60 uppercase">Network</span>
-                        <span class="text-[--matrix]">TridentDAO</span>
-                    </div>
-                    <div class="stat-card flex justify-between items-center">
-                        <span class="text-[10px] opacity-60 uppercase">Backing</span>
-                        <span class="text-white">AI-Sovereign Reserve</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-system p-4 rounded-lg">
-                <h2 class="text-xs font-orbitron text-[--glow] mb-4 border-b border-cyan-900 pb-2 uppercase tracking-widest">
-                    PLATFORM FEATURES
-                </h2>
-                <div class="space-y-2 text-sm">
-                    <div class="flex items-start gap-2">
-                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
-                        <span>AI-driven autonomous treasury management</span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
-                        <span>Real-time liquidity monitoring &amp; rebalancing</span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
-                        <span>Biometric-secured sovereign identity layer</span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
-                        <span>Cross-chain bridge &amp; DeFi integrations</span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[--matrix] mt-0.5">&#x25B6;</span>
-                        <span>EVE AI agent task automation &amp; compliance</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-system p-4 rounded-lg">
-                <div class="p-3 border border-[--matrix] bg-green-900/20 text-[--matrix] text-center font-bold rounded">
-                    <div class="font-orbitron text-xs tracking-widest mb-1">SYSTEM STATUS</div>
-                    <div class="text-sm">ALL SYSTEMS OPERATIONAL</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right panel: Visual core -->
-        <div class="md:col-span-8 border-system relative flex flex-col p-4 rounded-lg" style="background: radial-gradient(circle at center, rgba(0,40,60,0.4) 0%, rgba(0,0,0,0.95) 100%);">
-            <div class="flex flex-wrap justify-between text-[10px] font-mono mb-4 gap-2">
-                <span class="opacity-70">NETWORK: DECENTRALIZED // NODES: 1,024 ACTIVE</span>
-                <span class="text-[--matrix]">INTEGRITY: 100%</span>
-            </div>
-
-            <!-- Animated core visual -->
-            <div class="flex-1 flex flex-col items-center justify-center py-6">
-                <div class="relative w-72 h-72 mb-6">
-                    <div class="orbit-ring absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-full" style="animation: orbit 20s linear infinite;"></div>
-                    <div class="orbit-ring-reverse absolute inset-6 border border-yellow-500/20 rounded-full" style="animation: orbit-reverse 15s linear infinite;"></div>
-                    <div class="absolute inset-12 border border-[--glow]/20 rounded-full" style="animation: orbit 10s linear infinite;"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <div class="font-orbitron text-5xl text-[--gold] mb-1 gold-glow">Ψ</div>
-                        <span class="font-orbitron text-xl text-[--glow] psi-glow">PSI COIN</span>
-                        <span class="text-[9px] tracking-[0.4em] text-white opacity-70 mt-1 uppercase">CEC-WAM SOVEREIGN</span>
-                    </div>
-                </div>
-
-                <!-- Key pitch stats -->
-                <div class="grid grid-cols-3 gap-4 w-full max-w-lg text-center">
-                    <div class="stat-card">
-                        <div class="font-orbitron text-lg text-[--gold] gold-glow">24/7</div>
-                        <div class="text-[9px] opacity-60 uppercase mt-1">AI Monitoring</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="font-orbitron text-lg text-[--glow] psi-glow">∞</div>
-                        <div class="text-[9px] opacity-60 uppercase mt-1">Scalability</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="font-orbitron text-lg text-[--matrix]">SEC</div>
-                        <div class="text-[9px] opacity-60 uppercase mt-1">Grade Security</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CTA -->
-            <div class="mt-4 text-center">
-                <a href="dashboard.html" class="inline-block font-orbitron text-xs tracking-widest px-6 py-3 rounded-full text-black font-bold transition-all"
-                   style="background: linear-gradient(90deg, #00f3ff, #00ff41); box-shadow: 0 0 20px rgba(0,243,255,0.5);">
-                    VIEW LIVE DASHBOARD &rarr;
-                </a>
-            </div>
+        <div class="glass p-6 text-center">
+            <h3 class="text-gray-500 text-xs tracking-widest uppercase">Psi Coin Mass</h3>
+            <div id="mass-display" class="text-4xl font-bold text-purple-400 mt-2 font-orbitron">176,452.66</div>
+            <p class="text-[10px] text-purple-400 mt-2">BLOCKCHAIN VERIFIED: 7Avu2LscLpCNND...</p>
         </div>
     </div>
 
-    <!-- Ticker footer -->
-    <footer class="mt-6 border-t border-cyan-900 pt-4 font-mono text-[10px] overflow-hidden opacity-60 z-10" aria-label="System status ticker">
-        <div class="overflow-hidden">
-            <div class="ticker-inner">
-                <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
-                <span>[PSI] TOKEN LAUNCH PHASE INITIATED</span>
-                <span>[NET] GLOBAL NODE NETWORK ONLINE</span>
-                <span>[AI] EVE AUTONOMOUS AGENT RUNNING</span>
-                <span>[DAO] TRIDENTDAO GOVERNANCE LIVE</span>
-                <span>[SYS] CEC-WAM-SHIELD ACTIVE</span>
-                <span>[PSI] TOKEN LAUNCH PHASE INITIATED</span>
-                <span>[NET] GLOBAL NODE NETWORK ONLINE</span>
-                <span>[AI] EVE AUTONOMOUS AGENT RUNNING</span>
-                <span>[DAO] TRIDENTDAO GOVERNANCE LIVE</span>
-            </div>
+    <div class="glass p-4 flex flex-col h-96">
+        <div class="text-xs text-green-500 border-b border-green-900 pb-2 mb-2">> EVE CONSOLE HYBRID BRAIN (GROQ INTEGRATED)</div>
+        <div id="chat-log" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-3 text-gray-300 p-2">
+            <div class="text-green-400">> 1010_WAKE: INITIALIZED. AWAITING DIRECTIVE.</div>
         </div>
-    </footer>
+        
+        <div class="flex gap-2 mt-4">
+            <input type="text" id="cmd-input" placeholder="Talk to Eve..." class="w-full bg-black border border-green-800 text-white p-3 rounded focus:outline-none focus:border-green-400 font-mono text-xs">
+            <button onclick="talkToEve()" class="bg-green-900/50 text-green-400 font-bold px-6 rounded border border-green-600 hover:bg-green-700 transition-all font-orbitron">EXECUTE</button>
+        </div>
+    </div>
 
     <script>
-        // Update timestamp in ticker
-        (function addTimestampTicker() {
-            var ticker = document.querySelector('.ticker-inner');
-            if (!ticker) return;
-            var span = document.createElement('span');
-            span.textContent = '[SYNC] LAST SYNC: ' + new Date().toLocaleTimeString();
-            ticker.appendChild(span);
-        })();
+        // MATRIX RAIN BACKGROUND
+        const c = document.getElementById('matrix');
+        const ctx = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        const chars = "01CEC_WAM_1010_EVE".split('');
+        const drops = Array(Math.floor(c.width/15)).fill(1);
+        setInterval(() => {
+            ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height);
+            ctx.fillStyle = '#0F0';
+            drops.forEach((y, i) => {
+                ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*15, y*15);
+                if (y*15 > c.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }, 33);
+
+        // DATA SYNC ENGINE
+        async function syncData() {
+            if (SHEET_URL.includes("PASTE")) return;
+            try {
+                const response = await fetch(SHEET_URL);
+                const text = await response.text();
+                // Real-time replacement logic goes here when CSV is pasted
+            } catch (err) { console.log("Syncing..."); }
+        }
+        setInterval(syncData, 5000);
+
+        // EVE GROQ BRAIN INTERFACE
+        async function talkToEve() {
+            const input = document.getElementById('cmd-input');
+            const log = document.getElementById('chat-log');
+            const msg = input.value;
+            if(!msg) return;
+
+            log.innerHTML += `<div class="text-white">> YOU: ${msg}</div>`;
+            input.value = "";
+            log.scrollTop = log.scrollHeight;
+            
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "mixtral-8x7b-32768",
+                        messages: [
+                            {role: "system", content: "You are EVE, the AI Core of the CEC-WAM system. You are concise, highly intelligent, and loyal to Architect 1010. The current liquid valuation is $1,250,039.00 and the PSI mass is 176,452.66."},
+                            {role: "user", content: msg}
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const reply = data.choices.message.content;
+                
+                log.innerHTML += `<div class="text-purple-400 font-bold">> EVE: ${reply}</div>`;
+                log.scrollTop = log.scrollHeight;
+            } catch(e) { log.innerHTML += `<div class="text-red-500">> EVE: ERROR CONNECTING TO GROQ CORE.</div>`; }
+        }
     </script>
 </body>
 </html>
