@@ -131,7 +131,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
     function getDiscount(address user)
         external
         view
-        returns (uint256 tierIndex, uint8 discountBps, string memory tierName)
+        returns (uint256 tierIndex, uint16 discountBps, string memory tierName)
     {
         uint256 staked = stakes[user].amount;
         // Iterate tiers in descending order to find highest qualifying tier
