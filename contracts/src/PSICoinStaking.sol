@@ -65,10 +65,10 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
         psiToken = IERC20(_psiToken);
 
         // Initialise default tiers
-        tiers.push(Tier({ minStake:      10_000 * 10 ** 18, discountBps:  500, name: "Bronze"  }));
-        tiers.push(Tier({ minStake:      50_000 * 10 ** 18, discountBps: 1000, name: "Silver"  }));
-        tiers.push(Tier({ minStake:     250_000 * 10 ** 18, discountBps: 2000, name: "Gold"    }));
-        tiers.push(Tier({ minStake:   1_000_000 * 10 ** 18, discountBps: 3500, name: "Quantum" }));
+        tiers.push(Tier({ minStake:      10_000 * 1e18, discountBps:  500, name: "Bronze"  }));
+        tiers.push(Tier({ minStake:      50_000 * 1e18, discountBps: 1000, name: "Silver"  }));
+        tiers.push(Tier({ minStake:     250_000 * 1e18, discountBps: 2000, name: "Gold"    }));
+        tiers.push(Tier({ minStake:   1_000_000 * 1e18, discountBps: 3500, name: "Quantum" }));
     }
 
     // ─── Staking ─────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ contract PSICoinStaking is ReentrancyGuard, Ownable {
     // ─── View helpers ────────────────────────────────────────────────────────
     /**
      * @notice Returns the discount tier for a given staker address.
-     * @return tierIndex Index into the `tiers` array (`type(uint256).max` means no tier qualifies).
+     * @return tierIndex Index into the `tiers` array (-1 cast to uint256 means no tier).
      * @return discountBps Discount in basis points (0 if no tier qualifies).
      * @return tierName Name of the tier ("None" if not qualifying).
      */
