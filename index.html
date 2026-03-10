@@ -1,118 +1,1162 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEC-WAM // EVE LIVE CORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
-    <style>
-        body { background-color: #000; color: #00ffbc; font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        .glass { background: rgba(10, 20, 25, 0.9); border: 1px solid #00ffbc; box-shadow: 0 0 15px rgba(0, 255, 188, 0.2); border-radius: 12px; }
-        .neon { text-shadow: 0 0 10px #00ffbc; }
-        #matrix { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.2; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QSLC | Quantum Sovereign Logistics Corp.</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --cyan-dim: #00b8c4;
+    --gold: #ffd700;
+    --neon-green: #39ff14;
+    --red: #ff003c;
+    --bg: #020b14;
+    --glass: rgba(0,245,255,0.04);
+    --glass-border: rgba(0,245,255,0.15);
+    --text: #c8f0f5;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── MATRIX RAIN CANVAS ── */
+  #matrix-canvas {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    opacity: 0.07;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── SCAN LINE OVERLAY ── */
+  body::after {
+    content:'';
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,245,255,0.015) 2px,
+      rgba(0,245,255,0.015) 4px
+    );
+    pointer-events:none;
+    z-index:1;
+  }
+
+  /* ── GRID LAYOUT ── */
+  .wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 20px;
+    border-bottom: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo-block { display:flex; align-items:center; gap:16px; }
+
+  .logo-glyph {
+    width:52px; height:52px;
+    border: 2px solid var(--cyan);
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px;
+    position:relative;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: rgba(0,245,255,0.08);
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 8px var(--cyan), inset 0 0 8px rgba(0,245,255,0.1); }
+    50% { box-shadow: 0 0 24px var(--cyan), inset 0 0 16px rgba(0,245,255,0.2); }
+  }
+
+  .logo-text h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 20px rgba(0,245,255,0.6);
+  }
+
+  .logo-text p {
+    font-size: 0.75rem;
+    color: var(--cyan-dim);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .status-bar {
+    display:flex; align-items:center; gap:24px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  .status-pill {
+    display:flex; align-items:center; gap:8px;
+    padding: 6px 14px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass);
+    letter-spacing: 0.1em;
+  }
+
+  .dot {
+    width:7px; height:7px; border-radius:50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+    animation: blink 1.8s ease-in-out infinite;
+  }
+
+  .dot.gold { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .dot.red  { background: var(--red);  box-shadow: 0 0 8px var(--red); animation-duration:0.8s; }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    overflow:hidden;
+    padding: 8px 0;
+    margin: 4px 0 32px;
+    background: rgba(0,245,255,0.02);
+  }
+
+  .ticker-track {
+    display:flex; gap:64px;
+    white-space:nowrap;
+    animation: ticker-scroll 30s linear infinite;
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.75rem;
+    color: var(--cyan-dim);
+  }
+
+  .ticker-track span { color: var(--neon-green); }
+
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── HERO METRICS ── */
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .metric-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .metric-card::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: scan-line 3s linear infinite;
+  }
+
+  .metric-card:nth-child(2)::before { animation-delay:-1s; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .metric-card:nth-child(3)::before { animation-delay:-2s; }
+
+  @keyframes scan-line {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .metric-card:hover { border-color: var(--cyan); }
+
+  .metric-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--cyan-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 16px rgba(0,245,255,0.4);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-value.gold-val { color: var(--gold); text-shadow: 0 0 16px rgba(255,215,0,0.4); }
+
+  .metric-sub {
+    font-size: 0.72rem;
+    color: var(--neon-green);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .metric-corner {
+    position:absolute;
+    bottom:12px; right:16px;
+    font-size:1.8rem;
+    opacity:0.12;
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 360px;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  @media(max-width:1100px) {
+    .main-grid { grid-template-columns: 1fr 1fr; }
+    .sidebar-col { grid-column: 1/-1; }
+  }
+  @media(max-width:700px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    position: relative;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--glass-border);
+    display:flex; align-items:center; gap:10px;
+  }
+
+  .panel-title::before {
+    content:'▸';
+    color: var(--neon-green);
+  }
+
+  /* ── STAR MAP (CSS CANVAS) ── */
+  #star-map {
+    width:100%; height:220px;
+    position:relative;
+    overflow:hidden;
+    background: radial-gradient(ellipse at 50% 60%, rgba(0,60,80,0.6) 0%, transparent 70%);
+  }
+
+  #star-map canvas { width:100%; height:100%; }
+
+  .map-overlay {
+    position:absolute; top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+  }
+
+  .map-overlay .node {
+    width:12px; height:12px; border-radius:50%;
+    background: var(--cyan);
+    box-shadow: 0 0 20px var(--cyan);
+    margin:0 auto 8px;
+    animation: pulse-node 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-node {
+    0%,100% { transform:scale(1); opacity:1; }
+    50% { transform:scale(1.6); opacity:0.6; }
+  }
+
+  .map-overlay p {
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    color:var(--cyan);
+    letter-spacing:0.15em;
+  }
+
+  /* ── PSI CHART ── */
+  .psi-chart {
+    width:100%; height:120px;
+    position:relative;
+    margin-bottom:12px;
+  }
+
+  .psi-chart svg { width:100%; height:100%; }
+
+  /* ── ACTIVITY FEED ── */
+  .feed-list {
+    display:flex; flex-direction:column; gap:8px;
+    max-height:260px; overflow-y:auto;
+  }
+
+  .feed-list::-webkit-scrollbar { width:3px; }
+  .feed-list::-webkit-scrollbar-track { background:transparent; }
+  .feed-list::-webkit-scrollbar-thumb { background:var(--cyan-dim); }
+
+  .feed-item {
+    display:flex; gap:12px; align-items:flex-start;
+    font-size:0.78rem;
+    padding: 8px 10px;
+    background: rgba(0,245,255,0.03);
+    border-left: 2px solid var(--glass-border);
+    animation: feed-in 0.4s ease;
+  }
+
+  @keyframes feed-in {
+    from { opacity:0; transform:translateX(-8px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+
+  .feed-item.green { border-left-color: var(--neon-green); }
+  .feed-item.gold  { border-left-color: var(--gold); }
+  .feed-item.red   { border-left-color: var(--red); }
+
+  .feed-time {
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    color:var(--cyan-dim);
+    white-space:nowrap;
+    margin-top:1px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar-col { display:flex; flex-direction:column; gap:16px; }
+
+  /* ── PSI COIN WIDGET ── */
+  .psi-widget {
+    text-align:center;
+    padding:28px 20px;
+  }
+
+  .psi-logo {
+    width:80px; height:80px;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Orbitron', monospace;
+    font-size:1.4rem;
+    font-weight:900;
+    color:var(--gold);
+    margin:0 auto 16px;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+    box-shadow: 0 0 32px rgba(255,215,0,0.2);
+    animation: coin-spin-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes coin-spin-glow {
+    0%,100% { box-shadow: 0 0 16px rgba(255,215,0,0.2); }
+    50%     { box-shadow: 0 0 40px rgba(255,215,0,0.5); }
+  }
+
+  .psi-price {
+    font-family:'Orbitron', monospace;
+    font-size:1.6rem;
+    font-weight:700;
+    color:var(--gold);
+    margin-bottom:4px;
+  }
+
+  .psi-change {
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.75rem;
+    color:var(--neon-green);
+    margin-bottom:20px;
+  }
+
+  .psi-stats {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; text-align:left;
+  }
+
+  .psi-stat-item { padding:10px; background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.1); }
+  .psi-stat-label { font-size:0.62rem; letter-spacing:0.15em; color:rgba(255,215,0,0.5); text-transform:uppercase; }
+  .psi-stat-val   { font-family:'Orbitron', monospace; font-size:0.9rem; color:var(--gold); }
+
+  /* ── SYSTEM STATUS ── */
+  .sys-list { display:flex; flex-direction:column; gap:8px; }
+
+  .sys-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px;
+    background:rgba(0,245,255,0.03);
+    font-size:0.78rem;
+  }
+
+  .sys-item-name { display:flex; align-items:center; gap:10px; color:var(--text); }
+  .sys-item-name .icon { font-size:0.9rem; }
+
+  .sys-badge {
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    padding:3px 8px;
+    letter-spacing:0.1em;
+  }
+
+  .sys-badge.online  { background:rgba(57,255,20,0.1);  color:var(--neon-green); border:1px solid rgba(57,255,20,0.3); }
+  .sys-badge.standby { background:rgba(255,215,0,0.1);  color:var(--gold);       border:1px solid rgba(255,215,0,0.3); }
+  .sys-badge.offline { background:rgba(255,0,60,0.1);   color:var(--red);        border:1px solid rgba(255,0,60,0.3); }
+
+  /* ── PROGRESS BARS ── */
+  .progress-wrap { margin-top:6px; }
+
+  .prog-row {
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:10px; font-size:0.75rem;
+  }
+
+  .prog-label { width:110px; color:var(--cyan-dim); letter-spacing:0.05em; flex-shrink:0; }
+
+  .prog-bar {
+    flex:1; height:4px;
+    background:rgba(0,245,255,0.1);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .prog-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--cyan), var(--neon-green));
+    box-shadow: 0 0 6px var(--cyan);
+    transition: width 2s ease;
+    width:0;
+  }
+
+  .prog-val { width:40px; text-align:right; font-family:'Share Tech Mono', monospace; font-size:0.7rem; color:var(--cyan); }
+
+  /* ── BOTTOM ROW ── */
+  .bottom-row {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:20px;
+    margin-bottom:24px;
+  }
+
+  @media(max-width:700px) { .bottom-row { grid-template-columns:1fr; } }
+
+  /* ── VAULT TABLE ── */
+  .vault-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+  .vault-table th {
+    font-family:'Orbitron', monospace;
+    font-size:0.6rem;
+    letter-spacing:0.15em;
+    color:var(--cyan-dim);
+    text-align:left;
+    padding:6px 10px;
+    border-bottom:1px solid var(--glass-border);
+  }
+  .vault-table td { padding:8px 10px; border-bottom:1px solid rgba(0,245,255,0.04); }
+  .vault-table tr:hover td { background:rgba(0,245,255,0.04); }
+  .hash { font-family:'Share Tech Mono', monospace; font-size:0.65rem; color:var(--cyan-dim); }
+  .amount-green { color:var(--neon-green); font-family:'Share Tech Mono', monospace; }
+  .amount-red   { color:var(--red);        font-family:'Share Tech Mono', monospace; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top:1px solid var(--glass-border);
+    padding:20px 0 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    color:var(--cyan-dim);
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  footer a { color:var(--cyan-dim); text-decoration:none; }
+  footer a:hover { color:var(--cyan); }
+
+  /* ── CORNER DECORATIONS ── */
+  .corner-tl, .corner-br {
+    position:absolute;
+    width:12px; height:12px;
+    border-color:var(--cyan);
+    border-style:solid;
+    opacity:0.5;
+  }
+  .corner-tl { top:0; left:0; border-width:2px 0 0 2px; }
+  .corner-br { bottom:0; right:0; border-width:0 2px 2px 0; }
+
+  /* ── GLITCH TEXT ── */
+  .glitch {
+    position:relative;
+    display:inline-block;
+  }
+  .glitch::before, .glitch::after {
+    content:attr(data-text);
+    position:absolute; top:0; left:0;
+    width:100%; height:100%;
+    font-family:inherit; font-size:inherit; font-weight:inherit;
+  }
+  .glitch::before {
+    color:var(--red);
+    clip-path:polygon(0 30%,100% 30%,100% 50%,0 50%);
+    animation:glitch-1 4s infinite;
+    opacity:0.7;
+  }
+  .glitch::after {
+    color:var(--neon-green);
+    clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%);
+    animation:glitch-2 4s infinite;
+    opacity:0.7;
+  }
+  @keyframes glitch-1 {
+    0%,85%,100%{transform:translateX(0)} 86%{transform:translateX(-3px)} 90%{transform:translateX(3px)} 95%{transform:translateX(0)}
+  }
+  @keyframes glitch-2 {
+    0%,85%,100%{transform:translateX(0)} 87%{transform:translateX(3px)} 92%{transform:translateX(-2px)} 96%{transform:translateX(0)}
+  }
+
+  /* ── BLOCKCHAIN NODES VISUAL ── */
+  #chain-canvas { width:100%; height:180px; display:block; }
+
+  /* ── KEY INJECT MODAL ── */
+  #key-modal {
+    display:none;
+    position:fixed; top:0;left:0;right:0;bottom:0;
+    background:rgba(2,11,20,0.92);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+  }
+  #key-modal.open { display:flex; }
+
+  .modal-box {
+    background:#050f1a;
+    border:1px solid var(--cyan);
+    box-shadow:0 0 60px rgba(0,245,255,0.2);
+    padding:36px;
+    max-width:420px;
+    width:90%;
+    text-align:center;
+  }
+
+  .modal-box h2 {
+    font-family:'Orbitron', monospace;
+    color:var(--cyan);
+    font-size:1rem;
+    letter-spacing:0.15em;
+    margin-bottom:10px;
+  }
+
+  .modal-box p {
+    font-size:0.78rem;
+    color:var(--cyan-dim);
+    margin-bottom:20px;
+    line-height:1.6;
+  }
+
+  .modal-input {
+    width:100%;
+    background:rgba(0,245,255,0.05);
+    border:1px solid var(--glass-border);
+    color:var(--cyan);
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.8rem;
+    padding:10px 14px;
+    outline:none;
+    margin-bottom:16px;
+    letter-spacing:0.1em;
+  }
+
+  .modal-input:focus { border-color:var(--cyan); }
+
+  .modal-btn {
+    background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,245,255,0.05));
+    border:1px solid var(--cyan);
+    color:var(--cyan);
+    font-family:'Orbitron', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.2em;
+    padding:10px 28px;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .modal-btn:hover { background:rgba(0,245,255,0.15); box-shadow:0 0 20px rgba(0,245,255,0.3); }
+
+  .skip-link {
+    display:block; margin-top:12px;
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    color:var(--cyan-dim);
+    cursor:pointer;
+    text-decoration:underline;
+  }
+</style>
 </head>
-<body class="p-4">
-    <canvas id="matrix"></canvas>
+<body>
 
-    <script>
-        // SOVEREIGN CONSTANTS LOCKED
-        const GROQ_KEY = "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"; 
-        
-        // 👉 PASTE YOUR GOOGLE SHEET CSV LINK BETWEEN THE QUOTES BELOW:
-        const SHEET_URL = "PASTE_YOUR_CSV_LINK_HERE"; 
-    </script>
+<!-- Matrix Rain -->
+<canvas id="matrix-canvas"></canvas>
 
-    <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-        <div><h1 class="text-3xl font-black neon font-orbitron">CEC-WAM</h1></div>
-        <div class="text-green-400 font-bold text-xs tracking-widest animate-pulse">● EVE_HEI: AGENT_ACTIVE_24/7</div>
+<!-- Key Injection Modal -->
+<div id="key-modal">
+  <div class="modal-box">
+    <div class="corner-tl"></div><div class="corner-br"></div>
+    <h2>🔑 ARCHITECT KEY INJECT</h2>
+    <p>Inject your EVE API Key locally. This key is stored only in your browser's localStorage and is never transmitted.</p>
+    <input type="password" class="modal-input" id="key-input" placeholder="EVE_API_KEY · · · · · · · · · · · ·">
+    <button class="modal-btn" onclick="injectKey()">INJECT KEY</button>
+    <span class="skip-link" onclick="closeModal()">[ SKIP — CONTINUE IN READ-ONLY MODE ]</span>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo-glyph">🔱</div>
+      <div class="logo-text">
+        <h1 class="glitch" data-text="QSLC">QSLC</h1>
+        <p>Quantum Sovereign Logistics Corp. · CEC-WAM MATRIX</p>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-pill"><div class="dot"></div>NODE ACTIVE</div>
+      <div class="status-pill"><div class="dot gold"></div>SOLANA · MAINNET</div>
+      <div class="status-pill" id="auth-pill">
+        <div class="dot red" id="auth-dot"></div>
+        <span id="auth-label">GUEST MODE</span>
+      </div>
+      <div class="status-pill" style="cursor:pointer" onclick="document.getElementById('key-modal').classList.add('open')">
+        🔑 INJECT KEY
+      </div>
+    </div>
+  </header>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="ticker">
+      <span>PSI/USDC</span> 0.000312 &nbsp;▲+4.2%&nbsp;
+      <span>SOL/USD</span> 147.83 &nbsp;▲+1.8%&nbsp;
+      <span>PSI MASS</span> 176,452.66 &nbsp;
+      <span>CHAIN HEIGHT</span> 284,910,441 &nbsp;
+      <span>CEC-WAM NODE</span> ACTIVE &nbsp;
+      <span>VAULT STATUS</span> SEALED · AES-256 &nbsp;
+      <span>PSI/USDC</span> 0.000312 &nbsp;▲+4.2%&nbsp;
+      <span>SOL/USD</span> 147.83 &nbsp;▲+1.8%&nbsp;
+      <span>PSI MASS</span> 176,452.66 &nbsp;
+      <span>CHAIN HEIGHT</span> 284,910,441 &nbsp;
+      <span>CEC-WAM NODE</span> ACTIVE &nbsp;
+      <span>VAULT STATUS</span> SEALED · AES-256 &nbsp;
+    </div>
+  </div>
+
+  <!-- HERO METRICS -->
+  <div class="hero-metrics">
+    <div class="metric-card">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="metric-label">PSI Coin · Circulating Mass</div>
+      <div class="metric-value">176,452<span style="font-size:1rem;color:var(--cyan-dim)">.66</span></div>
+      <div class="metric-sub">▲ +4.2% · 24H CHANGE</div>
+      <div class="metric-corner">Ψ</div>
+    </div>
+    <div class="metric-card">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="metric-label">CEC-WAM · Active Contracts</div>
+      <div class="metric-value gold-val">1,047</div>
+      <div class="metric-sub">◈ LEDGER MATRIX SYNC · LIVE</div>
+      <div class="metric-corner">◈</div>
+    </div>
+    <div class="metric-card">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="metric-label">Network · Validator Nodes</div>
+      <div class="metric-value">34</div>
+      <div class="metric-sub" style="color:var(--cyan-dim)">⬡ SOVEREIGN MESH · ONLINE</div>
+      <div class="metric-corner">⬡</div>
+    </div>
+    <div class="metric-card">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="metric-label">Architect · Handle</div>
+      <div class="metric-value" style="font-size:1.1rem;letter-spacing:0.05em">SOVEREIGN<br>ARCHITECT <span style="color:var(--gold)">1010</span></div>
+      <div class="metric-sub">◉ IDENTITY VERIFIED</div>
+      <div class="metric-corner">◉</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- STAR MAP PANEL -->
+    <div class="panel">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="panel-title">CEC-WAM Node Topology · Live Mesh</div>
+      <div id="star-map">
+        <canvas id="star-canvas"></canvas>
+        <div class="map-overlay">
+          <div class="node"></div>
+          <p>CORE NODE · 1010</p>
+        </div>
+      </div>
+      <div class="progress-wrap" style="margin-top:16px">
+        <div class="prog-row">
+          <span class="prog-label">Mesh Sync</span>
+          <div class="prog-bar"><div class="prog-fill" data-width="87"></div></div>
+          <span class="prog-val">87%</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-label">Chain Depth</span>
+          <div class="prog-bar"><div class="prog-fill" data-width="96" style="background:linear-gradient(90deg,var(--gold),var(--neon-green))"></div></div>
+          <span class="prog-val">96%</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-label">PSI Liquidity</span>
+          <div class="prog-bar"><div class="prog-fill" data-width="62"></div></div>
+          <span class="prog-val">62%</span>
+        </div>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="glass p-6 text-center">
-            <h3 class="text-gray-500 text-xs tracking-widest uppercase">Verified Liquid Cache</h3>
-            <div id="val-display" class="text-4xl font-bold text-white mt-2 font-orbitron">$1,250,039.00</div>
-            <p class="text-[10px] text-green-400 mt-2">SOURCE: H33 VAULT / MASTER LEDGER</p>
+    <!-- ACTIVITY FEED -->
+    <div class="panel">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="panel-title">Live Transaction Feed · CEC-WAM</div>
+      <div class="feed-list" id="feed-list">
+        <div class="feed-item green">
+          <span class="feed-time">14:32:01</span>
+          <span>PSI Transfer · 1,200 PSI → Node_0x3A7F</span>
         </div>
-        <div class="glass p-6 text-center">
-            <h3 class="text-gray-500 text-xs tracking-widest uppercase">Psi Coin Mass</h3>
-            <div id="mass-display" class="text-4xl font-bold text-purple-400 mt-2 font-orbitron">176,452.66</div>
-            <p class="text-[10px] text-purple-400 mt-2">BLOCKCHAIN VERIFIED: 7Avu2LscLpCNND...</p>
+        <div class="feed-item gold">
+          <span class="feed-time">14:31:44</span>
+          <span>Contract #1044 · SEALED · QSLC-BRIDGE</span>
         </div>
+        <div class="feed-item green">
+          <span class="feed-time">14:30:18</span>
+          <span>Validator Node_0x9C2B · JOINED MESH</span>
+        </div>
+        <div class="feed-item">
+          <span class="feed-time">14:29:55</span>
+          <span>Ledger Matrix · Block #284,910,391 confirmed</span>
+        </div>
+        <div class="feed-item red">
+          <span class="feed-time">14:28:12</span>
+          <span>Node_0x1F44 · SYNC TIMEOUT · Retrying…</span>
+        </div>
+        <div class="feed-item green">
+          <span class="feed-time">14:27:01</span>
+          <span>PSI Mint · +500 PSI · Vault_SA1010</span>
+        </div>
+        <div class="feed-item gold">
+          <span class="feed-time">14:25:33</span>
+          <span>Contract #1043 · SEALED · LOGISTICS-X</span>
+        </div>
+        <div class="feed-item green">
+          <span class="feed-time">14:24:09</span>
+          <span>PSI Transfer · 340 PSI → Node_0x7E1A</span>
+        </div>
+      </div>
     </div>
 
-    <div class="glass p-4 flex flex-col h-96">
-        <div class="text-xs text-green-500 border-b border-green-900 pb-2 mb-2">> EVE CONSOLE HYBRID BRAIN (GROQ INTEGRATED)</div>
-        <div id="chat-log" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-3 text-gray-300 p-2">
-            <div class="text-green-400">> 1010_WAKE: INITIALIZED. AWAITING DIRECTIVE.</div>
+    <!-- SIDEBAR -->
+    <div class="sidebar-col">
+
+      <!-- PSI COIN -->
+      <div class="panel psi-widget">
+        <div class="corner-tl"></div><div class="corner-br"></div>
+        <div class="panel-title" style="justify-content:center">PSI Coin · Live</div>
+        <div class="psi-logo">Ψ</div>
+        <div class="psi-price" id="psi-price">$0.000312</div>
+        <div class="psi-change" id="psi-change">▲ +4.20% · 24H</div>
+        <div class="psi-stats">
+          <div class="psi-stat-item">
+            <div class="psi-stat-label">Market Cap</div>
+            <div class="psi-stat-val" id="psi-mcap">$55.1K</div>
+          </div>
+          <div class="psi-stat-item">
+            <div class="psi-stat-label">Volume 24H</div>
+            <div class="psi-stat-val" id="psi-vol">$8.2K</div>
+          </div>
+          <div class="psi-stat-item">
+            <div class="psi-stat-label">Supply</div>
+            <div class="psi-stat-val">176.4K</div>
+          </div>
+          <div class="psi-stat-item">
+            <div class="psi-stat-label">Network</div>
+            <div class="psi-stat-val">SOLANA</div>
+          </div>
         </div>
-        
-        <div class="flex gap-2 mt-4">
-            <input type="text" id="cmd-input" placeholder="Talk to Eve..." class="w-full bg-black border border-green-800 text-white p-3 rounded focus:outline-none focus:border-green-400 font-mono text-xs">
-            <button onclick="talkToEve()" class="bg-green-900/50 text-green-400 font-bold px-6 rounded border border-green-600 hover:bg-green-700 transition-all font-orbitron">EXECUTE</button>
+      </div>
+
+      <!-- SYSTEM STATUS -->
+      <div class="panel">
+        <div class="corner-tl"></div><div class="corner-br"></div>
+        <div class="panel-title">System Status</div>
+        <div class="sys-list">
+          <div class="sys-item">
+            <span class="sys-item-name"><span class="icon">🧠</span>EVE HEI Core</span>
+            <span class="sys-badge online">ONLINE</span>
+          </div>
+          <div class="sys-item">
+            <span class="sys-item-name"><span class="icon">⛓</span>CEC-WAM Ledger</span>
+            <span class="sys-badge online">SYNCED</span>
+          </div>
+          <div class="sys-item">
+            <span class="sys-item-name"><span class="icon">◈</span>PSI Bridge</span>
+            <span class="sys-badge standby">STANDBY</span>
+          </div>
+          <div class="sys-item">
+            <span class="sys-item-name"><span class="icon">🌐</span>Mesh Network</span>
+            <span class="sys-badge online">34 NODES</span>
+          </div>
+          <div class="sys-item">
+            <span class="sys-item-name"><span class="icon">🔐</span>Vault Integrity</span>
+            <span class="sys-badge online">AES-256</span>
+          </div>
         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bottom-row">
+
+    <!-- BLOCKCHAIN VIZ -->
+    <div class="panel">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="panel-title">Blockchain · Recent Blocks</div>
+      <canvas id="chain-canvas"></canvas>
     </div>
 
-    <script>
-        // MATRIX RAIN BACKGROUND
-        const c = document.getElementById('matrix');
-        const ctx = c.getContext('2d');
-        c.width = window.innerWidth; c.height = window.innerHeight;
-        const chars = "01CEC_WAM_1010_EVE".split('');
-        const drops = Array(Math.floor(c.width/15)).fill(1);
-        setInterval(() => {
-            ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height);
-            ctx.fillStyle = '#0F0';
-            drops.forEach((y, i) => {
-                ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*15, y*15);
-                if (y*15 > c.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }, 33);
+    <!-- VAULT TABLE -->
+    <div class="panel">
+      <div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="panel-title">Vault · Recent Transactions</div>
+      <table class="vault-table">
+        <thead>
+          <tr>
+            <th>TXN HASH</th>
+            <th>TYPE</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="vault-tbody">
+          <tr>
+            <td class="hash">3xK9…f2Aa</td>
+            <td>PSI SEND</td>
+            <td class="amount-red">-1,200 Ψ</td>
+            <td><span class="sys-badge online" style="font-size:0.6rem">CONFIRMED</span></td>
+          </tr>
+          <tr>
+            <td class="hash">7bZQ…9cD1</td>
+            <td>CONTRACT</td>
+            <td class="amount-green">+SEALED</td>
+            <td><span class="sys-badge online" style="font-size:0.6rem">CONFIRMED</span></td>
+          </tr>
+          <tr>
+            <td class="hash">A1mW…3eFx</td>
+            <td>PSI RECV</td>
+            <td class="amount-green">+500 Ψ</td>
+            <td><span class="sys-badge online" style="font-size:0.6rem">CONFIRMED</span></td>
+          </tr>
+          <tr>
+            <td class="hash">9pLR…0bH7</td>
+            <td>PSI SEND</td>
+            <td class="amount-red">-340 Ψ</td>
+            <td><span class="sys-badge standby" style="font-size:0.6rem">PENDING</span></td>
+          </tr>
+          <tr>
+            <td class="hash">2nYT…6gM3</td>
+            <td>BRIDGE</td>
+            <td class="amount-green">+200 Ψ</td>
+            <td><span class="sys-badge online" style="font-size:0.6rem">CONFIRMED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-        // DATA SYNC ENGINE
-        async function syncData() {
-            if (SHEET_URL.includes("PASTE")) return;
-            try {
-                const response = await fetch(SHEET_URL);
-                const text = await response.text();
-                // Real-time replacement logic goes here when CSV is pasted
-            } catch (err) { console.log("Syncing..."); }
-        }
-        setInterval(syncData, 5000);
+  </div>
 
-        // EVE GROQ BRAIN INTERFACE
-        async function talkToEve() {
-            const input = document.getElementById('cmd-input');
-            const log = document.getElementById('chat-log');
-            const msg = input.value;
-            if(!msg) return;
+  <!-- FOOTER -->
+  <footer>
+    <div>© 2025 QUANTUM SOVEREIGN LOGISTICS CORP. · ALL RIGHTS RESERVED</div>
+    <div>SOVEREIGN ARCHITECT 1010 · <a href="https://github.com/whiteantwan58-tech" target="_blank">GITHUB</a> · CEC-WAM v3.0</div>
+    <div id="footer-clock" style="font-family:'Share Tech Mono',monospace">--:--:-- UTC</div>
+  </footer>
 
-            log.innerHTML += `<div class="text-white">> YOU: ${msg}</div>`;
-            input.value = "";
-            log.scrollTop = log.scrollHeight;
-            
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "mixtral-8x7b-32768",
-                        messages: [
-                            {role: "system", content: "You are EVE, the AI Core of the CEC-WAM system. You are concise, highly intelligent, and loyal to Architect 1010. The current liquid valuation is $1,250,039.00 and the PSI mass is 176,452.66."},
-                            {role: "user", content: msg}
-                        ]
-                    })
-                });
-                const data = await res.json();
-                const reply = data.choices.message.content;
-                
-                log.innerHTML += `<div class="text-purple-400 font-bold">> EVE: ${reply}</div>`;
-                log.scrollTop = log.scrollHeight;
-            } catch(e) { log.innerHTML += `<div class="text-red-500">> EVE: ERROR CONNECTING TO GROQ CORE.</div>`; }
-        }
-    </script>
+</div><!-- /wrapper -->
+
+<script>
+// ── MATRIX RAIN ──────────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  let cols, drops;
+
+  function resize(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols  = Math.floor(canvas.width / 16);
+    drops = Array(cols).fill(1);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const chars = 'ΨΩΛΔΘΞアイウエオカキクケコサシスセソABCDEF0123456789QSLC1010';
+
+  function draw(){
+    ctx.fillStyle = 'rgba(2,11,20,0.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#00f5ff';
+    ctx.font = '13px Share Tech Mono, monospace';
+    drops.forEach((y,i)=>{
+      const ch = chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch, i*16, y*16);
+      if(y*16 > canvas.height && Math.random()>0.975) drops[i]=0;
+      drops[i]++;
+    });
+  }
+  setInterval(draw, 50);
+})();
+
+// ── STAR MAP (node topology) ──────────────────────────────
+(function(){
+  const canvas = document.getElementById('star-canvas');
+  const ctx    = canvas.getContext('2d');
+  const parent = document.getElementById('star-map');
+
+  function resize(){
+    canvas.width  = parent.offsetWidth;
+    canvas.height = parent.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const nodes = Array.from({length:28},()=>({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random()*2+1,
+    vx:(Math.random()-0.5)*0.0008,
+    vy:(Math.random()-0.5)*0.0008,
+    brightness: Math.random()
+  }));
+
+  // Core node
+  const core = {x:0.5,y:0.5,r:5};
+
+  function draw(){
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // Draw edges
+    nodes.forEach(n=>{
+      const dx = n.x - core.x, dy = n.y - core.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist<0.35){
+        ctx.beginPath();
+        ctx.moveTo(core.x*W, core.y*H);
+        ctx.lineTo(n.x*W, n.y*H);
+        ctx.strokeStyle = `rgba(0,245,255,${0.12 - dist*0.3})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    });
+
+    // Draw nodes
+    nodes.forEach(n=>{
+      n.x += n.vx; n.y += n.vy;
+      if(n.x<0||n.x>1) n.vx*=-1;
+      if(n.y<0||n.y>1) n.vy*=-1;
+      n.brightness = Math.sin(Date.now()*0.002 + n.x*10)*0.3+0.7;
+
+      ctx.beginPath();
+      ctx.arc(n.x*W, n.y*H, n.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(0,245,255,${n.brightness*0.8})`;
+      ctx.shadowColor = '#00f5ff';
+      ctx.shadowBlur  = 6;
+      ctx.fill();
+    });
+
+    // Core
+    ctx.beginPath();
+    ctx.arc(core.x*W, core.y*H, core.r, 0, Math.PI*2);
+    ctx.fillStyle = '#00f5ff';
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── BLOCKCHAIN CANVAS ─────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('chain-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  function resize(){
+    canvas.width  = canvas.parentElement.offsetWidth - 40;
+    canvas.height = 180;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const blocks = Array.from({length:8},(_,i)=>({
+    id: 284910441 - (7-i),
+    txns: Math.floor(Math.random()*200+50),
+    size: Math.random()*0.6+0.4
+  }));
+
+  function draw(){
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    const bw = 80, bh = 52, gap = (W - bw*8) / 9;
+
+    blocks.forEach((b,i)=>{
+      const x = gap + i*(bw+gap);
+      const y = H/2 - bh/2;
+      const alpha = 0.4 + i*0.08;
+
+      // Block body
+      ctx.strokeStyle = `rgba(0,245,255,${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.fillStyle = `rgba(0,245,255,${alpha*0.08})`;
+      ctx.fillRect(x,y,bw,bh);
+      ctx.strokeRect(x,y,bw,bh);
+
+      // Chain link
+      if(i < 7){
+        ctx.beginPath();
+        ctx.moveTo(x+bw, H/2);
+        ctx.lineTo(x+bw+gap, H/2);
+        ctx.strokeStyle = `rgba(0,245,255,${alpha*0.6})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3,3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Block text
+      ctx.fillStyle = `rgba(0,245,255,${alpha+0.2})`;
+      ctx.font = '8px Share Tech Mono, monospace';
+      ctx.fillText('#'+b.id.toString().slice(-5), x+5, y+14);
+      ctx.fillStyle = `rgba(57,255,20,${alpha})`;
+      ctx.fillText(b.txns+' TXN', x+5, y+28);
+      ctx.fillStyle = `rgba(0,245,255,${alpha*0.7})`;
+      ctx.fillText((b.size*1.2).toFixed(2)+'MB', x+5, y+44);
+
+      // Height bar
+      ctx.fillStyle = `rgba(0,245,255,${alpha*0.4})`;
+      ctx.fillRect(x, y+bh+6, bw*b.size, 4);
+    });
+  }
+  draw();
+})();
+
+// ── PROGRESS BARS ANIMATE ─────────────────────────────────
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.prog-fill').forEach(el=>{
+    setTimeout(()=>{ el.style.width = el.dataset.width+'%'; },300);
+  });
+});
+
+// ── CLOCK ─────────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2,'0');
+  const m = String(now.getUTCMinutes()).padStart(2,'0');
+  const s = String(now.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('footer-clock').textContent = `${h}:${m}:${s} UTC`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── LIVE FEED (auto-push new entries) ─────────────────────
+const feedMessages = [
+  ['PSI Transfer · 220 PSI → Node_0x2B9C','green'],
+  ['Contract #1048 · SEALED · QSLC-CORE','gold'],
+  ['Validator Node_0xAA3D · HEARTBEAT OK',''],
+  ['Block #284,910,442 · CONFIRMED',''],
+  ['PSI Mint · +100 PSI · Vault_SA1010','green'],
+  ['Node_0x5F7E · SYNC COMPLETE','green'],
+  ['Contract #1047 · SEALED · LOGISTICS-Y','gold'],
+  ['PSI Transfer · 780 PSI → Node_0x6C1B','green'],
+];
+let feedIdx = 0;
+setInterval(()=>{
+  const feed = document.getElementById('feed-list');
+  const now  = new Date();
+  const ts   = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const [msg,cls] = feedMessages[feedIdx % feedMessages.length];
+  const div = document.createElement('div');
+  div.className = 'feed-item ' + cls;
+  div.innerHTML = `<span class="feed-time">${ts}</span><span>${msg}</span>`;
+  feed.insertBefore(div, feed.firstChild);
+  if(feed.children.length > 16) feed.removeChild(feed.lastChild);
+  feedIdx++;
+}, 4200);
+
+// ── PSI PRICE FLICKER (simulated live feed) ───────────────
+let psiBase = 0.000312;
+setInterval(()=>{
+  psiBase *= (1 + (Math.random()-0.499)*0.002);
+  const change = ((psiBase/0.000312 - 1)*100).toFixed(2);
+  document.getElementById('psi-price').textContent = '$'+psiBase.toFixed(6);
+  const up = parseFloat(change) >= 0;
+  const el = document.getElementById('psi-change');
+  el.textContent = (up?'▲ +':'▼ ')+change+'% · 24H';
+  el.style.color = up ? 'var(--neon-green)' : 'var(--red)';
+}, 5000);
+
+// ── KEY INJECT ────────────────────────────────────────────
+function injectKey(){
+  const val = document.getElementById('key-input').value.trim();
+  if(!val){ alert('Key cannot be empty.'); return; }
+  localStorage.setItem('EVE_API_KEY', val);
+  closeModal();
+  document.getElementById('auth-dot').className   = 'dot';
+  document.getElementById('auth-label').textContent = 'ARCHITECT';
+  document.getElementById('auth-pill').title = 'Key stored locally only.';
+}
+
+function closeModal(){
+  document.getElementById('key-modal').classList.remove('open');
+}
+
+// Check if key already injected
+if(localStorage.getItem('EVE_API_KEY')){
+  document.getElementById('auth-dot').className   = 'dot';
+  document.getElementById('auth-label').textContent = 'ARCHITECT';
+}
+</script>
 </body>
 </html>
