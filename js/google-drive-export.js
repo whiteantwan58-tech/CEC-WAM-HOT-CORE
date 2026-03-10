@@ -313,7 +313,6 @@ class GoogleDriveExporter {
 
   async syncToAppSheet(data) {
     // Simulate AppSheet sync (real implementation would use AppSheet API)
-    console.log('Syncing to AppSheet:', data);
     
     // In production, would POST to AppSheet webhook or API
     // await fetch(appsheetWebhookUrl, {
