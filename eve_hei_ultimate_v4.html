@@ -902,7 +902,7 @@ function drawISSMap(lat,lon){
 ══════════════════════════════════════════════════════════════ */
 async function loadNOAA(){
   try{
-    const d=await fetch('https://api.weather.gov/alerts/active?status=actual&limit=20',{headers:{Accept:'application/geo+json','User-Agent':'EVE-HEI-v4/1.0 (CEC-WAM)'}}).then(r=>r.json());
+    const d=await fetch('https://api.weather.gov/alerts/active?status=actual&limit=20',{headers:{Accept:'application/geo+json','User-Agent':'EVE-HEI-v4/1.0 (CEC-WAM; contact: noaa-bot-admin@example.com)'}}).then(r=>r.json());
     const el=document.getElementById('noaa-alerts');
     const features=d.features||[];
     if(!features.length){el.innerHTML='<div class="no-data">✓ No active weather alerts at this time.</div>';return;}
