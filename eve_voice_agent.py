@@ -29,7 +29,7 @@ except ImportError:
 
 # Try to import optional dependencies
 try:
-    from elevenlabs import generate, set_api_key, voices
+    from elevenlabs import ElevenLabs
     ELEVENLABS_AVAILABLE = True
 except ImportError:
     ELEVENLABS_AVAILABLE = False
@@ -110,13 +110,15 @@ class EVEAgent:
         """Initialize ElevenLabs API"""
         if ELEVENLABS_AVAILABLE and self.elevenlabs_api_key:
             try:
-                set_api_key(self.elevenlabs_api_key)
+                self._elevenlabs_client = ElevenLabs(api_key=self.elevenlabs_api_key)
                 self.elevenlabs_ready = True
                 self._log("ElevenLabs initialized successfully")
             except Exception as e:
+                self._elevenlabs_client = None
                 self.elevenlabs_ready = False
                 self._log(f"ElevenLabs initialization failed: {e}", level="error")
         else:
+            self._elevenlabs_client = None
             self.elevenlabs_ready = False
             self._log("ElevenLabs not available (missing API key or library)", level="warning")
     
@@ -253,12 +255,13 @@ Respond naturally and conversationally while being precise and helpful."""
             return None
         
         try:
-            # Generate speech using ElevenLabs
-            audio = generate(
+            # Generate speech using ElevenLabs v2.x SDK
+            audio_stream = self._elevenlabs_client.text_to_speech.convert(
+                voice_id=self.voice_id,
                 text=text,
-                voice=self.voice_id,
-                model="eleven_monolingual_v1"
+                model_id="eleven_monolingual_v1"
             )
+            audio = b"".join(audio_stream)
             
             self._log(f"Speech generated: {text[:50]}...")
             return audio
