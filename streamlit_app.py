@@ -1899,9 +1899,19 @@ with tabs[9]:
         except Exception as e:
             st.session_state.eve_agent = None
             st.error(f"EVE initialization error: {str(e)}")
-    
+
+    # Resolve EVE_WAKE status for the header panel
+    _eve_wake_active = True
+    if st.session_state.eve_agent:
+        try:
+            _eve_wake_active = st.session_state.eve_agent.get_status().get('eve_wake', True)
+        except Exception:
+            pass
+    _eve_wake_label = "⚡ ACTIVE" if _eve_wake_active else "🔴 INACTIVE"
+    _eve_wake_color = "#FFD700" if _eve_wake_active else "#FF4444"
+
     # EVE Status Panel with 5D Holographic Theme
-    st.markdown("""
+    st.markdown(f"""
     <div style='background: linear-gradient(135deg, rgba(157, 0, 255, 0.15), rgba(0, 255, 255, 0.15)); 
                 padding: 30px; border-radius: 20px; 
                 border: 2px solid rgba(157, 0, 255, 0.5);
@@ -1932,15 +1942,19 @@ with tabs[9]:
                     <div style='color: #00FF88; font-size: 0.8rem;'>Status</div>
                     <div style='color: #00FF88; font-weight: bold;'>✓ ONLINE</div>
                 </div>
+                <div>
+                    <div style='color: {_eve_wake_color}; font-size: 0.8rem;'>EVE_WAKE</div>
+                    <div style='color: {_eve_wake_color}; font-weight: bold;'>{_eve_wake_label}</div>
+                </div>
             </div>
         </div>
     </div>
     
     <style>
-    @keyframes pulse {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.05); }
-    }
+    @keyframes pulse {{
+        0%, 100% {{ opacity: 0.3; transform: scale(1); }}
+        50% {{ opacity: 0.6; transform: scale(1.05); }}
+    }}
     </style>
     """, unsafe_allow_html=True)
     
@@ -2001,6 +2015,21 @@ with tabs[9]:
                     <div style='color: #FFFFFF; font-weight: bold; margin-top: 5px;'>{uptime}</div>
                 </div>
                 """, unsafe_allow_html=True)
+
+            # EVE_WAKE status row
+            st.markdown("<br>", unsafe_allow_html=True)
+            wake_active = eve_status.get('eve_wake', True)
+            wake_label = "⚡ ACTIVE — All Platforms" if wake_active else "🔴 INACTIVE"
+            wake_color = "#FFD700" if wake_active else "#FF4444"
+            st.markdown(f"""
+            <div style='background: rgba(255, 215, 0, 0.08); padding: 12px 20px; border-radius: 10px;
+                        border: 1px solid {wake_color}44; text-align: center;
+                        box-shadow: 0 2px 12px {wake_color}22;'>
+                <span style='color: {wake_color}; font-weight: bold; font-size: 1rem;'>
+                    EVE_WAKE: {wake_label}
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
         except Exception as e:
             st.warning(f"Could not load EVE status: {str(e)}")
     

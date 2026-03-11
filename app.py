@@ -1088,7 +1088,11 @@ with tab6:
     hours = int(runtime.total_seconds() // 3600)
     minutes = int((runtime.total_seconds() % 3600) // 60)
     seconds = int(runtime.total_seconds() % 60)
-    
+
+    # Resolve EVE_WAKE dynamically from the environment
+    _app_eve_wake = os.getenv('EVE_WAKE', 'true').strip().lower() not in ('false', '0', 'no', 'off')
+    _app_wake_label = "ACTIVE" if _app_eve_wake else "INACTIVE"
+
     st.markdown(f"""
     <div style="text-align: center; 
                 background: linear-gradient(135deg, rgba(255, 0, 255, 0.25), rgba(0, 255, 255, 0.25)); 
@@ -1125,6 +1129,11 @@ with tab6:
                         border: 2px solid #FF00FF; border-radius: 25px;
                         box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">
                 🧬 DNA MATRIX: VERIFIED
+            </div>
+            <div style="padding: 10px 20px; background: rgba(255, 215, 0, 0.2); 
+                        border: 2px solid #FFD700; border-radius: 25px;
+                        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
+                ⚡ EVE_WAKE: {_app_wake_label}
             </div>
         </div>
     </div>
