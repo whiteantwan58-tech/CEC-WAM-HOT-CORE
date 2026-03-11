@@ -60,7 +60,10 @@ class EVEAgent:
         self.system_code = os.getenv('EVE_SYSTEM_CODE', 'CEC_WAM_HEI_EVE_7A2F-9C4B')
         self.owner_name = os.getenv('EVE_OWNER_NAME', 'Twan')
         self.personality = os.getenv('EVE_PERSONALITY', 'professional,helpful,intelligent,learning,warm,light-island-rhythm')
-        
+
+        # EVE_WAKE — controls always-on activation across all platforms (default: true)
+        self.eve_wake = os.getenv('EVE_WAKE', 'true').strip().lower() not in ('false', '0', 'no', 'off')
+
         # ElevenLabs configuration
         self.elevenlabs_api_key = os.getenv('ELEVENLABS_API_KEY')
         self.voice_id = os.getenv('ELEVENLABS_VOICE_ID', '21m00Tcm4TlvDq8ikWAM')
@@ -386,6 +389,7 @@ Respond naturally and conversationally while being precise and helpful."""
             "system_code": self.system_code,
             "owner": self.owner_name,
             "status": "active",
+            "eve_wake": self.eve_wake,
             "uptime": "24/7",
             "elevenlabs_ready": self.elevenlabs_ready,
             "openai_ready": self.openai_ready,

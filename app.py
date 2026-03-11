@@ -1088,7 +1088,19 @@ with tab6:
     hours = int(runtime.total_seconds() // 3600)
     minutes = int((runtime.total_seconds() % 3600) // 60)
     seconds = int(runtime.total_seconds() % 60)
-    
+
+    # Resolve EVE_WAKE dynamically from the environment
+    _app_eve_wake = os.getenv('EVE_WAKE', 'true').strip().lower() not in ('false', '0', 'no', 'off')
+    _app_wake_label = "ACTIVE" if _app_eve_wake else "INACTIVE"
+
+    # Pre-compute style values based on auto-refresh state
+    _live = st.session_state.get('auto_refresh_enabled', True)
+    _update_bg     = "rgba(0, 255, 136, 0.25)" if _live else "rgba(128, 128, 128, 0.2)"
+    _update_border = "#00FF88" if _live else "#888888"
+    _update_shadow = "rgba(0, 255, 136, 0.4)" if _live else "rgba(128, 128, 128, 0.1)"
+    _update_anim   = "codeUpdatePulse 3s ease-in-out infinite" if _live else "none"
+    _update_label  = "CODE AUTO-UPDATE: ACTIVE · 30s" if _live else "CODE AUTO-UPDATE: PAUSED"
+
     st.markdown(f"""
     <div style="text-align: center; 
                 background: linear-gradient(135deg, rgba(255, 0, 255, 0.25), rgba(0, 255, 255, 0.25)); 
@@ -1126,6 +1138,19 @@ with tab6:
                         box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);">
                 🧬 DNA MATRIX: VERIFIED
             </div>
+            <div style="padding: 10px 20px; background: rgba(255, 215, 0, 0.2); 
+                        border: 2px solid #FFD700; border-radius: 25px;
+                        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
+                ⚡ EVE_WAKE: {_app_wake_label}
+            </div>
+            <div style="padding: 10px 20px; 
+                        background: {_update_bg}; 
+                        border: 2px solid {_update_border}; 
+                        border-radius: 25px;
+                        box-shadow: 0 0 20px {_update_shadow};
+                        animation: {_update_anim};">
+                🔄 {_update_label}
+            </div>
         </div>
     </div>
     <style>
@@ -1138,6 +1163,10 @@ with tab6:
                 transform: scale(1.1); 
                 filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.9));
             }}
+        }}
+        @keyframes codeUpdatePulse {{
+            0%, 100% {{ box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }}
+            50% {{ box-shadow: 0 0 35px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.3); }}
         }}
     </style>
     """, unsafe_allow_html=True)

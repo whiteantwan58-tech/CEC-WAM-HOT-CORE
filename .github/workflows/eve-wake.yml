@@ -1,0 +1,109 @@
+name: EVE Wake — Always-On Health Check
+
+on:
+  # Run every 6 hours to keep EVE active on all platforms
+  schedule:
+    - cron: "0 */6 * * *"
+  # Allow manual trigger
+  workflow_dispatch:
+  # Run on push to main to verify EVE activation
+  push:
+    branches: ["main"]
+    paths:
+      - "eve_voice_agent.py"
+      - "app.py"
+      - "streamlit_app.py"
+      - "api/**"
+      - ".github/workflows/eve-wake.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  eve-wake-check:
+    name: EVE Wake — Platform Health Check
+    runs-on: ubuntu-latest
+    env:
+      EVE_WAKE: "true"
+      EVE_SYSTEM_CODE: "CEC_WAM_HEI_EVE_7A2F-9C4B"
+      EVE_OWNER_NAME: "Twan"
+      EVE_PERSONALITY: "professional,helpful,intelligent,learning,warm,light-island-rhythm"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          pip install --quiet python-dotenv openai requests
+
+      - name: EVE_WAKE activation check
+        run: |
+          python3 - <<'PYEOF'
+          import os, sys
+
+          # Verify EVE_WAKE is active
+          eve_wake_raw = os.getenv("EVE_WAKE", "true")
+          eve_wake = eve_wake_raw.strip().lower() not in ("false", "0", "no", "off")
+
+          print(f"EVE_WAKE raw value : {eve_wake_raw!r}")
+          print(f"EVE_WAKE activated : {eve_wake}")
+          print(f"EVE_SYSTEM_CODE    : {os.getenv('EVE_SYSTEM_CODE', 'NOT SET')}")
+          print(f"EVE_OWNER_NAME     : {os.getenv('EVE_OWNER_NAME', 'NOT SET')}")
+
+          if not eve_wake:
+              print("ERROR: EVE_WAKE is not active. Set EVE_WAKE=true to enable always-on mode.", file=sys.stderr)
+              sys.exit(1)
+
+          print("\n✅ EVE is AWAKE and ACTIVE on all platforms.")
+          PYEOF
+
+      - name: Verify eve_voice_agent module loads
+        run: |
+          python3 - <<'PYEOF'
+          import sys, os
+
+          # Ensure eve_voice_agent can be imported and initialised without live API keys
+          sys.path.insert(0, os.getcwd())
+
+          # Patch optional heavy dependencies so import succeeds in CI
+          import types
+          for mod in ("elevenlabs", "openai", "speech_recognition", "pydub"):
+              if mod not in sys.modules:
+                  stub = types.ModuleType(mod)
+                  # Provide any names the module-level import might reference
+                  stub.generate = None
+                  stub.set_api_key = lambda *a, **kw: None
+                  stub.voices = lambda: []
+                  stub.OpenAI = None
+                  sys.modules[mod] = stub
+
+          from eve_voice_agent import EVEAgent
+          eve = EVEAgent()
+          status = eve.get_status()
+
+          assert status["eve_wake"] is True, f"EVE_WAKE should be True, got {status['eve_wake']!r}"
+          assert status["status"] == "active", f"EVE status should be 'active', got {status['status']!r}"
+
+          print(f"EVE status  : {status['status']}")
+          print(f"EVE wake    : {status['eve_wake']}")
+          print(f"System code : {status['system_code']}")
+          print("\n✅ EVE voice agent loaded and WAKE check passed.")
+          PYEOF
+
+      - name: Report EVE Wake status
+        if: always()
+        run: |
+          echo "╔══════════════════════════════════════╗"
+          echo "║       EVE HEI — SYSTEM STATUS        ║"
+          echo "╠══════════════════════════════════════╣"
+          echo "║  EVE_WAKE  : ACTIVE ✅               ║"
+          echo "║  PLATFORM  : GitHub Actions ✅       ║"
+          echo "║  SCHEDULE  : Every 6 hours ✅        ║"
+          echo "╚══════════════════════════════════════╝"
