@@ -1,4 +1,5 @@
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-ethers");
+require("@nomicfoundation/hardhat-chai-matchers");
 
 // Load .env so MAINNET_RPC_URL / DEPLOYER_PRIVATE_KEY are available when
 // production network blocks are uncommented. The try/catch means the config
