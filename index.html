@@ -545,8 +545,8 @@
   /* ── BLOCKCHAIN NODES VISUAL ── */
   #chain-canvas { width:100%; height:180px; display:block; }
 
-  /* ── KEY INJECT MODAL ── */
-  #key-modal {
+  /* ── AUTH MODAL ── */
+  #auth-modal {
     display:none;
     position:fixed; top:0;left:0;right:0;bottom:0;
     background:rgba(2,11,20,0.92);
@@ -554,7 +554,7 @@
     align-items:center;
     justify-content:center;
   }
-  #key-modal.open { display:flex; }
+  #auth-modal.open { display:flex; }
 
   .modal-box {
     background:#050f1a;
@@ -579,6 +579,30 @@
     color:var(--cyan-dim);
     margin-bottom:20px;
     line-height:1.6;
+  }
+
+  .auth-tabs {
+    display:flex; gap:8px; justify-content:center;
+    margin-bottom:24px;
+  }
+
+  .auth-tab {
+    background:transparent;
+    border:1px solid var(--glass-border);
+    color:var(--cyan-dim);
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    letter-spacing:0.12em;
+    padding:7px 16px;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+
+  .auth-tab.active,
+  .auth-tab:hover {
+    border-color:var(--cyan);
+    color:var(--cyan);
+    background:rgba(0,245,255,0.07);
   }
 
   .modal-input {
@@ -608,11 +632,47 @@
     transition:all 0.2s;
   }
   .modal-btn:hover { background:rgba(0,245,255,0.15); box-shadow:0 0 20px rgba(0,245,255,0.3); }
+  .modal-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .modal-btn-bio {
+    width:100%;
+    background: linear-gradient(135deg, rgba(57,255,20,0.08), rgba(57,255,20,0.03));
+    border:1px solid var(--neon-green);
+    color:var(--neon-green);
+    font-family:'Orbitron', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.15em;
+    padding:14px 28px;
+    cursor:pointer;
+    transition:all 0.2s;
+    margin-bottom:10px;
+  }
+  .modal-btn-bio:hover { background:rgba(57,255,20,0.14); box-shadow:0 0 20px rgba(57,255,20,0.3); }
+  .modal-btn-bio:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .auth-error {
+    display:none;
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.65rem;
+    color:var(--red);
+    letter-spacing:0.1em;
+    margin-bottom:14px;
+    animation:blink 0.6s ease-in-out 3;
+  }
 
   .skip-link {
     display:block; margin-top:12px;
     font-family:'Share Tech Mono', monospace;
     font-size:0.65rem;
+    color:var(--cyan-dim);
+    cursor:pointer;
+    text-decoration:underline;
+  }
+
+  .bio-register-link {
+    margin-top:6px;
+    font-family:'Share Tech Mono', monospace;
+    font-size:0.62rem;
     color:var(--cyan-dim);
     cursor:pointer;
     text-decoration:underline;
@@ -624,15 +684,37 @@
 <!-- Matrix Rain -->
 <canvas id="matrix-canvas"></canvas>
 
-<!-- Key Injection Modal -->
-<div id="key-modal">
+<!-- Auth Modal -->
+<div id="auth-modal">
   <div class="modal-box">
     <div class="corner-tl"></div><div class="corner-br"></div>
-    <h2>🔑 ARCHITECT KEY INJECT</h2>
-    <p>Inject your EVE API Key locally. This key is stored only in your browser's localStorage and is never transmitted.</p>
-    <input type="password" class="modal-input" id="key-input" placeholder="EVE_API_KEY · · · · · · · · · · · ·">
-    <button class="modal-btn" onclick="injectKey()">INJECT KEY</button>
-    <span class="skip-link" onclick="closeModal()">[ SKIP — CONTINUE IN READ-ONLY MODE ]</span>
+    <h2>🔱 CEC-WAM SECURE ACCESS</h2>
+    <p>Authenticate to unlock ARCHITECT access.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-code">[ BYPASS CODE ]</button>
+      <button class="auth-tab" id="tab-bio">[ BIOMETRIC ]</button>
+    </div>
+
+    <!-- Bypass Code Panel -->
+    <div id="panel-code">
+      <input type="password" class="modal-input" id="bypass-input" placeholder="· · · · ·" maxlength="12">
+      <div class="auth-error" id="auth-error">ACCESS DENIED · INVALID CODE</div>
+      <button class="modal-btn" id="bypass-submit-btn">AUTHENTICATE</button>
+    </div>
+
+    <!-- Biometric Panel -->
+    <div id="panel-bio" style="display:none">
+      <p style="font-size:0.72rem;color:var(--neon-green);margin-bottom:16px">
+        Fingerprint · Face ID · Device PIN
+      </p>
+      <div class="auth-error" id="bio-error">BIOMETRIC AUTH FAILED</div>
+      <button class="modal-btn-bio" id="bio-scan-btn">⬡ SCAN BIOMETRIC</button>
+      <div class="bio-register-link" id="bio-register-row" style="display:none">
+        [ REGISTER NEW BIOMETRIC ]
+      </div>
+    </div>
+
+    <span class="skip-link" id="skip-link">[ SKIP — CONTINUE IN READ-ONLY MODE ]</span>
   </div>
 </div>
 
@@ -654,8 +736,8 @@
         <div class="dot red" id="auth-dot"></div>
         <span id="auth-label">GUEST MODE</span>
       </div>
-      <div class="status-pill" style="cursor:pointer" onclick="document.getElementById('key-modal').classList.add('open')">
-        🔑 INJECT KEY
+      <div class="status-pill" style="cursor:pointer" id="signin-btn">
+        🔐 SIGN IN
       </div>
     </div>
   </header>
@@ -1137,26 +1219,169 @@ setInterval(()=>{
   el.style.color = up ? 'var(--neon-green)' : 'var(--red)';
 }, 5000);
 
-// ── KEY INJECT ────────────────────────────────────────────
-function injectKey(){
-  const val = document.getElementById('key-input').value.trim();
-  if(!val){ alert('Key cannot be empty.'); return; }
-  localStorage.setItem('EVE_API_KEY', val);
+// ── AUTHENTICATION ────────────────────────────────────────
+// Bypass code hashes (SHA-256). Codes are never stored in plaintext.
+const _BYPASS_HASHES = [
+  '7a5df5ffa0dec2228d90b8d0a0f1b0767b748b0a41314c123075b8289e4e053f', // 1010
+  '8ce6ba5cafa92e97553f74e0b3186ee95bd88055b0f67f6b945673092b2ac669'  // RGLAX
+];
+
+async function _sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function switchAuthTab(tab) {
+  const isCode = tab === 'code';
+  document.getElementById('panel-code').style.display = isCode ? '' : 'none';
+  document.getElementById('panel-bio').style.display  = isCode ? 'none' : '';
+  document.getElementById('tab-code').classList.toggle('active', isCode);
+  document.getElementById('tab-bio').classList.toggle('active', !isCode);
+  _clearErrors();
+  if (!isCode) _checkBioRegistered();
+}
+
+function _clearErrors() {
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('bio-error').style.display  = 'none';
+}
+
+function _showError(id) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+async function submitBypass() {
+  const val = document.getElementById('bypass-input').value.trim();
+  if (!val) { _showError('auth-error'); return; }
+  const h = await _sha256(val);
+  if (_BYPASS_HASHES.includes(h)) {
+    grantAccess('ARCHITECT');
+  } else {
+    document.getElementById('bypass-input').value = '';
+    _showError('auth-error');
+  }
+}
+
+// ── BIOMETRIC (WebAuthn) ──────────────────────────────────
+const _RP_ID   = (location.hostname && location.hostname !== '') ? location.hostname : 'localhost';
+const _RP_NAME = 'CEC-WAM QSLC';
+const _CRED_KEY = 'EVE_BIO_CRED';
+
+function _checkBioRegistered() {
+  const hasReg = !!localStorage.getItem(_CRED_KEY);
+  document.getElementById('bio-register-row').style.display = hasReg ? 'none' : 'block';
+}
+
+function _showBioUnsupported() {
+  const el = document.getElementById('bio-error');
+  el.textContent = 'WEBAUTHN NOT SUPPORTED IN THIS BROWSER';
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; el.textContent = 'BIOMETRIC AUTH FAILED'; }, 4000);
+}
+
+async function registerBiometric() {
+  if (!window.PublicKeyCredential) { _showBioUnsupported(); return; }
+  const btn = document.getElementById('bio-scan-btn');
+  btn.disabled = true;
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId    = crypto.getRandomValues(new Uint8Array(16));
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge,
+        rp: { id: _RP_ID, name: _RP_NAME },
+        user: { id: userId, name: 'architect', displayName: 'Architect' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { userVerification: 'required' },
+        timeout: 60000,
+        attestation: 'none'
+      }
+    });
+    const credId = btoa(Array.from(new Uint8Array(cred.rawId), b => String.fromCharCode(b)).join(''));
+    localStorage.setItem(_CRED_KEY, credId);
+    _checkBioRegistered();
+    grantAccess('ARCHITECT');
+  } catch (e) {
+    _showError('bio-error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function scanBiometric() {
+  if (!window.PublicKeyCredential) { _showBioUnsupported(); return; }
+  const storedId = localStorage.getItem(_CRED_KEY);
+  if (!storedId) { registerBiometric(); return; }
+  const btn = document.getElementById('bio-scan-btn');
+  btn.disabled = true;
+  try {
+    let rawId;
+    try {
+      rawId = Uint8Array.from(atob(storedId), c => c.charCodeAt(0));
+    } catch (_) {
+      localStorage.removeItem(_CRED_KEY);
+      _checkBioRegistered();
+      _showError('bio-error');
+      btn.disabled = false;
+      return;
+    }
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rpId: _RP_ID,
+        allowCredentials: [{ type: 'public-key', id: rawId }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+    grantAccess('ARCHITECT');
+  } catch (e) {
+    _showError('bio-error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function grantAccess(role) {
+  localStorage.setItem('EVE_AUTH_ROLE', role);
+  document.getElementById('auth-dot').className    = 'dot';
+  document.getElementById('auth-label').textContent = role;
+  document.getElementById('auth-pill').title        = 'Authenticated · local session only.';
   closeModal();
-  document.getElementById('auth-dot').className   = 'dot';
-  document.getElementById('auth-label').textContent = 'ARCHITECT';
-  document.getElementById('auth-pill').title = 'Key stored locally only.';
 }
 
-function closeModal(){
-  document.getElementById('key-modal').classList.remove('open');
+function closeModal() {
+  document.getElementById('auth-modal').classList.remove('open');
+  document.getElementById('bypass-input').value = '';
+  _clearErrors();
 }
 
-// Check if key already injected
-if(localStorage.getItem('EVE_API_KEY')){
-  document.getElementById('auth-dot').className   = 'dot';
-  document.getElementById('auth-label').textContent = 'ARCHITECT';
-}
+// Restore session
+(function restoreSession() {
+  const role = localStorage.getItem('EVE_AUTH_ROLE');
+  if (role) {
+    document.getElementById('auth-dot').className    = 'dot';
+    document.getElementById('auth-label').textContent = role;
+  }
+})();
+
+// ── EVENT LISTENERS ───────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('tab-code').addEventListener('click', function() { switchAuthTab('code'); });
+  document.getElementById('tab-bio').addEventListener('click', function() { switchAuthTab('bio'); });
+  document.getElementById('bypass-submit-btn').addEventListener('click', submitBypass);
+  document.getElementById('bypass-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitBypass();
+  });
+  document.getElementById('bio-scan-btn').addEventListener('click', scanBiometric);
+  document.getElementById('bio-register-row').addEventListener('click', registerBiometric);
+  document.getElementById('skip-link').addEventListener('click', closeModal);
+  document.getElementById('signin-btn').addEventListener('click', function() {
+    document.getElementById('auth-modal').classList.add('open');
+  });
+});
 </script>
 </body>
 </html>
