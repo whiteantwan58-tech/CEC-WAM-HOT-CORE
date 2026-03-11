@@ -55,6 +55,9 @@ commits = [
   "718011710d37b01da50a2d7329f608be1faccda7",
   "1910788d1ce0be0c7fedf4836d6a977fe343e85b",
   "c0c26b80e74e61c9c0f991dd6806c741a47d6656",
+  # 91ddfbb: index.html commit by whiteantwan58-tech containing a hardcoded Groq API
+  # key (gsk_...). The key has been rotated and is no longer active.
+  "91ddfbb623650d7c8c33f4721e3a018cc9f4913a",
 ]
 # ElevenLabs public voice IDs are not secrets — they are published in documentation
 # and are safe to suppress globally.  The rotated keys above are covered by the
