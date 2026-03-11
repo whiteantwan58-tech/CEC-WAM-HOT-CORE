@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVE HEI ULTIMATE v4.0 | Sovereign Architect 1010</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan:    #00f5ff;
+  --cyan-dim:#00b8c4;
+  --gold:    #ffd700;
+  --neon:    #39ff14;
+  --purple:  #bf5fff;
+  --red:     #ff003c;
+  --bg:      #020b14;
+  --card-bg: rgba(0,245,255,0.04);
+  --border:  rgba(0,245,255,0.18);
+  --text:    #c8f0f5;
+  --glow:    0 0 18px rgba(0,245,255,0.45);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* ── MATRIX RAIN ── */
+#matrix-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  opacity:.07;z-index:0;pointer-events:none;
+}
+
+/* ── SCANLINES ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,245,255,.015) 2px,rgba(0,245,255,.015) 4px);
+  pointer-events:none;z-index:1;
+}
+
+/* ── LAYOUT ── */
+.wrapper{position:relative;z-index:2;max-width:1600px;margin:0 auto;padding:0 20px 60px;}
+
+/* ── HEADER ── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 0 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;
+}
+.logo-block{display:flex;align-items:center;gap:14px;}
+.logo-glyph{
+  width:54px;height:54px;border:2px solid var(--cyan);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;
+  color:var(--cyan);box-shadow:var(--glow);animation:pulse-glyph 3s ease-in-out infinite;
+}
+@keyframes pulse-glyph{0%,100%{box-shadow:0 0 18px rgba(0,245,255,.45)}50%{box-shadow:0 0 36px rgba(0,245,255,.9)}}
+.logo-text h1{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:var(--cyan);letter-spacing:3px;}
+.logo-text p{font-size:.8rem;color:var(--cyan-dim);letter-spacing:2px;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.status-dot{display:flex;align-items:center;gap:6px;font-size:.8rem;font-family:'Share Tech Mono',monospace;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px var(--neon);animation:blink 1.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.refresh-counter{
+  font-family:'Share Tech Mono',monospace;font-size:.75rem;
+  color:var(--gold);border:1px solid rgba(255,215,0,.3);
+  padding:4px 12px;border-radius:4px;background:rgba(255,215,0,.06);
+}
+.api-key-btn{
+  background:transparent;border:1px solid var(--cyan);color:var(--cyan);
+  padding:6px 14px;border-radius:4px;cursor:pointer;font-family:'Orbitron',sans-serif;
+  font-size:.7rem;letter-spacing:1px;transition:all .3s;
+}
+.api-key-btn:hover{background:rgba(0,245,255,.1);}
+
+/* ── TABS ── */
+.tab-bar{
+  display:flex;gap:2px;flex-wrap:wrap;
+  padding:16px 0 0;border-bottom:1px solid var(--border);
+}
+.tab-btn{
+  background:transparent;border:none;color:var(--cyan-dim);
+  padding:10px 18px;cursor:pointer;font-family:'Orbitron',sans-serif;
+  font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;
+  border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--cyan);background:rgba(0,245,255,.05);}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,245,255,.07);}
+.tab-content{display:none;padding-top:24px;}
+.tab-content.active{display:block;}
+
+/* ── CARD ── */
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:10px;padding:20px;
+  backdrop-filter:blur(26px) saturate(200%);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;inset:-1px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(0,245,255,.12),transparent 50%,rgba(191,95,255,.08));
+  z-index:-1;pointer-events:none;
+}
+.card-title{
+  font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;
+  color:var(--cyan);letter-spacing:2px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.card-title .icon{font-size:1.1rem;}
+
+/* ── GRID UTILS ── */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+.mt-16{margin-top:16px;}
+.mt-20{margin-top:20px;}
+
+/* ── STAT CHIP ── */
+.stat{
+  background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);
+  border-radius:6px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;
+}
+.stat-label{font-size:.7rem;color:var(--cyan-dim);letter-spacing:1.5px;text-transform:uppercase;}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700;color:var(--cyan);}
+.stat-sub{font-size:.72rem;color:var(--text);}
+.positive{color:var(--neon);}
+.negative{color:var(--red);}
+
+/* ── AI BRAIN ── */
+.kernel-modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.kernel-btn{
+  background:rgba(191,95,255,.08);border:1px solid rgba(191,95,255,.3);
+  color:#d4a0ff;padding:6px 14px;border-radius:20px;cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:1px;
+  transition:all .3s;white-space:nowrap;
+}
+.kernel-btn:hover,.kernel-btn.active{
+  background:rgba(191,95,255,.25);border-color:var(--purple);
+  color:var(--purple);box-shadow:0 0 12px rgba(191,95,255,.4);
+}
+.chat-window{
+  background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;
+  height:320px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:var(--cyan-dim) transparent;
+}
+.msg{display:flex;flex-direction:column;gap:4px;}
+.msg-role{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--cyan-dim);}
+.msg-text{font-size:.88rem;line-height:1.55;color:var(--text);}
+.msg.eve .msg-role{color:var(--purple);}
+.msg.eve .msg-text{color:#e0c8ff;}
+.chat-input-row{display:flex;gap:10px;margin-top:14px;}
+.chat-input{
+  flex:1;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  color:var(--text);padding:10px 14px;border-radius:6px;font-family:'Rajdhani',sans-serif;
+  font-size:.9rem;outline:none;transition:border-color .3s;
+}
+.chat-input:focus{border-color:var(--cyan);}
+.chat-send{
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  border:none;color:#000;padding:10px 20px;border-radius:6px;
+  cursor:pointer;font-family:'Orbitron',sans-serif;font-size:.7rem;
+  font-weight:700;letter-spacing:1px;transition:opacity .3s;
+}
+.chat-send:hover{opacity:.85;}
+.chat-send:disabled{opacity:.4;cursor:not-allowed;}
+.thinking{color:var(--purple);font-style:italic;font-size:.8rem;animation:fadepulse 1s ease-in-out infinite;}
+@keyframes fadepulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ── GITHUB ── */
+.repo-item{
+  background:rgba(0,245,255,.04);border:1px solid var(--border);
+  border-radius:6px;padding:12px 14px;display:flex;
+  justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  transition:border-color .3s;cursor:pointer;
+}
+.repo-item:hover{border-color:var(--cyan);}
+.repo-name{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--cyan);}
+.repo-desc{font-size:.75rem;color:var(--text);margin-top:3px;}
+.repo-meta{display:flex;gap:10px;align-items:center;font-size:.72rem;flex-shrink:0;}
+.lang-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.commit-item{
+  padding:10px 14px;border-left:2px solid var(--cyan-dim);
+  margin-bottom:8px;background:rgba(0,245,255,.03);border-radius:0 6px 6px 0;
+}
+.commit-sha{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--gold);}
+.commit-msg{font-size:.82rem;color:var(--text);margin:3px 0;}
+.commit-meta{font-size:.68rem;color:var(--cyan-dim);}
+
+/* ── PSI CHART ── */
+.chart-container{position:relative;height:180px;width:100%;}
+canvas.chart-canvas{width:100%!important;height:100%!important;}
+
+/* ── NASA ── */
+.apod-img{width:100%;border-radius:8px;object-fit:cover;max-height:340px;border:1px solid var(--border);}
+.iss-coords{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;
+}
+.coord-card{
+  background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.2);
+  border-radius:8px;padding:14px;text-align:center;
+}
+.coord-label{font-size:.68rem;color:var(--neon);letter-spacing:2px;text-transform:uppercase;}
+.coord-value{font-family:'Orbitron',sans-serif;font-size:1.25rem;color:var(--neon);margin-top:4px;}
+
+/* ── NOAA ── */
+.alert-item{
+  padding:12px 14px;border-left:3px solid var(--gold);
+  background:rgba(255,215,0,.05);border-radius:0 6px 6px 0;margin-bottom:10px;
+}
+.alert-event{font-family:'Orbitron',sans-serif;font-size:.8rem;color:var(--gold);}
+.alert-area{font-size:.75rem;color:var(--text);margin-top:4px;}
+.alert-time{font-size:.68rem;color:var(--cyan-dim);margin-top:2px;}
+.alert-extreme{border-left-color:var(--red)!important;background:rgba(255,0,60,.06)!important;}
+.alert-extreme .alert-event{color:var(--red)!important;}
+
+/* ── SATELLITE CANVAS ── */
+#satellite-canvas,#starmap-canvas{
+  width:100%;border-radius:8px;border:1px solid var(--border);
+  background:#000308;display:block;
+}
+
+/* ── FORMULAS ── */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.formula-card{
+  background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.2);
+  border-radius:8px;padding:16px;
+}
+.formula-id{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--gold);letter-spacing:2px;margin-bottom:8px;}
+.formula-name{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--cyan);margin-bottom:8px;}
+.formula-expr{
+  font-family:'Share Tech Mono',monospace;font-size:.82rem;
+  color:var(--neon);background:rgba(0,0,0,.4);
+  padding:8px 12px;border-radius:4px;margin:8px 0;word-break:break-all;
+}
+.formula-desc{font-size:.78rem;color:var(--text);line-height:1.5;}
+
+/* ── API KEY MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:100;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:#040e1a;border:1px solid var(--cyan);border-radius:12px;
+  padding:30px;max-width:480px;width:90%;
+}
+.modal h3{font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:16px;letter-spacing:2px;}
+.modal p{font-size:.83rem;color:var(--text);margin-bottom:16px;line-height:1.55;}
+.modal input{
+  width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  color:var(--text);padding:10px 14px;border-radius:6px;font-family:'Share Tech Mono',monospace;
+  font-size:.85rem;outline:none;margin-bottom:12px;
+}
+.modal input:focus{border-color:var(--cyan);}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  border:none;color:#000;padding:9px 20px;border-radius:6px;
+  cursor:pointer;font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;
+}
+.btn-secondary{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text);padding:9px 20px;border-radius:6px;cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-size:.72rem;
+}
+
+/* ── LOADER ── */
+.loader{
+  display:flex;align-items:center;gap:10px;
+  color:var(--cyan-dim);font-size:.8rem;padding:20px 0;
+}
+.spinner{
+  width:18px;height:18px;border:2px solid rgba(0,245,255,.2);
+  border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:4px;}
+
+/* ── MISC ── */
+.tag{
+  display:inline-block;padding:2px 8px;border-radius:3px;
+  font-size:.65rem;font-family:'Share Tech Mono',monospace;
+}
+.tag-green{background:rgba(57,255,20,.12);color:var(--neon);border:1px solid rgba(57,255,20,.3);}
+.tag-cyan{background:rgba(0,245,255,.1);color:var(--cyan);border:1px solid rgba(0,245,255,.25);}
+.tag-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.3);}
+.tag-red{background:rgba(255,0,60,.1);color:var(--red);border:1px solid rgba(255,0,60,.3);}
+
+.no-data{color:var(--cyan-dim);font-size:.8rem;font-style:italic;padding:12px 0;}
+
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- MATRIX RAIN -->
+<canvas id="matrix-canvas"></canvas>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo-glyph">EVE</div>
+      <div class="logo-text">
+        <h1>EVE HEI ULTIMATE v4.0</h1>
+        <p>SOVEREIGN ARCHITECT 1010 · CEC-WAM HOLOGRAPHIC CORE</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-dot"><span class="dot"></span> LIVE SYSTEMS ONLINE</div>
+      <div class="refresh-counter">REFRESH: <span id="refresh-count">90</span>s</div>
+      <button class="api-key-btn" onclick="openApiModal()">⚙ API KEYS</button>
+    </div>
+  </header>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="brain">🧠 AI BRAIN</button>
+    <button class="tab-btn" data-tab="github">🐙 GITHUB LIVE</button>
+    <button class="tab-btn" data-tab="psi">💎 PSI TRACKER</button>
+    <button class="tab-btn" data-tab="nasa">🚀 NASA / ISS</button>
+    <button class="tab-btn" data-tab="noaa">🌦 NOAA</button>
+    <button class="tab-btn" data-tab="satellite">🛰 SATELLITE</button>
+    <button class="tab-btn" data-tab="starmap">🌌 STAR MAP</button>
+    <button class="tab-btn" data-tab="formulas">📐 FORMULAS</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: AI BRAIN
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content active" id="tab-brain">
+    <div class="grid-2">
+      <div class="card" style="grid-column:1/-1;">
+        <div class="card-title"><span class="icon">🧠</span> OBAMA KERNEL · EVE AI BRAIN — ANTHROPIC CLAUDE</div>
+
+        <div class="kernel-modes">
+          <button class="kernel-btn active" data-mode="QSLC_COMMAND">QSLC COMMAND</button>
+          <button class="kernel-btn" data-mode="PSI_ANALYST">PSI ANALYST</button>
+          <button class="kernel-btn" data-mode="CODE_SOVEREIGN">CODE SOVEREIGN</button>
+          <button class="kernel-btn" data-mode="BLOCKCHAIN_ORACLE">BLOCKCHAIN ORACLE</button>
+          <button class="kernel-btn" data-mode="CEC_WAM_CORE">CEC-WAM CORE</button>
+          <button class="kernel-btn" data-mode="TACTICAL_INTEL">TACTICAL INTEL</button>
+        </div>
+
+        <div class="chat-window" id="chat-window">
+          <div class="msg eve">
+            <span class="msg-role">▶ EVE HEI v4.0 — QSLC COMMAND MODE</span>
+            <span class="msg-text">Online, Sovereign Architect 1010. Obama Kernel activated. I have full context of the QSLC ecosystem — PSI Coin, ROG Ally X (E:\\ drive), GitHub handle <strong>whiteantwan58-tech</strong>, CEC-WAM blockchain contracts, and all Tactical Intel streams. How may I serve the mission today?</span>
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="Enter command for EVE HEI..." autocomplete="off"/>
+          <button class="chat-send" id="chat-send" onclick="sendMessage()">TRANSMIT</button>
+        </div>
+        <div style="margin-top:8px;font-size:.7rem;color:var(--cyan-dim);">
+          Model: <strong style="color:var(--purple)">claude-sonnet-4-20250514</strong> · 
+          Key: <span id="ai-key-status" style="color:var(--red)">NOT SET — click ⚙ API KEYS above</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: GITHUB LIVE
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-github">
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="stat"><span class="stat-label">FOLLOWERS</span><span class="stat-val" id="gh-followers">—</span></div>
+      <div class="stat"><span class="stat-label">PUBLIC REPOS</span><span class="stat-val" id="gh-repos">—</span></div>
+      <div class="stat"><span class="stat-label">TOTAL STARS</span><span class="stat-val" id="gh-stars">—</span></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">📦</span> REPOSITORIES</div>
+        <div id="gh-repo-list"><div class="loader"><div class="spinner"></div>Loading repos…</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🔀</span> RECENT COMMITS</div>
+        <div id="gh-commits"><div class="loader"><div class="spinner"></div>Loading commits…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: PSI TRACKER
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-psi">
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="stat">
+        <span class="stat-label">PSI / TRIDENTDAO PRICE</span>
+        <span class="stat-val" id="psi-price">—</span>
+        <span class="stat-sub" id="psi-change">24h change</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">MARKET CAP</span>
+        <span class="stat-val" id="psi-mcap">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">24H VOLUME</span>
+        <span class="stat-val" id="psi-vol">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📈</span> 30-DAY PRICE CHART</div>
+      <div class="chart-container">
+        <canvas id="psi-chart" class="chart-canvas"></canvas>
+      </div>
+      <div style="margin-top:10px;font-size:.72rem;color:var(--cyan-dim);">
+        Data: CoinGecko · Token: <span class="tag tag-cyan">tridentdao</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: NASA / ISS
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-nasa">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔭</span> NASA — ASTRONOMY PICTURE OF THE DAY</div>
+        <div id="apod-container"><div class="loader"><div class="spinner"></div>Loading APOD…</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🛸</span> ISS REAL-TIME LOCATION</div>
+        <div class="iss-coords">
+          <div class="coord-card">
+            <div class="coord-label">LATITUDE</div>
+            <div class="coord-value" id="iss-lat">—</div>
+          </div>
+          <div class="coord-card">
+            <div class="coord-label">LONGITUDE</div>
+            <div class="coord-value" id="iss-lon">—</div>
+          </div>
+          <div class="coord-card">
+            <div class="coord-label">ALTITUDE (km)</div>
+            <div class="coord-value" id="iss-alt">—</div>
+          </div>
+          <div class="coord-card">
+            <div class="coord-label">VELOCITY (km/h)</div>
+            <div class="coord-value" id="iss-vel">—</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:.7rem;color:var(--cyan-dim);">
+          Source: wheretheiss.at · Auto-updates every 5 seconds
+        </div>
+        <canvas id="iss-map" width="600" height="200" style="width:100%;margin-top:14px;border-radius:6px;border:1px solid var(--border);background:#000308;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: NOAA
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-noaa">
+    <div class="card">
+      <div class="card-title"><span class="icon">⚠️</span> NOAA — ACTIVE US WEATHER ALERTS</div>
+      <div id="noaa-alerts"><div class="loader"><div class="spinner"></div>Loading weather alerts…</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: SATELLITE
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-satellite">
+    <div class="card">
+      <div class="card-title"><span class="icon">🛰</span> ORBITAL TRACK VISUALIZER — ANIMATED</div>
+      <canvas id="satellite-canvas" height="500"></canvas>
+      <div style="margin-top:12px;font-size:.72rem;color:var(--cyan-dim);">
+        Simulated LEO / MEO / GEO orbital planes · Color-coded by altitude band
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: STAR MAP
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-starmap">
+    <div class="card">
+      <div class="card-title"><span class="icon">🌌</span> 3D STAR FIELD WITH CONSTELLATION OVERLAYS</div>
+      <canvas id="starmap-canvas" height="540"></canvas>
+      <div style="margin-top:12px;font-size:.72rem;color:var(--cyan-dim);">
+        Real-time rendered · 2,400+ stars · Major constellation overlays
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB: FORMULAS
+  ══════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-formulas">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title"><span class="icon">📐</span> CEC-WAM FORMULA VAULT — 12 SOVEREIGN EQUATIONS</div>
+      <div class="formula-grid" id="formula-grid"></div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="api-modal">
+  <div class="modal">
+    <h3>⚙ API CONFIGURATION</h3>
+    <p>Enter your Anthropic API key to enable the EVE AI Brain. Keys are stored in <code>sessionStorage</code> only and never transmitted to any third party beyond Anthropic's official API.</p>
+    <input type="password" id="modal-anthropic-key" placeholder="Anthropic API Key (sk-ant-…)"/>
+    <input type="text" id="modal-nasa-key" placeholder="NASA API Key (leave blank for DEMO_KEY)"/>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeApiModal()">CANCEL</button>
+      <button class="btn-primary" onclick="saveApiKeys()">SAVE KEYS</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   MATRIX RAIN
+══════════════════════════════════════════════════════════════ */
+(function(){
+  const c = document.getElementById('matrix-canvas');
+  const ctx = c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const chars='アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF█▓▒░';
+  const cols=Math.floor(window.innerWidth/16);
+  const drops=Array(cols).fill(1);
+  setInterval(()=>{
+    ctx.fillStyle='rgba(2,11,20,0.05)';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#00f5ff';ctx.font='14px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    });
+  },50);
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    const id='tab-'+btn.dataset.tab;
+    document.getElementById(id).classList.add('active');
+    // lazy init canvases on first open
+    if(btn.dataset.tab==='satellite')initSatellite();
+    if(btn.dataset.tab==='starmap')initStarmap();
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════
+   API KEY MODAL
+══════════════════════════════════════════════════════════════ */
+function openApiModal(){
+  document.getElementById('modal-anthropic-key').value=sessionStorage.getItem('anthropic_key')||'';
+  document.getElementById('modal-nasa-key').value=sessionStorage.getItem('nasa_key')||'';
+  document.getElementById('api-modal').classList.add('open');
+}
+function closeApiModal(){document.getElementById('api-modal').classList.remove('open');}
+function saveApiKeys(){
+  const aKey=document.getElementById('modal-anthropic-key').value.trim();
+  const nKey=document.getElementById('modal-nasa-key').value.trim();
+  if(aKey) sessionStorage.setItem('anthropic_key',aKey);
+  if(nKey) sessionStorage.setItem('nasa_key',nKey);
+  updateKeyStatus();
+  closeApiModal();
+  loadNASA(); // reload with new NASA key if provided
+}
+function updateKeyStatus(){
+  const k=sessionStorage.getItem('anthropic_key');
+  const el=document.getElementById('ai-key-status');
+  if(k){el.textContent='KEY SET ✓';el.style.color='var(--neon)';}
+  else{el.textContent='NOT SET — click ⚙ API KEYS above';el.style.color='var(--red)';}
+}
+updateKeyStatus();
+
+/* ══════════════════════════════════════════════════════════════
+   AUTO-REFRESH COUNTDOWN
+══════════════════════════════════════════════════════════════ */
+let refreshSecs=90;
+const refreshEl=document.getElementById('refresh-count');
+setInterval(()=>{
+  refreshSecs--;
+  if(refreshSecs<=0){
+    refreshSecs=90;
+    loadGitHub();loadPSI();loadNASA();loadISSOnce();loadNOAA();
+  }
+  refreshEl.textContent=refreshSecs;
+},1000);
+
+/* ══════════════════════════════════════════════════════════════
+   KERNEL MODES
+══════════════════════════════════════════════════════════════ */
+let activeKernel='QSLC_COMMAND';
+const kernelPrompts={
+  QSLC_COMMAND:`You are EVE HEI v4.0, the AI core of the Quantum Sovereign Logistics Corp (QSLC). You operate in QSLC COMMAND MODE. You assist Sovereign Architect 1010 (Twan) with logistics operations, freight strategy, route optimization, and executive command decisions for the CEC-WAM network. Keep responses concise, tactical, and mission-focused.`,
+  PSI_ANALYST:`You are EVE HEI v4.0 in PSI ANALYST MODE. You analyze PSI Coin (an ERC-20 utility & governance token on Ethereum/Polygon/L2) — tokenomics, staking tiers (Bronze 10k/Silver 50k/Gold 250k/Quantum 1M), market dynamics, DeFi integrations with TridentDAO, and on-chain data for the QSLC ecosystem. Be precise and data-driven.`,
+  CODE_SOVEREIGN:`You are EVE HEI v4.0 in CODE SOVEREIGN MODE. You are a senior full-stack and blockchain engineer specializing in Solidity (0.8.20), OpenZeppelin 5, Hardhat 3, Python/Streamlit, and the QSLC GitHub repo (github.com/whiteantwan58-tech/CEC-WAM-HOT-CORE). Provide working, production-grade code. ROG Ally X with E:\\ drive is the dev machine.`,
+  BLOCKCHAIN_ORACLE:`You are EVE HEI v4.0 in BLOCKCHAIN ORACLE MODE. You have deep knowledge of PSICoin.sol and PSICoinStaking.sol (Solidity 0.8.20, OpenZeppelin 5), Ethereum/Polygon/L2 ecosystems, gas optimization, ERC-20 compliance, DeFi protocols, and smart contract security. Architect 1010 controls the deploy keys.`,
+  CEC_WAM_CORE:`You are EVE HEI v4.0 in CEC-WAM CORE MODE. CEC-WAM is the Carrier/Entity/Contractor — Worldwide Asset Management system. Assist with carrier onboarding, asset tracking, logistics ledger (Google Sheets integration), freight discounts, and the full CEC-WAM Master Ledger operations for Sovereign Architect 1010.`,
+  TACTICAL_INTEL:`You are EVE HEI v4.0 in TACTICAL INTEL MODE. You provide strategic intelligence, competitive analysis, market surveillance, tech trends, and sovereign architecture planning for the QSLC mission. Think like a high-level analyst with access to all public intelligence streams. Be brief, sharp, and impactful.`
+};
+
+document.querySelectorAll('.kernel-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.kernel-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeKernel=btn.dataset.mode;
+    const modeName=btn.textContent;
+    appendMsg('eve',`Kernel switched to <strong>${modeName}</strong>. All subsequent commands will be processed in this context.`);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════
+   AI CHAT
+══════════════════════════════════════════════════════════════ */
+let chatHistory=[];
+
+function appendMsg(role,html){
+  const win=document.getElementById('chat-window');
+  const div=document.createElement('div');
+  div.className='msg '+(role==='eve'?'eve':'user');
+  div.innerHTML=`<span class="msg-role">${role==='eve'?'▶ EVE HEI v4.0':'◀ ARCHITECT 1010'}</span><span class="msg-text">${html}</span>`;
+  win.appendChild(div);
+  win.scrollTop=win.scrollHeight;
+}
+
+function appendThinking(){
+  const win=document.getElementById('chat-window');
+  const div=document.createElement('div');
+  div.className='msg eve';div.id='thinking-msg';
+  div.innerHTML='<span class="msg-role">▶ EVE HEI v4.0</span><span class="msg-text thinking">Processing via Obama Kernel…</span>';
+  win.appendChild(div);win.scrollTop=win.scrollHeight;
+}
+function removeThinking(){const t=document.getElementById('thinking-msg');if(t)t.remove();}
+
+async function sendMessage(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const key=sessionStorage.getItem('anthropic_key');
+  if(!key){appendMsg('eve','⚠ Anthropic API key not set. Click <strong>⚙ API KEYS</strong> in the header to configure.');return;}
+
+  input.value='';
+  document.getElementById('chat-send').disabled=true;
+  appendMsg('user',text);
+  chatHistory.push({role:'user',content:text});
+
+  appendThinking();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1024,
+        system:kernelPrompts[activeKernel],
+        messages:chatHistory.slice(-12)
+      })
+    });
+    removeThinking();
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      appendMsg('eve',`⚠ API Error ${res.status}: ${err.error?.message||'Check your API key and try again.'}`);
+    } else {
+      const data=await res.json();
+      const block=Array.isArray(data.content)&&data.content.length>0?data.content[0]:null;
+      const reply=(block&&typeof block.text==='string'&&block.text)||'[No response]';
+      chatHistory.push({role:'assistant',content:reply});
+      appendMsg('eve',reply.replace(/\n/g,'<br>'));
+    }
+  }catch(e){
+    removeThinking();
+    appendMsg('eve',`⚠ Network error: ${e.message}. Ensure your browser allows cross-origin requests to Anthropic.`);
+  }
+  document.getElementById('chat-send').disabled=false;
+}
+
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
+
+/* ══════════════════════════════════════════════════════════════
+   GITHUB LIVE
+══════════════════════════════════════════════════════════════ */
+const GH_USER='whiteantwan58-tech';
+const LANG_COLORS={
+  JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',
+  Solidity:'#AA6746',HTML:'#e34c26',CSS:'#563d7c',Shell:'#89e051',
+  Rust:'#dea584',Go:'#00ADD8',default:'#8b949e'
+};
+
+async function loadGitHub(){
+  try{
+    // User profile
+    const u=await fetch(`https://api.github.com/users/${GH_USER}`).then(r=>r.json());
+    document.getElementById('gh-followers').textContent=u.followers?.toLocaleString()||'—';
+    document.getElementById('gh-repos').textContent=u.public_repos?.toLocaleString()||'—';
+
+    // Repos
+    const repos=await fetch(`https://api.github.com/users/${GH_USER}/repos?sort=updated&per_page=20`).then(r=>r.json());
+    if(!Array.isArray(repos))throw new Error('Invalid API response — check rate limits or GitHub availability');
+    const totalStars=repos.reduce((s,r)=>s+(r.stargazers_count||0),0);
+    document.getElementById('gh-stars').textContent=totalStars.toLocaleString();
+
+    const listEl=document.getElementById('gh-repo-list');
+    listEl.innerHTML='';
+    repos.slice(0,10).forEach(r=>{
+      const lc=LANG_COLORS[r.language]||LANG_COLORS.default;
+      const div=document.createElement('div');div.className='repo-item';
+      div.innerHTML=`<div>
+        <div class="repo-name"><a href="${r.html_url}" target="_blank" rel="noopener noreferrer">⬢ ${r.name}</a></div>
+        <div class="repo-desc">${r.description||'No description'}</div>
+      </div>
+      <div class="repo-meta">
+        ${r.language?`<span style="display:flex;align-items:center;gap:4px;"><span class="lang-dot" style="background:${lc}"></span>${r.language}</span>`:''}
+        ${r.stargazers_count?`<span>⭐ ${r.stargazers_count}</span>`:''}
+        ${r.open_issues_count?`<span style="color:var(--gold)">⚠ ${r.open_issues_count}</span>`:''}
+      </div>`;
+      listEl.appendChild(div);
+    });
+
+    // Recent commits from main repo
+    const commits=await fetch(`https://api.github.com/repos/${GH_USER}/CEC-WAM-HOT-CORE/commits?per_page=8`).then(r=>r.json()).catch(()=>[]);
+    const commitEl=document.getElementById('gh-commits');
+    commitEl.innerHTML='';
+    if(Array.isArray(commits)&&commits.length){
+      commits.forEach(c=>{
+        const div=document.createElement('div');div.className='commit-item';
+        const sha=c.sha?.slice(0,7)||'';
+        const msg=(c.commit?.message||'').split('\n')[0];
+        const author=c.commit?.author?.name||'';
+        const date=c.commit?.author?.date?new Date(c.commit.author.date).toLocaleDateString():'';
+        div.innerHTML=`<div class="commit-sha">${sha}</div>
+          <div class="commit-msg">${escHtml(msg)}</div>
+          <div class="commit-meta">${escHtml(author)} · ${date}</div>`;
+        commitEl.appendChild(div);
+      });
+    } else {
+      commitEl.innerHTML='<div class="no-data">No commits found or rate limited.</div>';
+    }
+  }catch(e){
+    document.getElementById('gh-repo-list').innerHTML=`<div class="no-data">GitHub API error: ${e.message}</div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PSI / TRIDENTDAO TRACKER  (CoinGecko)
+══════════════════════════════════════════════════════════════ */
+let psiChart=null;
+
+async function loadPSI(){
+  try{
+    // Price + market data
+    const psiRes=await fetch('https://api.coingecko.com/api/v3/coins/tridentdao?localization=false&tickers=false&community_data=false&developer_data=false');
+    if(!psiRes.ok){throw new Error(`CoinGecko ${psiRes.status}`);}
+    const data=await psiRes.json();
+    if(data.error){throw new Error(typeof data.error==='string'?data.error:'CoinGecko API error');}
+    const usd=data.market_data?.current_price?.usd;
+    const ch24=data.market_data?.price_change_percentage_24h;
+    const mcap=data.market_data?.market_cap?.usd;
+    const vol=data.market_data?.total_volume?.usd;
+    document.getElementById('psi-price').textContent=usd!=null?`$${usd.toFixed(6)}`:'N/A';
+    const chEl=document.getElementById('psi-change');
+    if(ch24!=null){
+      chEl.textContent=`24h: ${ch24>=0?'+':''}${ch24.toFixed(2)}%`;
+      chEl.className='stat-sub '+(ch24>=0?'positive':'negative');
+    }
+    document.getElementById('psi-mcap').textContent=mcap!=null?fmtBig(mcap):'N/A';
+    document.getElementById('psi-vol').textContent=vol!=null?fmtBig(vol):'N/A';
+  }catch(e){
+    document.getElementById('psi-price').textContent='N/A';
+    console.warn('PSI price error:',e.message);
+  }
+
+  // 30-day chart
+  try{
+    const chart=await fetch('https://api.coingecko.com/api/v3/coins/tridentdao/market_chart?vs_currency=usd&days=30').then(r=>r.json());
+    const prices=chart.prices||[];
+    const labels=prices.map(p=>new Date(p[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    const vals=prices.map(p=>p[1]);
+    const ctx=document.getElementById('psi-chart').getContext('2d');
+    const grad=ctx.createLinearGradient(0,0,0,180);
+    grad.addColorStop(0,'rgba(0,245,255,0.35)');
+    grad.addColorStop(1,'rgba(0,245,255,0)');
+    if(psiChart)psiChart.destroy();
+    psiChart=new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[{label:'PSI USD',data:vals,borderColor:'#00f5ff',borderWidth:2,backgroundColor:grad,pointRadius:0,tension:0.4,fill:true}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(4,14,26,0.95)',borderColor:'rgba(0,245,255,0.3)',borderWidth:1,titleColor:'#00f5ff',bodyColor:'#c8f0f5'}},
+        scales:{
+          x:{ticks:{color:'#00b8c4',maxTicksLimit:8,font:{size:10}},grid:{color:'rgba(0,245,255,0.06)'}},
+          y:{ticks:{color:'#00b8c4',font:{size:10},callback:v=>'$'+v.toFixed(4)},grid:{color:'rgba(0,245,255,0.06)'}}
+        }
+      }
+    });
+  }catch(e){console.warn('PSI chart error:',e.message);}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NASA APOD
+══════════════════════════════════════════════════════════════ */
+async function loadNASA(){
+  const key=sessionStorage.getItem('nasa_key')||'DEMO_KEY';
+  try{
+    const d=await fetch(`https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(key)}`).then(r=>r.json());
+    const cont=document.getElementById('apod-container');
+    if(d.error){cont.innerHTML=`<div class="no-data">NASA API: ${d.error.message}</div>`;return;}
+    const isVideo=d.media_type==='video';
+    cont.innerHTML=`
+      ${isVideo
+        ?`<iframe src="${escHtml(d.url)}" style="width:100%;height:280px;border-radius:8px;border:1px solid var(--border);" allowfullscreen></iframe>`
+        :`<img class="apod-img" src="${escHtml(d.hdurl||d.url)}" alt="${escHtml(d.title)}" loading="lazy"/>`}
+      <div style="margin-top:12px;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--cyan);margin-bottom:6px;">${escHtml(d.title)}</div>
+        <div style="font-size:.7rem;color:var(--gold);margin-bottom:8px;">${escHtml(d.date)}${d.copyright?` · © ${escHtml(d.copyright)}`:''}</div>
+        <div style="font-size:.78rem;color:var(--text);line-height:1.55;">${escHtml((d.explanation||'').slice(0,400))}${(d.explanation||'').length>400?'…':''}</div>
+      </div>`;
+  }catch(e){document.getElementById('apod-container').innerHTML=`<div class="no-data">NASA API error: ${e.message}</div>`;}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ISS REAL-TIME
+══════════════════════════════════════════════════════════════ */
+const issTrack=[];
+async function loadISSOnce(){
+  try{
+    const d=await fetch('https://api.wheretheiss.at/v1/satellites/25544').then(r=>r.json());
+    document.getElementById('iss-lat').textContent=d.latitude?.toFixed(4)||'—';
+    document.getElementById('iss-lon').textContent=d.longitude?.toFixed(4)||'—';
+    document.getElementById('iss-alt').textContent=d.altitude?.toFixed(1)||'—';
+    document.getElementById('iss-vel').textContent=d.velocity?Math.round(d.velocity*3.6).toLocaleString():'—';
+    issTrack.push({lat:d.latitude,lon:d.longitude});
+    if(issTrack.length>60)issTrack.shift();
+    drawISSMap(d.latitude,d.longitude);
+  }catch(e){console.warn('ISS error:',e.message);}
+}
+
+setInterval(loadISSOnce,5000);
+
+function drawISSMap(lat,lon){
+  const c=document.getElementById('iss-map');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.fillStyle='#000308';ctx.fillRect(0,0,W,H);
+  // Grid — batch all vertical lines into one path, all horizontal into another
+  ctx.strokeStyle='rgba(0,245,255,0.08)';ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let x=0;x<=W;x+=W/12){ctx.moveTo(x,0);ctx.lineTo(x,H);}
+  ctx.stroke();
+  ctx.beginPath();
+  for(let y=0;y<=H;y+=H/6){ctx.moveTo(0,y);ctx.lineTo(W,y);}
+  ctx.stroke();
+  // Equator
+  ctx.strokeStyle='rgba(0,245,255,0.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+  // Track
+  if(issTrack.length>1){
+    ctx.strokeStyle='rgba(0,245,255,0.5)';ctx.lineWidth=1.5;ctx.beginPath();
+    issTrack.forEach((p,i)=>{
+      const x=(p.lon+180)/360*W;const y=(90-p.lat)/180*H;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    });ctx.stroke();
+  }
+  // ISS dot
+  const x=(lon+180)/360*W;const y=(90-lat)/180*H;
+  ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+  ctx.fillStyle='var(--neon)';ctx.shadowColor='var(--neon)';ctx.shadowBlur=14;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='var(--neon)';ctx.font='9px Share Tech Mono';
+  ctx.fillText('ISS',x+8,y-5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NOAA WEATHER ALERTS
+══════════════════════════════════════════════════════════════ */
+async function loadNOAA(){
+  try{
+    const d=await fetch('https://api.weather.gov/alerts/active?status=actual&limit=20',{headers:{Accept:'application/geo+json','User-Agent':'EVE-HEI-v4/1.0 (CEC-WAM)'}}).then(r=>r.json());
+    const el=document.getElementById('noaa-alerts');
+    const features=d.features||[];
+    if(!features.length){el.innerHTML='<div class="no-data">✓ No active weather alerts at this time.</div>';return;}
+    el.innerHTML='';
+    features.forEach(f=>{
+      const p=f.properties||{};
+      const sev=(p.severity||'').toLowerCase();
+      const div=document.createElement('div');
+      div.className='alert-item'+((sev==='extreme'||sev==='severe')?' alert-extreme':'');
+      const onset=p.onset?new Date(p.onset).toLocaleString():'';
+      const expires=p.expires?new Date(p.expires).toLocaleString():'';
+      div.innerHTML=`<div class="alert-event">${escHtml(p.event||'ALERT')} <span class="tag ${sev==='extreme'||sev==='severe'?'tag-red':'tag-gold'}">${escHtml(p.severity||'')}</span></div>
+        <div class="alert-area">${escHtml((p.areaDesc||'').slice(0,120))}</div>
+        <div class="alert-time">Onset: ${escHtml(onset)} · Expires: ${escHtml(expires)}</div>`;
+      el.appendChild(div);
+    });
+  }catch(e){document.getElementById('noaa-alerts').innerHTML=`<div class="no-data">NOAA API error: ${e.message}</div>`;}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SATELLITE CANVAS
+══════════════════════════════════════════════════════════════ */
+let satInit=false;
+function initSatellite(){
+  if(satInit)return;satInit=true;
+  const c=document.getElementById('satellite-canvas');
+  c.width=c.offsetWidth||1200;c.height=500;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height,CX=W/2,CY=H/2;
+
+  // Orbital bands: [color, a, b, tilt, speed, label, count]
+  const orbits=[
+    ['#39ff14',CX*0.28,CY*0.22,0.15,0.008,'LEO',8],
+    ['#00f5ff',CX*0.42,CY*0.32,0.30,0.005,'MEO',5],
+    ['#ffd700',CX*0.62,CY*0.46,0.0,0.003,'GEO',4],
+    ['#bf5fff',CX*0.78,CY*0.60,-0.25,0.0015,'HEO',3],
+  ];
+
+  const sats=orbits.flatMap(([col,a,b,tilt,sp,lbl,cnt])=>
+    Array.from({length:cnt},(_,i)=>({col,a,b,tilt,sp,lbl,angle:i*(Math.PI*2/cnt),phase:Math.random()*Math.PI*2}))
+  );
+
+  function drawEarth(){
+    const g=ctx.createRadialGradient(CX,CY,0,CX,CY,58);
+    g.addColorStop(0,'#0a2a4a');g.addColorStop(0.6,'#051522');g.addColorStop(1,'#020b14');
+    ctx.beginPath();ctx.arc(CX,CY,58,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(0,245,255,0.5)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(0,245,255,0.15)';ctx.font='10px Share Tech Mono';
+    ctx.textAlign='center';ctx.fillText('EARTH',CX,CY+4);
+    ctx.textAlign='left';
+  }
+
+  function getSatPos(s,t){
+    const a=s.angle+t*s.sp+s.phase;
+    const xr=s.a*Math.cos(a);
+    const yr=s.b*Math.sin(a);
+    const x=CX+xr*Math.cos(s.tilt)-yr*Math.sin(s.tilt);
+    const y=CY+xr*Math.sin(s.tilt)+yr*Math.cos(s.tilt);
+    return{x,y};
+  }
+
+  let t=0;
+  function draw(){
+    ctx.fillStyle='rgba(0,3,8,0.25)';ctx.fillRect(0,0,W,H);
+    // Grid dots
+    ctx.fillStyle='rgba(0,245,255,0.06)';
+    for(let i=0;i<W;i+=32)for(let j=0;j<H;j+=32){ctx.beginPath();ctx.arc(i,j,1,0,Math.PI*2);ctx.fill();}
+    // Orbits
+    orbits.forEach(([col,a,b,tilt])=>{
+      ctx.save();ctx.translate(CX,CY);ctx.rotate(tilt);
+      ctx.beginPath();ctx.ellipse(0,0,a,b,0,0,Math.PI*2);
+      ctx.strokeStyle=col+'44';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+    });
+    drawEarth();
+    // Satellites
+    sats.forEach(s=>{
+      const {x,y}=getSatPos(s,t);
+      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle=s.col;ctx.shadowColor=s.col;ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+    });
+    // Legend
+    orbits.forEach(([col,,,,lbl],i)=>{
+      ctx.fillStyle=col;ctx.beginPath();ctx.arc(16,16+i*20,5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(200,240,245,0.7)';ctx.font='11px Share Tech Mono';ctx.fillText(lbl,26,20+i*20);
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAR MAP CANVAS
+══════════════════════════════════════════════════════════════ */
+let starInit=false;
+function initStarmap(){
+  if(starInit)return;starInit=true;
+  const c=document.getElementById('starmap-canvas');
+  c.width=c.offsetWidth||1200;c.height=540;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+
+  // Generate stars with 3D-ish depth
+  const stars=Array.from({length:2400},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    z:Math.random()*3+0.2,   // depth 0.2–3.2
+    col:randStarColor(),
+    twinkle:Math.random()*Math.PI*2
+  }));
+
+  function randStarColor(){
+    const r=Math.random();
+    if(r<0.5)return'#ffffff';
+    if(r<0.7)return'#aaddff';
+    if(r<0.85)return'#ffeeaa';
+    return'#ffaaaa';
+  }
+
+  // Constellation data [name, [x1%,y1%,x2%,y2%, ...pairs]]
+  const constellations=[
+    {name:'ORION',segs:[[15,25,18,32],[18,32,22,38],[22,38,26,34],[26,34,30,38],[30,38,34,32],[34,32,37,25],[20,28,26,34],[32,28,26,34]]},
+    {name:'URSA MAJOR',segs:[[55,15,60,18],[60,18,65,17],[65,17,70,20],[70,20,73,26],[73,26,68,30],[68,30,62,28],[62,28,55,15],[70,20,75,18],[75,18,80,22]]},
+    {name:'CASSIOPEIA',segs:[[10,60,18,55],[18,55,26,60],[26,60,34,55],[34,55,42,60]]},
+    {name:'SCORPIUS',segs:[[72,55,75,62],[75,62,78,68],[78,68,76,74],[76,74,72,78],[72,78,70,82],[70,82,72,86],[72,86,75,88],[75,88,78,85]]},
+    {name:'CYGNUS',segs:[[48,42,52,36],[52,36,56,42],[56,42,60,48],[60,48,64,42],[64,42,68,36],[52,36,52,48],[52,48,52,58]]},
+  ];
+
+  let t=0;
+  function draw(){
+    ctx.fillStyle='#000308';ctx.fillRect(0,0,W,H);
+    // Subtle galactic band
+    const band=ctx.createLinearGradient(0,H*0.35,W,H*0.65);
+    band.addColorStop(0,'rgba(0,0,0,0)');
+    band.addColorStop(0.5,'rgba(30,10,50,0.12)');
+    band.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=band;ctx.fillRect(0,0,W,H);
+
+    // Stars
+    stars.forEach(s=>{
+      s.twinkle+=0.015;
+      const br=0.5+0.5*Math.sin(s.twinkle);
+      const r=s.z*br;
+      ctx.beginPath();ctx.arc(s.x,s.y,r,0,Math.PI*2);
+      const alpha=0.3+0.7*br;
+      if(s.col==='#aaddff')ctx.fillStyle=`rgba(170,220,255,${alpha})`;
+      else if(s.col==='#ffeeaa')ctx.fillStyle=`rgba(255,238,170,${alpha})`;
+      else if(s.col==='#ffaaaa')ctx.fillStyle=`rgba(255,170,170,${alpha})`;
+      else ctx.fillStyle=`rgba(255,255,255,${alpha})`;
+      ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=s.z>2?4:2;
+      ctx.fill();ctx.shadowBlur=0;
+    });
+
+    // Constellations
+    constellations.forEach(con=>{
+      ctx.strokeStyle='rgba(0,245,255,0.35)';ctx.lineWidth=0.8;
+      con.segs.forEach(([x1p,y1p,x2p,y2p])=>{
+        ctx.beginPath();
+        ctx.moveTo(x1p/100*W,y1p/100*H);
+        ctx.lineTo(x2p/100*W,y2p/100*H);
+        ctx.stroke();
+      });
+      // Label at first node
+      const [x1p,y1p]=con.segs[0];
+      ctx.fillStyle='rgba(0,245,255,0.6)';ctx.font='10px Orbitron';
+      ctx.fillText(con.name,x1p/100*W,y1p/100*H-8);
+    });
+
+    // Slow drift (parallax)
+    stars.forEach(s=>{s.x-=s.z*0.02;if(s.x<0)s.x=W;});
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CEC-WAM FORMULA VAULT
+══════════════════════════════════════════════════════════════ */
+const FORMULAS=[
+  {id:'CEC-F001',name:'FREIGHT RATE INDEX',expr:'FRI = (ΣBase_Rate × Load_Factor) / Network_Density',desc:'Determines the real-time freight rate index across all QSLC carrier lanes adjusted for network density and current load factor.'},
+  {id:'CEC-F002',name:'PSI STAKING YIELD',expr:'Y = (Staked_PSI / Total_Supply) × APR × Tier_Multiplier',desc:'Calculates staking yield for PSI Coin holders based on staked proportion, annual rate, and tier multiplier (Bronze→Quantum).'},
+  {id:'CEC-F003',name:'QUANTUM DISCOUNT MATRIX',expr:'D = 1 − exp(−λ × Tier_PSI / 1,000,000)',desc:'Exponential discount curve ensuring Quantum tier (1M PSI) approaches but never exceeds the 35% maximum freight discount.'},
+  {id:'CEC-F004',name:'WAM ASSET VELOCITY',expr:'AV = (Assets_Moved × Distance_km) / (Time_hrs × Cost_USD)',desc:'Worldwide Asset Management velocity metric: ton-kilometers per hour per dollar, the core CEC-WAM efficiency KPI.'},
+  {id:'CEC-F005',name:'EVE CONFIDENCE SCORE',expr:'ECS = (Accuracy × 0.4) + (Latency⁻¹ × 0.3) + (Context_Depth × 0.3)',desc:'EVE HEI AI confidence scoring formula combining response accuracy, inverse latency, and sovereign context depth.'},
+  {id:'CEC-F006',name:'OBAMA KERNEL ENTROPY',expr:'H(K) = −Σ p(mode_i) × log₂ p(mode_i)',desc:'Information entropy of the Obama Kernel across all 6 active modes, measuring cognitive distribution breadth.'},
+  {id:'CEC-F007',name:'BLOCKCHAIN SETTLEMENT',expr:'S_t = TxFee × GasPrice + (Value × Bridge_Rate)',desc:'On-chain settlement cost for PSI Coin transactions factoring L1/L2 gas prices and cross-chain bridge rates.'},
+  {id:'CEC-F008',name:'CARRIER ONBOARD SCORE',expr:'COS = (Compliance × 0.35) + (Capacity × 0.30) + (History × 0.35)',desc:'CEC-WAM carrier onboarding evaluation score weighting regulatory compliance, freight capacity, and track record.'},
+  {id:'CEC-F009',name:'ISS ORBITAL PERIOD',expr:'T = 2π × √(a³ / GM_Earth)',desc:'Keplerian orbital period formula for ISS and tracked satellites, where a is semi-major axis and GM is Earth\'s gravitational parameter.'},
+  {id:'CEC-F010',name:'ROG ALLY X COMPUTE INDEX',expr:'CI = (TDP_W × IPC_Gen × Clock_GHz) / Thermal_Throttle_Factor',desc:'Compute efficiency index for the ROG Ally X (E:\\ dev node), balancing thermal performance against peak compute throughput.'},
+  {id:'CEC-F011',name:'SOVEREIGN NET WORTH DELTA',expr:'ΔSNW = ΔPSI_Value + ΔFreight_Revenue + ΔStaking_Yield − OpEx',desc:'Net worth delta for Sovereign Architect 1010, aggregating PSI portfolio, freight revenue, staking yields, minus operational expenses.'},
+  {id:'CEC-F012',name:'HOLOGRAPHIC CORE FLUX',expr:'Φ_HEI = ∫₀ᵀ EVE(t) · Sovereign_Intent(t) dt',desc:'EVE HEI integration flux: the time-integral of AI output aligned with Sovereign Architect intent — the core CEC-WAM mission coherence metric.'},
+];
+
+(function renderFormulas(){
+  const grid=document.getElementById('formula-grid');
+  FORMULAS.forEach(f=>{
+    const div=document.createElement('div');div.className='formula-card';
+    div.innerHTML=`<div class="formula-id">${escHtml(f.id)}</div>
+      <div class="formula-name">${escHtml(f.name)}</div>
+      <div class="formula-expr">${escHtml(f.expr)}</div>
+      <div class="formula-desc">${escHtml(f.desc)}</div>`;
+    grid.appendChild(div);
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   UTILITY
+══════════════════════════════════════════════════════════════ */
+function escHtml(s){
+  if(s==null)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+function fmtBig(n){
+  if(n==null)return'N/A';
+  if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return'$'+(n/1e3).toFixed(1)+'K';
+  return'$'+n.toFixed(2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INIT — load all data
+══════════════════════════════════════════════════════════════ */
+loadGitHub();
+loadPSI();
+loadNASA();
+loadISSOnce();
+loadNOAA();
+</script>
+</body>
+</html>
