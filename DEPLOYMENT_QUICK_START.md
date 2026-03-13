@@ -84,13 +84,14 @@ Covers:
 - Clearing multiple sessions
 - Configuring data sources
 
-### For Static HTML Deployment (Vercel/GitHub Pages)
-→ See: **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)**
+### For Static HTML Deployment (GitHub Pages / Self-Hosted)
+The `deploy-dashboard.yml` GitHub Actions workflow automatically publishes `index.html`
+to GitHub Pages on every push to `main`. For custom hosting, serve the repo root on
+any static-file server (nginx, Caddy, Netlify, etc.).
 
 Covers:
 - Static site deployment
 - GitHub Pages setup
-- Vercel deployment
 - Custom domains
 
 ---

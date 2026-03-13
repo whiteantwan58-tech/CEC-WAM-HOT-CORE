@@ -61,8 +61,10 @@ CEC-WAM-HOT-CORE/
 │   │   └── deploy.js               # Deployment script
 │   └── test/
 │       └── PSICoin.test.js         # Full contract test suite
-├── index.html                      # PSI Coin public-facing dashboard (PWA)
+├── index.html                      # PSI Coin public-facing dashboard (PWA + WebAuthn)
 ├── dashboard.html                  # Standalone HTML logistics dashboard
+├── js/
+│   └── encrypt.js                  # WebCrypto AES-GCM local encryption utility
 ├── app.py                          # Streamlit live-data app (EVE HEI core)
 ├── streamlit_app.py                # Alternate Streamlit entry point
 ├── eve_voice_agent.py              # EVE AI voice agent
@@ -102,6 +104,58 @@ The PSI Coin sovereign dashboard is available at:
 🌐 **[https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/](https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/)**
 
 Open `index.html` locally for a zero-dependency standalone experience.
+
+---
+
+## 🔑 Environment Variables
+
+All sensitive credentials are managed via environment variables — **never committed to the repo**.
+
+### Local Development
+
+```bash
+# 1. Copy the template
+cp .env.example .env
+
+# 2. Open .env and fill in your actual values
+#    (NEVER commit the .env file — it is already in .gitignore)
+```
+
+Key variables (see `.env.example` for the full list):
+
+| Variable | Description |
+|---|---|
+| `OPENAI_API_KEY` | OpenAI API key (from platform.openai.com) |
+| `ELEVENLABS_API_KEY` | ElevenLabs voice synthesis key |
+| `GROQ_API_KEY` | Groq inference key |
+| `GOOGLE_SHEETS_URL` | Published CSV URL for live logistics data |
+| `EVE_SYSTEM_CODE` | EVE agent identity code |
+
+### Cloud / CI Secrets
+
+For Streamlit Cloud, GitHub Actions, or any other host, set each variable in the
+host's **Secrets / Environment Variables** settings panel — never in a file that
+gets committed.
+
+- **Streamlit Cloud:** App Settings → Secrets (uses TOML syntax: `KEY = "value"`, not `.env` format)
+- **GitHub Actions:** Repository Settings → Secrets and Variables → Actions
+- **Railway / Render / Fly.io:** Dashboard → Environment → Add Variable
+
+### Optional: Local Encryption Utility
+
+`js/encrypt.js` provides an AES-GCM 256-bit helper (WebCrypto, no dependencies)
+for encrypting sensitive strings before storing them in `localStorage`/IndexedDB.
+**Keys are never stored** — you supply the passphrase on each call.
+
+```javascript
+// Encrypt a value:
+const { ciphertext, iv, salt } = await CecCrypto.encrypt('my-api-key', 'my-passphrase');
+
+// Decrypt later:
+const plaintext = await CecCrypto.decrypt(ciphertext, iv, salt, 'my-passphrase');
+```
+
+> ⚠️ Requires a **secure context** (HTTPS or `localhost`). See `js/encrypt.js` for full docs.
 
 ---
 
