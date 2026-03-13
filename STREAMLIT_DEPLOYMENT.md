@@ -187,7 +187,7 @@ This repository supports multiple deployment methods:
 - **URL:** `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
 - **Entry:** `index.html`
 - **Best for:** Fast, static HTML dashboard
-- **Guide:** See the GitHub Pages deployment workflow in `.github/workflows/deploy-dashboard.yml`
+- **Guide:** [`.github/workflows/deploy-dashboard.yml`](.github/workflows/deploy-dashboard.yml) — see also [GitHub Pages documentation](https://docs.github.com/en/pages)
 
 **Note:** Choose ONE primary deployment method to avoid confusion.
 

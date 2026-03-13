@@ -24,10 +24,10 @@ commits = [
   # containing the ElevenLabs API key. Key has been rotated and redacted.
   "656cd548cb3d14fb2caf1ce3e70350abce240445",
   # 58f4a80: .gitignore was (incorrectly) replaced with env variable content including
-  # a VERCEL_API_KEY and a template private-key placeholder. Key has been rotated.
+  # an API key and a template private-key placeholder. The key has been rotated.
   "58f4a80f5602a2579d5cdff32a23e344e62b9801",
-  # 52a7c55: .env.example contained a VERCEL_API_KEY and template private-key placeholder.
-  # The Vercel key has been rotated and removed from the codebase.
+  # 52a7c55: .env.example contained an API key and template private-key placeholder.
+  # The key has been rotated and removed from the codebase.
   "52a7c55e63a83c39de0951d3e467e9d732870580",
   # 918182c: .env.example update that still contained the template private-key placeholder
   # (YOUR_PRIVATE_KEY_HERE). This is a documentation placeholder, not a real credential.

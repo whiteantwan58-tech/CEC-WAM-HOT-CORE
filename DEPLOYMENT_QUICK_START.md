@@ -84,7 +84,9 @@ Covers:
 - Configuring data sources
 
 ### For Static HTML Deployment (GitHub Pages)
-→ See: `.github/workflows/deploy-dashboard.yml`
+→ See: [`.github/workflows/deploy-dashboard.yml`](.github/workflows/deploy-dashboard.yml)
+
+For setup instructions, see the [GitHub Pages documentation](https://docs.github.com/en/pages).
 
 Covers:
 - Static site deployment
