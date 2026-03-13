@@ -1,6 +1,6 @@
 """
 EVE Voice AI - Voice Synthesis API Endpoint
-Serverless function for Vercel deployment
+Serverless HTTP handler for voice synthesis
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -19,7 +19,7 @@ except ImportError:
 
 
 class handler(BaseHTTPRequestHandler):
-    """Vercel serverless function handler for voice synthesis"""
+    """HTTP request handler for voice synthesis"""
     
     def _set_cors_headers(self):
         """Set CORS headers for cross-origin requests"""

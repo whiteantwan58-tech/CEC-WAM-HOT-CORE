@@ -157,15 +157,6 @@ EVE: Understood, Twan. I'll provide detailed explanations in our conversations.
 
 **Result:** EVE available at `https://your-app.streamlit.app`
 
-### Option 2: Vercel (Serverless)
-
-```bash
-vercel
-```
-
-Add environment variables in Vercel dashboard.
-
-**Result:** EVE available at `https://your-app.vercel.app`
 
 ---
 

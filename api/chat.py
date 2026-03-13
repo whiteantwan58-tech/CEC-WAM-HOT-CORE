@@ -1,6 +1,6 @@
 """
 EVE Voice AI - Chat API Endpoint
-Serverless function for Vercel deployment
+Serverless HTTP handler for the chat endpoint
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -18,7 +18,7 @@ except ImportError:
 
 
 class handler(BaseHTTPRequestHandler):
-    """Vercel serverless function handler"""
+    """HTTP request handler for the chat endpoint"""
     
     def _set_cors_headers(self):
         """Set CORS headers for cross-origin requests"""

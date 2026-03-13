@@ -32,7 +32,7 @@ EVE (Evolved Virtual Entity) is an advanced AI assistant integrated into the CEC
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root (or use Streamlit/Vercel secrets):
+Create a `.env` file in the project root (or use Streamlit secrets):
 
 ```bash
 # EVE - ElevenLabs Configuration
@@ -84,30 +84,6 @@ EVE_PERSONALITY = "professional,helpful,intelligent,learning"
 
 5. Deploy!
 
-### Vercel (Serverless)
-
-1. Install Vercel CLI:
-```bash
-npm install -g vercel
-```
-
-2. Add environment variables in Vercel dashboard:
-   - ELEVENLABS_API_KEY
-   - ELEVENLABS_VOICE_ID
-   - OPENAI_API_KEY
-   - OPENAI_MODEL
-   - EVE_SYSTEM_CODE
-   - EVE_OWNER_NAME
-   - EVE_PERSONALITY
-
-3. Deploy:
-```bash
-vercel
-```
-
-The API endpoints will be available at:
-- `https://your-app.vercel.app/api/chat` - Chat endpoint
-- `https://your-app.vercel.app/api/voice` - Voice synthesis endpoint
 
 ## EVE Features
 
@@ -257,7 +233,7 @@ Popular voices:
 3. **Rotate keys regularly** - Change keys every few months
 4. **Monitor usage** - Check for unusual activity
 5. **Set spending limits** - In API provider dashboards
-6. **Use secrets management** - Streamlit secrets, Vercel environment variables
+6. **Use secrets management** - Streamlit secrets or your platform's environment variable manager
 
 ## Advanced Configuration
 

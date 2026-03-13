@@ -145,9 +145,6 @@ With the ElevenLabs API configured, EVE can now:
    ```bash
    # Deploy to Streamlit Cloud
    # Add ELEVENLABS_API_KEY to secrets
-   
-   # Or deploy to Vercel
-   # Add ELEVENLABS_API_KEY to environment variables
    ```
 
 2. **Test Voice Synthesis:**
