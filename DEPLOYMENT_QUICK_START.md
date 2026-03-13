@@ -10,7 +10,6 @@ This repository supports **multiple deployment types**. Make sure you're accessi
 |----------|---------|-----|------------|
 | **Streamlit Cloud** | Dynamic Python Dashboard | `https://[your-app].streamlit.app` | `streamlit_app.py` |
 | **GitHub Pages** | Static HTML Dashboard | `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/` | `index.html` |
-| **Vercel** | Static HTML (Production) | Custom domain | `index.html` |
 
 ---
 
@@ -84,13 +83,12 @@ Covers:
 - Clearing multiple sessions
 - Configuring data sources
 
-### For Static HTML Deployment (Vercel/GitHub Pages)
-→ See: **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)**
+### For Static HTML Deployment (GitHub Pages)
+→ See: `.github/workflows/deploy-dashboard.yml`
 
 Covers:
 - Static site deployment
 - GitHub Pages setup
-- Vercel deployment
 - Custom domains
 
 ---
@@ -123,7 +121,7 @@ CEC-WAM-HOT-CORE/
 - ✅ You want NASA API, PSI prices, and dynamic charts
 - ✅ You need the full interactive dashboard
 
-### Use **GitHub Pages / Vercel** if:
+### Use **GitHub Pages** if:
 - ✅ You want the fastest loading times
 - ✅ You prefer pure HTML/CSS/JS (no Python)
 - ✅ You need guaranteed 24/7 uptime

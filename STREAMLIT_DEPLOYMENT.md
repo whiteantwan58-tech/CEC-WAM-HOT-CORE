@@ -187,13 +187,7 @@ This repository supports multiple deployment methods:
 - **URL:** `https://whiteantwan58-tech.github.io/CEC-WAM-HOT-CORE/`
 - **Entry:** `index.html`
 - **Best for:** Fast, static HTML dashboard
-- **Guide:** See `VERCEL_DEPLOYMENT.md`
-
-### 3. **Vercel** (Static HTML with Edge)
-- **URL:** Custom domain via Vercel
-- **Entry:** `index.html`
-- **Best for:** Production static deployments
-- **Guide:** See `VERCEL_DEPLOYMENT.md`
+- **Guide:** See the GitHub Pages deployment workflow in `.github/workflows/deploy-dashboard.yml`
 
 **Note:** Choose ONE primary deployment method to avoid confusion.
 

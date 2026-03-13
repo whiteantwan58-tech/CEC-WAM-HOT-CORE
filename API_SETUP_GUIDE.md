@@ -232,13 +232,6 @@ COINGECKO_API_KEY=your_coingecko_api_key_here
    OPENAI_API_KEY = "sk-..."
 ```
 
-**Vercel:**
-```
-1. Project Settings → Environment Variables
-2. Add each key-value pair
-3. Select environment (Production/Preview/Development)
-```
-
 **Heroku:**
 ```bash
 heroku config:set NASA_API_KEY=your_key
