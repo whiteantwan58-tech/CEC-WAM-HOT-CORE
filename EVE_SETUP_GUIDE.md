@@ -84,14 +84,11 @@ EVE_PERSONALITY = "professional,helpful,intelligent,learning"
 
 5. Deploy!
 
-### Vercel (Serverless)
+### GitHub Pages / Self-Hosted (Serverless)
 
-1. Install Vercel CLI:
-```bash
-npm install -g vercel
-```
+Deploy the `api/` directory to any Python-compatible host (Railway, Render, Fly.io, etc.):
 
-2. Add environment variables in Vercel dashboard:
+1. Add environment variables in your host's dashboard:
    - ELEVENLABS_API_KEY
    - ELEVENLABS_VOICE_ID
    - OPENAI_API_KEY
@@ -100,14 +97,7 @@ npm install -g vercel
    - EVE_OWNER_NAME
    - EVE_PERSONALITY
 
-3. Deploy:
-```bash
-vercel
-```
-
-The API endpoints will be available at:
-- `https://your-app.vercel.app/api/chat` - Chat endpoint
-- `https://your-app.vercel.app/api/voice` - Voice synthesis endpoint
+2. Configure the API base URL in `index.html` to point to your deployed host.
 
 ## EVE Features
 

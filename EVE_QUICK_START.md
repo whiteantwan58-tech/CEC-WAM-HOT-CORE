@@ -157,15 +157,10 @@ EVE: Understood, Twan. I'll provide detailed explanations in our conversations.
 
 **Result:** EVE available at `https://your-app.streamlit.app`
 
-### Option 2: Vercel (Serverless)
+### Option 2: Self-Hosted (Serverless)
 
-```bash
-vercel
-```
-
-Add environment variables in Vercel dashboard.
-
-**Result:** EVE available at `https://your-app.vercel.app`
+Deploy the `api/` directory to any Python-compatible host (Railway, Render, Fly.io, etc.)
+and set your environment variables in the host's dashboard.
 
 ---
 
